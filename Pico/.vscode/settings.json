@@ -17,5 +17,8 @@
         }
     },
     "cmake.buildBeforeRun": true,
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    //TODO: I couldn't get it to work with env variable, so someone would need to edit it 
+    "cortex-debug.openocdPath.windows": "C:/Users/epat/source/rpi_pico/sdk/openocd/src/openocd.exe",
+    "cmake.configureOnOpen": true,
 }
