@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundController", "SoundController\SoundController.csproj", "{950CEEE2-4B0F-4E59-B310-D5BE81384C5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortTest", "SerialPortTest\SerialPortTest.csproj", "{3208B30E-7275-4CBD-94D2-B246B97A0F2B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{950CEEE2-4B0F-4E59-B310-D5BE81384C5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{950CEEE2-4B0F-4E59-B310-D5BE81384C5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{950CEEE2-4B0F-4E59-B310-D5BE81384C5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{950CEEE2-4B0F-4E59-B310-D5BE81384C5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3208B30E-7275-4CBD-94D2-B246B97A0F2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3208B30E-7275-4CBD-94D2-B246B97A0F2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3208B30E-7275-4CBD-94D2-B246B97A0F2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3208B30E-7275-4CBD-94D2-B246B97A0F2B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3C17AB0F-CD93-4594-9440-A9FEA7B5977F}
+	EndGlobalSection
+EndGlobal
