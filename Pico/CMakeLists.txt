@@ -9,6 +9,7 @@ pico_sdk_init()
 add_executable(VolumeControl    
     main.c main.h
     pins.h
+    encoder.c encoder.h
 )
 
 pico_enable_stdio_usb(VolumeControl 1)

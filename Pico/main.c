@@ -1,62 +1,64 @@
-/* 
-    This code originates from the Getting started with Raspberry Pi Pico document
-    https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf
-    CC BY-ND Raspberry Pi (Trading) Ltd
-*/
-
-#include <stdio.h>
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "pico/binary_info.h"
 #include "main.h"
-#include "pins.h"
-
 
 int main() {
-    bi_decl(bi_program_description("PROJECT DESCRIPTION"));
-    
+    bi_decl(bi_program_description("PROGRAM USED TO CONTROL VOLUME IN WINDOWS"));
     stdio_init_all();
 
     init_pins();
 
-    bool button_held = false;
+    gpio_put(Pins_LED, true);
+    sleep_ms(50);
+    gpio_put(Pins_LED, false);
 
+    bool button_held = false;
+    EncoderStates last_states[] = {
+        EncoderState_AB,
+        EncoderState_AB,
+        EncoderState_AB,
+        EncoderState_AB
+    };
+    
     while(true) {
         bool toggle_mute = gpio_get(Pins_ToggleMute);
-        bool volume_up   = gpio_get(Pins_VolumeUp);
-        bool volume_down = gpio_get(Pins_VolumeDown);
+        bool volume_up   = gpio_get(Pins_EncoderA);
+        bool volume_down = gpio_get(Pins_EncoderB);
+
         if(toggle_mute && !button_held) {
             printf("Toggle Mute\n");
             button_held = true;
         }
-        else if(volume_up /*&& !button_held*/) {
-            printf("Volume Up\n");
-            sleep_ms(200);
-            //button_held = true;
-        }
-        else if (volume_down /*&& !button_held*/) {
-            printf("Volume Down\n");
-            sleep_ms(200);
-            //button_held = true;
-        }
-        else if(!toggle_mute && !volume_up && !volume_down) {
+        else if(!toggle_mute) {
             button_held = false;
         }
-        sleep_ms(10);
+        
+        EncoderDirection direction = read_encoder_state(volume_up, volume_down, last_states);
+        
+        if(direction == EncoderDirection_Clockwise) {
+            printf("Volume Up\n");
+            //sleep_ms(10);
+        }
+        else if (direction == EncoderDirection_CounterClockwise) {
+            printf("Volume Down\n");
+            //sleep_ms(10);
+        }
+        sleep_ms(1);
     }
 }
 
 void init_pins(void) 
 {
-    init_pin(Pins_LED,        GPIO_OUT);
-    init_pin(Pins_VolumeUp,   GPIO_IN);
-    init_pin(Pins_VolumeDown, GPIO_IN);
-    init_pin(Pins_ToggleMute, GPIO_IN);
+    init_pin(Pins_LED,        GPIO_OUT, false);
+    init_pin(Pins_EncoderA,   GPIO_IN,  true);
+    init_pin(Pins_EncoderB,   GPIO_IN,  true);
+    init_pin(Pins_ToggleMute, GPIO_IN,  false);
 }
 
 
-void init_pin(int pin, int direction) 
+void init_pin(int pin, int direction, bool pull_up) 
 {
     gpio_init(pin);
     gpio_set_dir(pin, direction);
+    if(direction == GPIO_IN) {
+        gpio_set_pulls(pin, pull_up, !pull_up);
+    }
 }

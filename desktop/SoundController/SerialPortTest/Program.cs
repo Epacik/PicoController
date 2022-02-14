@@ -5,14 +5,14 @@ using System.IO.Ports;
 Console.WriteLine("Hello, World!");
 var port = new SerialPort()
 {
-    PortName = "COM9",
-    BaudRate = 115200,
-    Parity = Parity.None,
-    StopBits = StopBits.One,
-    Handshake = Handshake.None,
-    DataBits = 8,
+    PortName               = "COM9",
+    BaudRate               = 115200,
+    Parity                 = Parity.None,
+    StopBits               = StopBits.One,
+    Handshake              = Handshake.None,
+    DataBits               = 8,
     ReceivedBytesThreshold = 1,
-    DtrEnable = true,
+    DtrEnable              = true,
 };
 
 MMDeviceEnumerator audioEnumerator = new MMDeviceEnumerator();
@@ -39,18 +39,7 @@ port.DataReceived += (s, e) =>
             device.AudioEndpointVolume.VolumeStepDown();
             break;
     }
-
-    Console.WriteLine();
 };
 port.Open();
 
 Console.ReadKey();
-
-while(true)
-{
-    try
-    {
-        Console.WriteLine(port.ReadChar());
-    }
-    catch (Exception) { }
-}
