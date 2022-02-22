@@ -11,46 +11,74 @@ int main() {
     gpio_put(Pins_LED, false);
 
     bool button_held = false;
-    EncoderStates last_states[] = {
-        EncoderState_AB,
-        EncoderState_AB,
-        EncoderState_AB,
-        EncoderState_AB
+
+    Encoder encoders[] = {
+        create_encoder(0, Pins_Encoder_0A, Pins_Encoder_0B, Pins_Encoder_0Button),
+        create_encoder(1, Pins_Encoder_1A, Pins_Encoder_1B, Pins_Encoder_1Button),
+        create_encoder(2, Pins_Encoder_2A, Pins_Encoder_2B, Pins_Encoder_2Button),
+        create_encoder(3, Pins_Encoder_3A, Pins_Encoder_3B, Pins_Encoder_3Button),
+        create_encoder(4, Pins_Encoder_4A, Pins_Encoder_4B, Pins_Encoder_4Button),
     };
     
     while(true) {
-        bool toggle_mute = gpio_get(Pins_ToggleMute);
-        bool volume_up   = gpio_get(Pins_EncoderA);
-        bool volume_down = gpio_get(Pins_EncoderB);
 
-        if(toggle_mute && !button_held) {
-            printf("Toggle Mute\n");
-            button_held = true;
-        }
-        else if(!toggle_mute) {
-            button_held = false;
-        }
+        for (int i = 0; i < 5; i++) {
+            Encoder encoder = encoders[i];
+
+            bool toggle_mute = gpio_get(encoder.pin_button);
+            bool encoder_a   = gpio_get(encoder.pin_a);
+            bool encoder_b   = gpio_get(encoder.pin_b);
+
+            if(toggle_mute && !encoder.button_held) {
+                printf("Encoder %d: Button pressed\n", encoder.id);
+                encoder.button_held = true;
+            }
+            else if(!toggle_mute && encoder.button_held) {
+                printf("Encoder %d: Button released\n", encoder.id);
+                encoder.button_held = false;
+            }
+
+            EncoderDirection direction = read_encoder_state(encoder_a, encoder_b, encoder.last_states);
         
-        EncoderDirection direction = read_encoder_state(volume_up, volume_down, last_states);
-        
-        if(direction == EncoderDirection_Clockwise) {
-            printf("Volume Up\n");
-            //sleep_ms(10);
+            if(direction == EncoderDirection_Clockwise) {
+                printf("Encoder %d: Clockwise\n", encoder.id);
+            }
+            else if (direction == EncoderDirection_CounterClockwise) {
+                printf("Encoder %d: Counter clockwise\n", encoder.id);
+            }
+
+            encoders[i] = encoder;
+            
         }
-        else if (direction == EncoderDirection_CounterClockwise) {
-            printf("Volume Down\n");
-            //sleep_ms(10);
-        }
-        sleep_ms(1);
+
+        sleep_us(500);
+        //sleep_ms(1);
     }
 }
 
 void init_pins(void) 
 {
-    init_pin(Pins_LED,        GPIO_OUT, false);
-    init_pin(Pins_EncoderA,   GPIO_IN,  true);
-    init_pin(Pins_EncoderB,   GPIO_IN,  true);
-    init_pin(Pins_ToggleMute, GPIO_IN,  false);
+    init_pin(Pins_LED,             GPIO_OUT, false);
+
+    init_pin(Pins_Encoder_0A,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_0B,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_0Button, GPIO_IN,  false);
+
+    init_pin(Pins_Encoder_1A,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_1B,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_1Button, GPIO_IN,  false);
+
+    init_pin(Pins_Encoder_2A,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_2B,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_2Button, GPIO_IN,  false);
+
+    init_pin(Pins_Encoder_3A,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_3B,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_3Button, GPIO_IN,  false);
+
+    init_pin(Pins_Encoder_4A,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_4B,      GPIO_IN,  true);
+    init_pin(Pins_Encoder_4Button, GPIO_IN,  false);
 }
 
 

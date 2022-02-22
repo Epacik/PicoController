@@ -82,3 +82,27 @@ void encoder_states_push(EncoderStates *last_four_states, EncoderStates new_stat
     last_four_states[2] = last_four_states[3];
     last_four_states[3] = new_state;
 }
+
+Encoder create_encoder(int id, Pins pin_a, Pins pin_b, Pins pin_button)
+{
+    EncoderStates last_states[] = {
+        EncoderState_AB,
+        EncoderState_AB,
+        EncoderState_AB,
+        EncoderState_AB
+    };
+    Encoder encoder = {
+        id,
+        pin_a, 
+        pin_b, 
+        pin_button,
+        {
+            EncoderState_AB,
+            EncoderState_AB,
+            EncoderState_AB,
+            EncoderState_AB
+        },
+        false
+    };
+    return encoder;
+}
