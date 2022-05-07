@@ -1,27 +1,32 @@
 #pragma once
 
-enum Pins {
-    Pins_Encoder_0A      = 2U,
-    Pins_Encoder_0B      = 3U,
-    Pins_Encoder_0Button = 17U,
+enum class Pins {
+    Encoder_0A      = 2U, 
+    Encoder_0B      = 3U, 
+    Encoder_0Button = 12U,
 
-    Pins_Encoder_1A      = 4U,
-    Pins_Encoder_1B      = 5U,
-    Pins_Encoder_1Button = 12U,
+    Encoder_1A      = 4U, 
+    Encoder_1B      = 5U, 
+    Encoder_1Button = 13U,
 
-    Pins_Encoder_2A      = 6U,
-    Pins_Encoder_2B      = 7U,
-    Pins_Encoder_2Button = 13U,
+    Encoder_2A      = 6U,
+    Encoder_2B      = 7U,
+    Encoder_2Button = 14U,
 
-    Pins_Encoder_3A      = 8U,
-    Pins_Encoder_3B      = 9U,
-    Pins_Encoder_3Button = 14U,
+    Encoder_3A      = 8U,
+    Encoder_3B      = 9U,
+    Encoder_3Button = 15U,
 
-    Pins_Encoder_4A      = 10U,
-    Pins_Encoder_4B      = 11U,
-    Pins_Encoder_4Button = 15U,
+    Encoder_4A      = 10U,
+    Encoder_4B      = 11U,
+    Encoder_4Button = 16U,
 
-    Pins_LED        = 25U,
+    Button_0        = 17U,
+    Button_1        = 18U,
+    Button_2        = 19U,
+    Button_3        = 20U,  
+
+    BuildtInLED     = 25U,
 };
 typedef enum Pins Pins;
 

@@ -2,3 +2,4 @@ build/
 desktop/SoundController/SerialPortTest/obj/
 desktop/SoundController/SerialPortTest/bin/
 desktop/SoundController/.vs/
+.cache/
