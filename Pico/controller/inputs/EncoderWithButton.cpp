@@ -1,7 +1,7 @@
 #include "EncoderWithButton.h"
 namespace Inputs
 {
-    EncoderWithButton::EncoderWithButton(uint32_t id, uint32_t pin0, uint32_t pin1, uint32_t pinButton)
+    EncoderWithButton::EncoderWithButton(uint8_t id, uint32_t pin0, uint32_t pin1, uint32_t pinButton)
         : Encoder(id, InputType::EncoderWithButton)
     {
         this->pins = {pin0, pin1, pinButton};

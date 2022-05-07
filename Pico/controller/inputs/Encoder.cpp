@@ -2,12 +2,12 @@
 
 namespace Inputs
 {
-    Encoder::Encoder(uint32_t id, uint32_t pin0, uint32_t pin1) : Input(id, InputType::Encoder)
+    Encoder::Encoder(uint8_t id, uint32_t pin0, uint32_t pin1) : Input(id, InputType::Encoder)
     {
         this->pins = {pin0, pin1};
     }
 
-    Encoder::Encoder(uint32_t id, InputType type = InputType::Encoder) : Input(id, type) {}
+    Encoder::Encoder(uint8_t id, InputType type = InputType::Encoder) : Input(id, type) {}
 
     Inputs::Message* Encoder::GetMessage()
     {

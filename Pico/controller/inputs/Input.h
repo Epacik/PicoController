@@ -1,6 +1,8 @@
 #pragma once
 #include <stdio.h>
-#include <vector>
+#include "etl/vector.h"
+#include "etl/array.h"
+#include "etl/memory.h"
 #include "hardware/gpio.h"
 
 namespace Inputs
@@ -14,10 +16,10 @@ namespace Inputs
 
     struct Message
     {
-        Message(uint32_t inputId, Inputs::InputType inputType, uint32_t value)
+        Message(uint8_t inputId, Inputs::InputType inputType, uint32_t value)
             : InputId(inputId), InputType(inputType), Value(value) {}
 
-        const uint32_t InputId;
+        const uint8_t InputId;
         const Inputs::InputType InputType;
         const uint32_t Value;
     };
@@ -27,11 +29,11 @@ namespace Inputs
     public:
         // return a notification to send to computer
         virtual Inputs::Message* GetMessage() = 0;
-        const uint32_t ID;
+        const uint8_t ID;
         const InputType Type;
 
     protected:
-        std::vector<uint32_t> pins;
+        etl::vector<uint32_t, 24> pins;
 
         Input(uint32_t id, InputType type) : ID(id), Type(type) {}
 

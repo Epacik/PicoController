@@ -21,11 +21,11 @@ namespace Inputs
     class Encoder : public Input
     {
     public:
-        Encoder(uint32_t id, uint32_t pin0, uint32_t pin1);
+        Encoder(uint8_t id, uint32_t pin0, uint32_t pin1);
         virtual Inputs::Message* GetMessage();
 
     protected:
-        Encoder(uint32_t id, InputType type);
+        Encoder(uint8_t id, InputType type);
 
         bool CompareStateAndPush(bool a, bool b, EncoderStates lastState, EncoderStates newState);
         bool CompareState(bool a, bool b, EncoderStates state);
@@ -33,6 +33,6 @@ namespace Inputs
         void PushLastState(EncoderStates state);
 
     private:
-        std::array<EncoderStates, 4> lastStates;
+        etl::array<EncoderStates, 4> lastStates;
     };
 }

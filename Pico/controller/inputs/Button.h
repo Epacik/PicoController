@@ -7,7 +7,7 @@ namespace Inputs
     {
     public:
         virtual Inputs::Message* GetMessage();
-        Button(uint32_t id, uint32_t pin);
+        Button(uint8_t id, uint32_t pin);
 
     private:
         bool isHeld;

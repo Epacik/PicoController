@@ -1,6 +1,6 @@
 #include "Button.h"
 
-Inputs::Button::Button(uint32_t id, uint32_t pin) : Input(id, InputType::Button)
+Inputs::Button::Button(uint8_t id, uint32_t pin) : Input(id, InputType::Button)
 {
     this->pins = {pin};
 }

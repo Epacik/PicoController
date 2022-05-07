@@ -1,3 +1,4 @@
+#include "etl_profile.h"
 #include "main.h"
 
 int main() {
@@ -18,14 +19,16 @@ int main() {
     uint32_t time = get_us_since_boot();
 
     while(true) {
-        // wait until at least next ms
+        // wait until at least next half of a ms to help with debounce buttons a bit
+        // technically it should work without it, 
+        // but there's a possibility that I have chosen wrong resistors or soldered something wrong
         if(time + 500 >= get_us_since_boot()) {
             continue;
         }
 
         for (auto &input : inputs) {
             auto message = input->GetMessage();
-            if(!message)
+            if(message == nullptr)
                 continue;
             //send to other core
             Core1::PushOntoMessageQueue(message);

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
-
 include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 project(VolumeControl C CXX ASM)
+project(VolumeControlTests C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 
@@ -12,24 +12,15 @@ endif()
 
 pico_sdk_init()
 
-add_executable(VolumeControl
-    main.cpp main.h
-    inputs/Input.h
-    inputs/Button.cpp inputs/Button.h
-    inputs/Encoder.cpp inputs/Encoder.h
-    inputs/EncoderWithButton.cpp inputs/EncoderWithButton.h
-    inputs/CreateInputs.h
-    Core1.cpp Core1.h
-    pins.h
+Include(FetchContent)
+
+FetchContent_Declare(
+  etl
+  GIT_REPOSITORY https://github.com/ETLCPP/etl
+  GIT_TAG        e59f995289f1064cb93c6d18596fbbad2d516fb0 #"20.27.3"
 )
 
-pico_enable_stdio_usb(VolumeControl 1)
-pico_enable_stdio_uart(VolumeControl 1)
+FetchContent_MakeAvailable(etl)
 
-
-target_link_libraries(VolumeControl 
-    pico_stdlib 
-    pico_multicore
-    hardware_exception)
-
-pico_add_extra_outputs(VolumeControl)
+add_subdirectory(controller)
+add_subdirectory(tests)
