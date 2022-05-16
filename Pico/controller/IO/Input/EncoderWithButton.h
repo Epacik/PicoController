@@ -11,6 +11,6 @@ namespace IO::Input
         IO::Input::Message* GetMessage() override;
 
     private:
-        bool isHeld;
+        bool isHeld{};
     };
 }

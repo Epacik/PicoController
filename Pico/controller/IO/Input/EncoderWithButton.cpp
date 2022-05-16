@@ -1,4 +1,11 @@
 #include "EncoderWithButton.h"
+
+enum class ButtonValues {
+    None     = 0,
+    Pressed  = 1 << 2,
+    Released = 1 << 3,
+};
+
 namespace IO::Input
 {
     using namespace IO;
@@ -9,27 +16,27 @@ namespace IO::Input
     EncoderWithButton::EncoderWithButton(uint8_t id, IInputPin* pin0, IInputPin* pin1, IInputPin* pinButton)
         : Encoder(id, InputType::EncoderWithButton)
     {
-        this->pins = {pin0, pin1, pinButton};
+        pins = {pin0, pin1, pinButton};
+        isHeld = false;
     }
 
     IO::Input::Message* EncoderWithButton::GetMessage()
     {
         auto newState = this->pins[2]->Read();
-        uint32_t buttonValue = 0;
+        ButtonValues buttonValue = ButtonValues::None;
 
         if (newState && !this->isHeld) // pressed
         {
             this->isHeld = true;
-            buttonValue = 1;
+            buttonValue = ButtonValues::Pressed;
         }
         else if (!newState && this->isHeld) // released
         {
             this->isHeld = false;
-            buttonValue = 1 << 1;
+            buttonValue = ButtonValues::Released;
         }
 
-        uint32_t encoderValue = static_cast<uint32_t>(CurrentDirection());
-        uint32_t value = (buttonValue << 2) | encoderValue;
+        uint32_t value = static_cast<uint32_t>(buttonValue) | static_cast<uint32_t>(CurrentDirection());
 
         return value == 0 ? nullptr : CreateMessage(value);
     }
