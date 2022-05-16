@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
 
-project(VolumeControl C CXX ASM)
-project(VolumeControlTests C CXX ASM)
+project(PicoController C CXX ASM)
+project(PicoControllerTests C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 

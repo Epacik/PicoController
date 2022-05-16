@@ -1,13 +1,16 @@
 #include "Button.h"
 
-Inputs::Button::Button(uint8_t id, uint32_t pin) : Input(id, InputType::Button)
+IO::Input::Button::Button(uint8_t id, uint8_t pin) :  Button(id, new InputPin(pin))
+{}
+
+IO::Input::Button::Button(uint8_t id, IInputPin* pin) : Input(id, InputType::Button)
 {
-    this->pins = {pin};
+    this->pins = { pin };
 }
 
-Inputs::Message* Inputs::Button::GetMessage()
+IO::Input::Message* IO::Input::Button::GetMessage()
 {
-    auto newState = gpio_get(this->pins[0]);
+    auto newState = this->pins[0]->Read();
 
     if (newState && !this->isHeld) // pressed
     {
@@ -23,3 +26,4 @@ Inputs::Message* Inputs::Button::GetMessage()
 
     return nullptr; // button didn't change state
 }
+

@@ -1,21 +1,25 @@
-add_executable(VolumeControl
-    main.cpp main.h
-    inputs/Input.h
-    inputs/Button.cpp inputs/Button.h
-    inputs/Encoder.cpp inputs/Encoder.h
-    inputs/EncoderWithButton.cpp inputs/EncoderWithButton.h
-    inputs/CreateInputs.h
-    Core1.cpp Core1.h
-    pins.h
-)
+add_executable(PicoController
+        main.cpp main.h
 
-pico_enable_stdio_usb(VolumeControl 1)
-pico_enable_stdio_uart(VolumeControl 1)
+        IO/Pins.cpp IO/Pins.h
+        IO/Input/Input.h
+        IO/Input/Button.cpp IO/Input/Button.h
+        IO/Input/Encoder.cpp IO/Input/Encoder.h
+        IO/Input/EncoderWithButton.cpp IO/Input/EncoderWithButton.h
+        IO/Input/CreateInputs.h
 
-target_link_libraries(VolumeControl 
+        Communication.cpp Communication.h
+        UserInteractions.cpp UserInteractions.h
+        pins.h
+        IO/Output/LED.cpp IO/Output/LED.h IO/Output/Output.h)
+
+pico_enable_stdio_usb(PicoController 1)
+pico_enable_stdio_uart(PicoController 1)
+
+target_link_libraries(PicoController 
     pico_stdlib 
     pico_multicore
     hardware_exception
     etl)
 
-pico_add_extra_outputs(VolumeControl)
+pico_add_extra_outputs(PicoController)

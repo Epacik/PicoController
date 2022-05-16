@@ -1,15 +1,20 @@
 #include "EncoderWithButton.h"
-namespace Inputs
+namespace IO::Input
 {
-    EncoderWithButton::EncoderWithButton(uint8_t id, uint32_t pin0, uint32_t pin1, uint32_t pinButton)
+    using namespace IO;
+    EncoderWithButton::EncoderWithButton(uint8_t id, uint8_t pin0, uint8_t pin1, uint8_t pinButton) 
+        : EncoderWithButton(id, new InputPin(pin0), new InputPin(pin1), new InputPin(pinButton))
+    {}
+    
+    EncoderWithButton::EncoderWithButton(uint8_t id, IInputPin* pin0, IInputPin* pin1, IInputPin* pinButton)
         : Encoder(id, InputType::EncoderWithButton)
     {
         this->pins = {pin0, pin1, pinButton};
     }
 
-    Inputs::Message* EncoderWithButton::GetMessage()
+    IO::Input::Message* EncoderWithButton::GetMessage()
     {
-        auto newState = gpio_get(this->pins[2]);
+        auto newState = this->pins[2]->Read();
         uint32_t buttonValue = 0;
 
         if (newState && !this->isHeld) // pressed

@@ -4,15 +4,16 @@
 #include "hardware/irq.h"
 #include "pico/util/queue.h"
 
+#include "IO/Input/Input.h"
 
-#include "inputs/Input.h"
 
-
-struct Core1
+class Communication
 {
-    static void Main();
-    static void PushOntoMessageQueue(Inputs::Message* message);
-
+public:
+    [[noreturn]]
+    static void Entry();
+    static void PushOntoMessageQueue(IO::Input::Message* message);
+    
     private: 
     //static void HardErrorHandler();
 };

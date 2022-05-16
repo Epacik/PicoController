@@ -1,15 +1,17 @@
 #include "Encoder.h"
 
-namespace Inputs
+namespace IO::Input
 {
-    Encoder::Encoder(uint8_t id, uint32_t pin0, uint32_t pin1) : Input(id, InputType::Encoder)
+    Encoder::Encoder(uint8_t id, uint8_t pin0, uint8_t pin1) : Encoder(id, new InputPin(id), new InputPin(id)) {}
+
+    Encoder::Encoder(uint8_t id, InputType type = InputType::Encoder) : Input(id, type) {}
+    
+    Encoder::Encoder(uint8_t id, IInputPin* pin0, IInputPin* pin1) : Input(id, InputType::Encoder)
     {
         this->pins = {pin0, pin1};
     }
 
-    Encoder::Encoder(uint8_t id, InputType type = InputType::Encoder) : Input(id, type) {}
-
-    Inputs::Message* Encoder::GetMessage()
+    IO::Input::Message* Encoder::GetMessage()
     {
         auto direction = CurrentDirection();
         switch (direction)
@@ -50,8 +52,8 @@ namespace Inputs
 
     EncoderDirection Encoder::CurrentDirection()
     {
-        auto newA = gpio_get(this->pins[0]);
-        auto newB = gpio_get(this->pins[1]);
+        auto newA = this->pins[0]->Read();
+        auto newB = this->pins[1]->Read();
 
         auto lastState = lastStates.back();
 

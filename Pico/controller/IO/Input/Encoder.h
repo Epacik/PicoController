@@ -1,7 +1,7 @@
 #pragma once
 #include "Input.h"
 
-namespace Inputs
+namespace IO::Input
 {
     enum class EncoderStates
     {
@@ -21,8 +21,9 @@ namespace Inputs
     class Encoder : public Input
     {
     public:
-        Encoder(uint8_t id, uint32_t pin0, uint32_t pin1);
-        virtual Inputs::Message* GetMessage();
+        Encoder(uint8_t id, uint8_t pin0, uint8_t pin1);
+        Encoder(uint8_t id, IInputPin* pin0, IInputPin* pin1);
+        IO::Input::Message* GetMessage() override;
 
     protected:
         Encoder(uint8_t id, InputType type);
