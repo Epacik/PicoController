@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core.Config
 {
-    internal class Action
+    public class Action
     {
         [JsonConstructor]
         public Action()
@@ -19,9 +19,9 @@ namespace PicoController.Core.Config
         }
 
         [JsonPropertyName("handler")]
-        public string Handler { get; set; } = "";
+        public string? Handler { get; set; }
 
         [JsonPropertyName("data")]
-        public string Data { get; set; } = "";
+        public string? Data { get; set; }
     }
 }

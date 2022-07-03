@@ -11,7 +11,7 @@ namespace PicoController.Core.Devices.Inputs
     {
         const string actionPress = "press";
         private static readonly string[] availableActions = { actionPress };
-        public Button(byte id, InputType type, Dictionary<string, Func<Task>?> actions) : base(id, type, availableActions, actions)
+        public Button(int deviceId, byte inputId, InputType type, Dictionary<string, Func<Task>?> actions) : base(deviceId, inputId, type, availableActions, actions)
         {}
 
         private bool IsPressed;

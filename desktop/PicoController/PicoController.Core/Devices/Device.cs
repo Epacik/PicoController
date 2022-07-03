@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using Encoder = PicoController.Core.Devices.Inputs.Encoder;
+using PicoController.Plugin.Interfaces;
 
 namespace PicoController.Core.Devices
 {
@@ -41,7 +43,7 @@ namespace PicoController.Core.Devices
             int i = 0;
             foreach (var dev in devices)
             {
-                var id = i;
+                var deviceId = i;
                 InterfaceBase ifc = dev.Interface.Type switch
                 {
                     "COM" => new Serial(dev.Interface.Data),
@@ -57,14 +59,14 @@ namespace PicoController.Core.Devices
 
                     foreach(var a in inp.Actions)
                     {
-                        actions[a.Key] = async () => { await Task.Yield(); Console.WriteLine($"device: {id}, input: {inp.Id}, action: {a.Key}"); };
+                        actions[a.Key] = LookupActions(a.Value);
                     }
 
                     inputs.Add(inp.Type switch
                     {
-                        InputType.Button            => new Button(inp.Id, inp.Type, actions),
-                        InputType.Encoder           => new Encoder(inp.Id, inp.Type, actions),
-                        InputType.EncoderWithButton => new EncoderWithButton(inp.Id, inp.Type, actions),
+                        InputType.Button            => new Button(deviceId, inp.Id, inp.Type, actions),
+                        InputType.Encoder           => new Encoder(deviceId, inp.Id, inp.Type, actions),
+                        InputType.EncoderWithButton => new EncoderWithButton(deviceId, inp.Id, inp.Type, actions),
                         _                           => throw new InvalidDataException(),
                     });
                 }
@@ -73,6 +75,48 @@ namespace PicoController.Core.Devices
             }
             return result;
         }
+
+        private static Func<Task>? LookupActions(Config.Action value)
+        {
+            if (string.IsNullOrWhiteSpace(value.Handler))
+                return null;
+
+            var handler = value.Handler;
+
+            if (LoadedActions.ContainsKey(handler) && LoadedActions[handler] is not null)
+            {
+                var action = LoadedActions[handler];
+                return IPluginActionToFuncOfTask(value, action);
+            }
+
+            if (handler.StartsWith("/")) //buildt in actions
+            {
+                var typename = handler.TrimStart('/');
+                var assembly = Assembly.GetExecutingAssembly();
+                var allBuildtInActions = assembly.DefinedTypes.Where(t => typeof(IPluginAction).IsAssignableFrom(t));
+                var actionType = allBuildtInActions.FirstOrDefault(t => t.Name == typename);
+                if(actionType is null)
+                    return null;
+
+                var action = Activator.CreateInstance(actionType.AsType()) as IPluginAction; 
+                if (action is null)
+                    return null;
+
+                LoadedActions[handler] = action;
+                return IPluginActionToFuncOfTask(value, action);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private static Func<Task> IPluginActionToFuncOfTask(Config.Action value, IPluginAction action)
+        {
+            return async () => await action.ExecuteAsync(value.Data);
+        }
+
+        private static Dictionary<string, IPluginAction> LoadedActions = new Dictionary<string, IPluginAction>();
 
         #region IDisposable
         protected virtual void Dispose(bool disposing)

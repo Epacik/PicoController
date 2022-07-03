@@ -5,14 +5,16 @@ namespace PicoController.Core.Devices.Inputs;
 
 public abstract class InputBase
 {
+    private readonly int deviceId;
     public readonly byte Id;
     public readonly InputType Type;
     public readonly Dictionary<string, Func<Task>?> Actions = new();
     public readonly ImmutableArray<string> AvailableActions;
 
-    public InputBase(byte id, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<Task>?> actions)
+    public InputBase(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<Task>?> actions)
     {
-        Id = id;
+        this.deviceId = deviceId;
+        Id = inputId;
         Type = type;
         Actions = actions;
         AvailableActions = availableActions.ToImmutableArray();
@@ -32,9 +34,11 @@ public abstract class InputBase
 
     protected void InvokeAction(string actionName)
     {
+        //Console.WriteLine($"device: {deviceId}, input: {Id}, action: {actionName}");
+
         if (Actions.ContainsKey(actionName))
         {
-            Actions[actionName]?.Invoke()?.GetAwaiter().GetResult();
+            Actions[actionName]?.Invoke();
         }
     }
 }

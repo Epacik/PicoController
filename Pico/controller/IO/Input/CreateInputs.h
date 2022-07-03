@@ -19,10 +19,10 @@ namespace IO::Input
 
         //Encoders with buttons
         inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 2, 3, 12)));
-        inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 4, 5, 13)));
+        inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 5, 4, 13)));
         inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 6, 7, 14)));
         inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 8, 9, 15)));
-        inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 10, 11, 16)));
+        inputs.push_back(etl::unique_ptr<Input>(new EncoderWithButton(id++, 11, 10, 16)));
 
         return inputs;
     }

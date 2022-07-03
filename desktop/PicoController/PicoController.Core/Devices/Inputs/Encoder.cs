@@ -13,7 +13,7 @@ namespace PicoController.Core.Devices.Inputs
         const string actionRotateCounterClockwise  = "rotationCounterClockwise";
         private static readonly string[] availableActions = { actionRotateClockwise, actionRotateCounterClockwise };
 
-        public Encoder(byte id, InputType type, Dictionary<string, Func<Task>?> actions) : base(id, type, availableActions, actions)
+        public Encoder(int deviceId, byte inputId, InputType type, Dictionary<string, Func<Task>?> actions) : base(deviceId, inputId, type, availableActions, actions)
         {
         }
 

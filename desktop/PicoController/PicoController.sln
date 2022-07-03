@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.Core", "Pico
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoController.Cli", "PicoController.Cli\PicoController.Cli.csproj", "{C7D34DB4-FD8E-4B1C-9D1C-36D5DADDEBCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoController.Plugin.Interfaces", "PicoController.Plugin.Interfaces\PicoController.Plugin.Interfaces.csproj", "{2909972B-45CE-428C-B2B0-FA057C4C7822}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{C7D34DB4-FD8E-4B1C-9D1C-36D5DADDEBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7D34DB4-FD8E-4B1C-9D1C-36D5DADDEBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7D34DB4-FD8E-4B1C-9D1C-36D5DADDEBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2909972B-45CE-428C-B2B0-FA057C4C7822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2909972B-45CE-428C-B2B0-FA057C4C7822}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2909972B-45CE-428C-B2B0-FA057C4C7822}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2909972B-45CE-428C-B2B0-FA057C4C7822}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

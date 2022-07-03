@@ -13,7 +13,7 @@ namespace PicoController.Core.Config
     public class Input
     {
         [JsonConstructor]
-        public Input(byte id, InputType type, Dictionary<string, object> actions)
+        public Input(byte id, InputType type, Dictionary<string, Action> actions)
         {
             Id = id;
             Type = type;
@@ -30,6 +30,6 @@ namespace PicoController.Core.Config
         //public int[] Pins { get; set; }
 
         [JsonPropertyName("actions")]
-        public Dictionary<string, object> Actions { get; set; }
+        public Dictionary<string, Action> Actions { get; set; }
     }
 }
