@@ -13,11 +13,6 @@ internal class WiFi : InterfaceBase
     {
     }
 
-    public WiFi(Dictionary<string, JsonElement> connectionData, int id) : this(connectionData)
-    {
-        this.id = id;
-    }
-
     public override void Dispose()
     {
     }
