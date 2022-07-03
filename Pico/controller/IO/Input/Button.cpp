@@ -5,12 +5,12 @@ enum class Values {
     Released = 1 << 1,
 };
 
-IO::Input::Button::Button(uint8_t id, uint8_t pin) :  Button(id, new InputPin(pin))
-{}
+IO::Input::Button::Button(uint8_t id, uint8_t pin) :  Button(id, new InputPin(pin)) {}
 
 IO::Input::Button::Button(uint8_t id, IInputPin* pin) : Input(id, InputType::Button)
 {
-    this->pins = { pin };
+    pins = { pin };
+    isHeld = false;
 }
 
 IO::Input::Message* IO::Input::Button::GetMessage()
