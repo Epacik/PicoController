@@ -33,9 +33,14 @@ public class Serial : InterfaceBase
 
     private void _port_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
-        var data = _port.ReadLine()?.Trim() ?? "";
-        var message = Inputs.InputMessage.Parse(data);
-        OnNewMessage(message);
+        
+        var data = _port.ReadExisting()?.Trim() ?? "";
+        var lines = data.Split(new[] { "\r\n" }, StringSplitOptions.None);
+        foreach(var line in lines)
+        {
+            var message = Inputs.InputMessage.Parse(line);
+            OnNewMessage(message);
+        }
     }
 
     public override void Disconnect()
