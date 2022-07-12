@@ -34,7 +34,7 @@ public abstract class InputBase
 
     protected void InvokeAction(string actionName)
     {
-        //Console.WriteLine($"device: {deviceId}, input: {Id}, action: {actionName}");
+        Console.WriteLine($"device: {deviceId}, input: {Id}, action: {actionName}");
 
         if (Actions.ContainsKey(actionName))
         {

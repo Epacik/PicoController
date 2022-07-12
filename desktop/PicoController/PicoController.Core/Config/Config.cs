@@ -18,14 +18,16 @@ namespace PicoController.Core.Config
             Devices = devices;
         }
 
+        [JsonPropertyName("maxDelayBetweenClicks")]
+        public int MaxDelayBetweenClicks { get; set; }
+
         [JsonPropertyName("devices")]
         public List<Device> Devices { get; set; } = new List<Device>();
-
-        public static Config Read()
+        public static Config? Read()
         {
             var configPath = ConfigPath();
             if (!File.Exists(configPath))
-                return new Config();
+                return null;
 
             var json = File.ReadAllText(configPath) ?? "";
             var options = new JsonSerializerOptions()
@@ -54,14 +56,217 @@ namespace PicoController.Core.Config
                 }
             };
             var json = JsonSerializer.Serialize(config, options);
+            Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
             File.WriteAllText(configPath, json);
         }
 
-        private static string ConfigPath()
+        public static void SaveExampleConfig()
+        {
+            var configPath = ConfigPath();
+            Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
+            File.WriteAllText(configPath, exampleConfig);
+        }
+
+        public static string ConfigDirectory()
         {
             var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var configPath = Path.Combine(userFolder, @".picoController/config.jsonc");
+            return Path.Combine(userFolder, ".picoController");
+        }
+        public static string ConfigPath()
+        {
+            var configPath = Path.Combine(ConfigDirectory(), "config.json");
             return configPath;
         }
+
+
+        private const string exampleConfig = @"{
+    ""maxDelayBetweenClicks"": 50,
+    ""devices"": [
+      {
+        ""interface"": {
+          ""type"": ""COM"",
+          ""data"": {
+            ""port"": ""COM6"",
+            ""rate"": 115200,
+            ""dataBits"": 8,
+            ""stopBits"": 1,
+            ""parity"": 0
+          }
+        },
+        ""inputs"": [
+          {
+            ""id"": 0,
+            ""type"": ""button"",
+            ""actions"": {
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 1,
+            ""type"": ""button"",
+            ""actions"": {
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 2,
+            ""type"": ""button"",
+            ""actions"": {
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 3,
+            ""type"": ""button"",
+            ""actions"": {
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 4,
+            ""type"": ""encoderWithButton"",
+            ""actions"": {
+              ""rotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""rotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 5,
+            ""type"": ""encoderWithButton"",
+            ""actions"": {
+              ""rotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""rotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 6,
+            ""type"": ""encoderWithButton"",
+            ""actions"": {
+              ""rotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""rotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 7,
+            ""type"": ""encoderWithButton"",
+            ""actions"": {
+              ""rotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""rotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          },
+          {
+            ""id"": 8,
+            ""type"": ""encoderWithButton"",
+            ""actions"": {
+              ""rotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""rotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationCounterClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""pressedRotationClockwise"": {
+                ""handler"": null,
+                ""data"": null
+              },
+              ""press"": {
+                ""handler"": null,
+                ""data"": null
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }";
     }
 }

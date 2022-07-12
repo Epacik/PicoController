@@ -26,9 +26,6 @@ namespace PicoController.Core.Config
         [JsonPropertyName("type")]
         public InputType Type { get; set; }
 
-        //[JsonPropertyName("pins")]
-        //public int[] Pins { get; set; }
-
         [JsonPropertyName("actions")]
         public Dictionary<string, Action> Actions { get; set; }
     }
