@@ -49,7 +49,7 @@ internal class Volume : IPluginAction, IDisposable
         }
     }
 
-    private void Src_MediaPlaybackDataChanged(object? sender, MediaPlaybackDataChangedArgs e)
+    private async void Src_MediaPlaybackDataChanged(object? sender, MediaPlaybackDataChangedArgs e)
     {
         using var device = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
@@ -60,6 +60,9 @@ internal class Volume : IPluginAction, IDisposable
             var session = sessions[i];
             if (session.GetSessionInstanceIdentifier.Contains(appName, StringComparison.InvariantCulture))
             {
+                session.SimpleAudioVolume.Volume = _tidalVolume;
+                // on slower hardware tidal was slow enough to circumvent volume change above
+                await Task.Delay(500).ConfigureAwait(false);
                 session.SimpleAudioVolume.Volume = _tidalVolume;
             }
         }
