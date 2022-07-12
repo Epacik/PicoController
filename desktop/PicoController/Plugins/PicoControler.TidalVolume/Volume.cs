@@ -9,6 +9,7 @@ using NPSMLib;
 
 internal class Volume : IPluginAction, IDisposable
 {
+    private const string appName = "TIDALPlayer";
     private readonly MMDeviceEnumerator _deviceEnumerator;
     private readonly NowPlayingSessionManager _playingSessionManager;
     private readonly List<NowPlayingSession> _sessions = new List<NowPlayingSession>();
@@ -53,7 +54,6 @@ internal class Volume : IPluginAction, IDisposable
     {
         using var device = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
-        var appName = "TIDALPlayer";
         var sessions = device.AudioSessionManager.Sessions;
         for (int i = 0; i < sessions.Count; i++)
         {
@@ -90,7 +90,6 @@ internal class Volume : IPluginAction, IDisposable
         float step = 0.01f;
         using var device = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
         
-        var appName = "TIDALPlayer";
         var action  = argument;
         var sessions = device.AudioSessionManager.Sessions;
         for (int i = 0; i < sessions.Count; i++)
