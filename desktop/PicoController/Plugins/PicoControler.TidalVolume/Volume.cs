@@ -6,6 +6,7 @@ namespace PicoControler.TidalVolume;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using NPSMLib;
+using System.Diagnostics;
 
 /// <summary>
 /// I don't know who thought that would be a good idea, but Tidal is making Windows Volume Mixer useless by resetting it's volume in the mixer while changing song that's playing... <br/>
@@ -13,7 +14,7 @@ using NPSMLib;
 /// </summary>
 internal class Volume : IPluginAction, IDisposable
 {
-    private const string appName = "TIDALPlayer";
+    private const string appName = "TIDAL";
     private readonly MMDeviceEnumerator _deviceEnumerator;
     private readonly NowPlayingSessionManager _playingSessionManager;
     private readonly List<NowPlayingSession> _sessions = new List<NowPlayingSession>();
@@ -68,6 +69,8 @@ internal class Volume : IPluginAction, IDisposable
                 // on slower hardware tidal was slow enough to circumvent volume change above
                 await Task.Delay(500).ConfigureAwait(false);
                 session.SimpleAudioVolume.Volume = _tidalVolume;
+                await Task.Delay(500).ConfigureAwait(false);
+                session.SimpleAudioVolume.Volume = _tidalVolume;
             }
         }
     }
@@ -99,7 +102,8 @@ internal class Volume : IPluginAction, IDisposable
         for (int i = 0; i < sessions.Count; i++)
         {
             var session = sessions[i];
-            if(session.GetSessionInstanceIdentifier.Contains(appName, StringComparison.InvariantCulture))
+            var process = Process.GetProcessById((int)session.GetProcessID);
+            if (process.ProcessName.Contains(appName, StringComparison.InvariantCultureIgnoreCase))
             {
                 if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
                     session.SimpleAudioVolume.Mute = !session.SimpleAudioVolume.Mute;
