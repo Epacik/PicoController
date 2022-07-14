@@ -9,7 +9,7 @@ using NPSMLib;
 
 /// <summary>
 /// I don't know who thought that would be a good idea, but Tidal is making Windows Volume Mixer useless by resetting it's volume in the mixer while changing song that's playing... <br/>
-/// To work around that this version of volume action listens to changes in NowPlayingSession and resets Tidal's volume back to what it was
+/// To work around that, this version of volume action listens to changes in NowPlayingSession and resets Tidal's volume back to what it was... twice because Tidal was changing volume a bit too slowly
 /// </summary>
 internal class Volume : IPluginAction, IDisposable
 {
