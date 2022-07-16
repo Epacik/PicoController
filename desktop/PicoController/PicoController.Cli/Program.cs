@@ -32,6 +32,7 @@ namespace PicoController.Cli
                         try
                         {
                             device.Connect();
+                            device.ActionThrownAnException += Device_ActionThrownAnException;
                         }
                         catch (Exception ex)
                         {
@@ -54,7 +55,10 @@ namespace PicoController.Cli
                     foreach (var device in devices)
                     {
                         if (!notLoadedDevices.Contains(device))
+                        {
+                            device.ActionThrownAnException -= Device_ActionThrownAnException;
                             device.Disconnect();
+                        }
                     }
                 }
                 finally
@@ -63,6 +67,16 @@ namespace PicoController.Cli
                         device.Dispose();
                 }
             }
+        }
+
+        private static void Device_ActionThrownAnException(object? sender, PluginActionExceptionEventArgs e)
+        {
+            PrintInColor("An action thrown an exception!\n" +
+                $"Device:    {e.DeviceNumber}, Input: {e.InputId}\n" +
+                $"Action:    {e.ActionName}\n" +
+                $"Exception: {e.Exception.Message}\n",
+                
+                ConsoleColor.Yellow);
         }
 
         private static void PrintInColor(string message, ConsoleColor foreground, ConsoleColor? background = null)

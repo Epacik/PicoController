@@ -1,13 +1,8 @@
 ﻿using PicoController.Plugin.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharpHook;
 using SharpHook.Native;
 
-namespace PicoController.Core.BuildtInActions;
+namespace PicoController.Core.BuildtInActions.HidSimulation;
 
 internal class KeyboardSequence : IPluginAction
 {
@@ -17,7 +12,7 @@ internal class KeyboardSequence : IPluginAction
     public KeyboardSequence()
     {
         _simulator = new EventSimulator();
-        foreach(var key in Enum.GetNames<KeyCode>())
+        foreach (var key in Enum.GetNames<KeyCode>())
         {
             var name = (ReadOnlySpan<char>)key;
             name = name.Slice(2, name.Length - 2);
@@ -52,24 +47,34 @@ internal class KeyboardSequence : IPluginAction
     {
         var sequencesStr = argument.Split("+", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var sequences = new List<KeyCode[]>();
-        foreach(var seq in sequencesStr)
+        foreach (var seq in sequencesStr)
         {
             if (seq.Contains('&'))
             {
                 var buttons = seq.Split('&');
                 var sequence = new KeyCode[buttons.Length];
                 for (int i = 0; i < buttons.Length; i++)
+                {
+                    if (!_buttons.ContainsKey(buttons[i]))
+                        throw new ArgumentException($"'{buttons[i]}' is not a valid key");
+
                     sequence[i] = _buttons[buttons[i]];
+                }
 
                 sequences.Add(sequence);
             }
             else
+            {
+                if (!_buttons.ContainsKey(seq))
+                    throw new ArgumentException($"'{seq}' is not a valid key");
+
                 sequences.Add(new KeyCode[] { _buttons[seq] });
+            }
         }
 
-        foreach(var seq in sequences)
+        foreach (var seq in sequences)
         {
-            if(seq.Length == 0)
+            if (seq.Length == 0)
             {
                 _simulator.SimulateKeyPress(seq[0]);
                 _simulator.SimulateKeyRelease(seq[0]);

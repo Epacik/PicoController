@@ -1,13 +1,8 @@
 ﻿using PicoController.Plugin.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharpHook;
 using SharpHook.Native;
 
-namespace PicoController.Core.BuildtInActions;
+namespace PicoController.Core.BuildtInActions.HidSimulation;
 
 internal class KeyboardCombination : IPluginAction
 {
@@ -17,7 +12,7 @@ internal class KeyboardCombination : IPluginAction
     public KeyboardCombination()
     {
         _simulator = new EventSimulator();
-        foreach(var key in Enum.GetNames<KeyCode>())
+        foreach (var key in Enum.GetNames<KeyCode>())
         {
             var name = (ReadOnlySpan<char>)key;
             name = name.Slice(2, name.Length - 2);
@@ -50,6 +45,13 @@ internal class KeyboardCombination : IPluginAction
 
     private void KeyCombination(string argument)
     {
+
+        foreach (var key in argument.Split("+"))
+        {
+            if (!_buttons.ContainsKey(key))
+                throw new ArgumentException($"'{key}' is not a valid key");
+        }
+
         var buttons = argument.Split("+").Select(x => _buttons[x]).ToArray();
 
         for (int i = 0; i < buttons.Length; i++)

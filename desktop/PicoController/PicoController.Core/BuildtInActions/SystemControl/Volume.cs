@@ -1,17 +1,11 @@
 ﻿using PicoController.Plugin.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PicoController.Core.BuildtInActions;
+namespace PicoController.Core.BuildtInActions.SystemControl;
 
 #if OS_WINDOWS
 #pragma warning disable CA1416 // Walidacja zgodności z platformą
 
 using NAudio.CoreAudioApi;
-using NAudio.CoreAudioApi.Interfaces;
 using System.Diagnostics;
 
 internal class Volume : IPluginAction
@@ -46,29 +40,30 @@ internal class Volume : IPluginAction
         var processes = Process.GetProcesses();
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
-        if(args.Length < 2)
+        if (args.Length < 2)
         {
             var volume = device.AudioEndpointVolume;
 
             if (argument.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
                 device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
 
-            else //if (argument.Equals("Up", StringComparison.InvariantCultureIgnoreCase))
+            else if (int.TryParse(argument, out int value))
             {
-                step *= int.Parse(argument);
+                step *= value;
                 if (step > 0 && device.AudioEndpointVolume.MasterVolumeLevelScalar + step > 1)
                     device.AudioEndpointVolume.MasterVolumeLevelScalar = 1;
-                else if(step < 0 && device.AudioEndpointVolume.MasterVolumeLevelScalar + step < 0)
+                else if (step < 0 && device.AudioEndpointVolume.MasterVolumeLevelScalar + step < 0)
                     device.AudioEndpointVolume.MasterVolumeLevelScalar = 0;
                 else
                     device.AudioEndpointVolume.MasterVolumeLevelScalar += step;
             }
+            else
+                throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
         }
         else
         {
-            
             var appName = args[0];
-            var action  = args[1];
+            var action = args[1];
             var sessions = device.AudioSessionManager.Sessions;
             for (int i = 0; i < sessions.Count; i++)
             {
@@ -89,9 +84,9 @@ internal class Volume : IPluginAction
                     if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
                         session.SimpleAudioVolume.Mute = !session.SimpleAudioVolume.Mute;
 
-                    else
+                    else if (int.TryParse(args[1], out int value))
                     {
-                        step *= int.Parse(args[1]);
+                        step *= value;
                         if (step > 0 && session.SimpleAudioVolume.Volume + step > 1)
                             session.SimpleAudioVolume.Volume = 1;
                         else if (step < 0 && session.SimpleAudioVolume.Volume + step < 0)
@@ -99,6 +94,9 @@ internal class Volume : IPluginAction
                         else
                             session.SimpleAudioVolume.Volume += step;
                     }
+                    else
+                        throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+
                 }
             }
         }

@@ -32,13 +32,22 @@ public abstract class InputBase
 
     protected abstract void ExecuteInternal(InputMessage message);
 
-    protected void InvokeAction(string actionName)
+    protected async void InvokeAction(string actionName)
     {
         Console.WriteLine($"device: {deviceId}, input: {Id}, action: {actionName}");
 
-        if (Actions.ContainsKey(actionName))
+        if (Actions.ContainsKey(actionName) && Actions[actionName] is not null)
         {
-            Actions[actionName]?.Invoke();
+            try
+            {
+                await Actions[actionName]!.Invoke();
+            }
+            catch (Exception ex)
+            {
+                ActionThrownAnException?.Invoke(this, new(deviceId, Id, actionName, ex));
+            }
         }
     }
+
+    public event EventHandler<PluginActionExceptionEventArgs>? ActionThrownAnException;
 }

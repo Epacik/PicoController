@@ -23,7 +23,17 @@ namespace PicoController.Core.Devices
             Interface = @interface;
             Inputs = inputs;
             Interface.NewMessage += Interface_NewMessage;
+
+            foreach(var input in Inputs)
+                input.ActionThrownAnException += Input_ActionThrownAnException;
         }
+
+        private void Input_ActionThrownAnException(object? sender, PluginActionExceptionEventArgs e)
+        {
+            ActionThrownAnException?.Invoke(this, e);
+        }
+
+        public event EventHandler<PluginActionExceptionEventArgs>? ActionThrownAnException;
 
         private void Interface_NewMessage(object? sender, InterfaceMessageEventArgs e)
         {
@@ -85,6 +95,8 @@ namespace PicoController.Core.Devices
                 if (disposing)
                 {
                     Interface.NewMessage -= Interface_NewMessage;
+                    foreach (var input in Inputs)
+                        input.ActionThrownAnException -= Input_ActionThrownAnException;
                 }
 
                 ((IDisposable)Interface).Dispose();
