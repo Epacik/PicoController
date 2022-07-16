@@ -37,7 +37,6 @@ internal class Volume : IPluginAction
     {
         float step = 0.01f;
         using var device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-        var processes = Process.GetProcesses();
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
         if (args.Length < 2)

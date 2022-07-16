@@ -10,7 +10,7 @@ namespace PicoController.Cli
             while (run)
             {
                 var config = Core.Config.Config.Read();
-                if(config is null)
+                if (config is null)
                 {
                     Core.Config.Config.SaveExampleConfig();
                     Console.WriteLine($"No config was found, and empty one was created at {Core.Config.Config.ConfigPath()}");
@@ -40,7 +40,7 @@ namespace PicoController.Cli
                         }
                     }
 
-                    
+
                     Console.WriteLine("Press q to quit, press r to reload");
                     while (true)
                     {
