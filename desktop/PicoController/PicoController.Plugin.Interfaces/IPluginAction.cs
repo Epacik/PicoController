@@ -1,4 +1,4 @@
-﻿namespace PicoController.Plugin.Interfaces;
+﻿namespace PicoController.Plugin;
 
 public interface IPluginAction
 {
