@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PicoController.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "--handlers"
+    }
+  }
+}
