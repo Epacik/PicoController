@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.Interfaces.csproj" />
+    <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">

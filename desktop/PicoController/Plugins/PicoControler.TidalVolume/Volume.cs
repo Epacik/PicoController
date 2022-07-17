@@ -1,4 +1,4 @@
-﻿using PicoController.Plugin.Interfaces;
+﻿using PicoController.Plugin;
 
 namespace PicoControler.TidalVolume;
 

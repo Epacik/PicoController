@@ -1,5 +1,5 @@
 ﻿using McMaster.NETCore.Plugins;
-using PicoController.Plugin.Interfaces;
+using PicoController.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,12 +33,6 @@ namespace PicoController.Core
                     _loaders.Add(dirName, loader);
                 }
             }
-
-            //foreach(var loader in _loaders)
-            //{
-            //    using (loader.Value.EnterContextualReflection())
-            //        _assemblies.Add(loader.Value.LoadDefaultAssembly());
-            //}
         }
 
         public static void UnloadPlugins()
@@ -101,7 +95,7 @@ namespace PicoController.Core
             using (loader.EnterContextualReflection())
             {
                 var assembly = loader.LoadDefaultAssembly();
-                var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPlugin);
+                var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPluginAction);
                 return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
             }
         }
@@ -110,7 +104,7 @@ namespace PicoController.Core
         {
             var typename = handler.TrimStart('/');
             var assembly = Assembly.GetExecutingAssembly();
-            var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPlugin);
+            var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPluginAction);
             return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
         }
 
@@ -131,7 +125,7 @@ namespace PicoController.Core
             return IPluginActionToFuncOfTask(value, action);
         }
 
-        private static bool IsPlugin(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);
+        private static bool IsPluginAction(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);
 
         private static Func<Task> IPluginActionToFuncOfTask(Config.Action value, IPluginAction action)
         {
@@ -139,5 +133,19 @@ namespace PicoController.Core
         }
 
         private static Dictionary<string, IPluginAction> LoadedActions = new Dictionary<string, IPluginAction>();
+
+        public static IEnumerable<string> AllAvailableActions()
+        {
+            var result = new List<string>();
+
+            result.AddRange(Assembly.GetExecutingAssembly().DefinedTypes.Where(IsPluginAction).Select(x => "/" + x.Name));
+
+            foreach(var loader in _loaders)
+            {
+                result.AddRange(loader.Value.LoadDefaultAssembly().DefinedTypes.Where(IsPluginAction).Select(x => $"{loader.Key}/{x.Name}"));
+            }
+
+            return result;
+        }
     }
 }
