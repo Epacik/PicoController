@@ -1,85 +1,41 @@
-﻿using System.Text.Json;
+﻿using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Parsing;
+using System.Text.Json;
+using Microsoft.Win32;
 using PicoController.Core;
+using PicoController.Core.BuiltInActions.Other;
+
 namespace PicoController.Cli
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
-            var run = true;
-            while (run)
-            {
-                var config = Core.Config.Config.Read();
-                if (config is null)
-                {
-                    Core.Config.Config.SaveExampleConfig();
-                    Console.WriteLine($"No config was found, and empty one was created at {Core.Config.Config.ConfigPath()}");
-                    Console.WriteLine("complete the config and reload");
-                    Console.WriteLine("Press any key to continue");
-                    Console.ReadKey();
+            var rootCommand = new RootCommand("Program communicating with a PicoController");
+            rootCommand.SetHandler(handler => DefaultBehavior.Run());
 
-                    continue;
-                }
-                Plugins.UnloadPlugins();
-                Plugins.LoadPlugins();
-                var devices = Core.Devices.Device.FromConfig(config);
-                var notLoadedDevices = new List<Core.Devices.Device>();
-                try
-                {
-                    Console.Clear();
-                    foreach (var device in devices)
-                    {
-                        try
-                        {
-                            device.Connect();
-                            device.ActionThrownAnException += Device_ActionThrownAnException;
-                        }
-                        catch (Exception ex)
-                        {
-                            PrintInColor($"Could not connect to device {device.ToString()}\nException: {ex.Message}", ConsoleColor.Red);
-                        }
-                    }
+            var helpCommand = new Command("--help-all", "Show help, and help for all available actions");
+            helpCommand.AddAlias("-ha");
+            helpCommand.SetHandler(handler => Help.ShowAll(handler));
 
+            var availableActionsCommand = new Command("--available-handlers", "Show all available handlers");
+            availableActionsCommand.AddAlias("--handlers");
+            availableActionsCommand.AddAlias("-H");
+            availableActionsCommand.SetHandler(handler => Help.ShowActions(handler));
 
-                    Console.WriteLine("Press q to quit, press r to reload");
-                    while (true)
-                    {
-                        var key = Console.ReadKey();
-                        if (key.Key == ConsoleKey.Q)
-                            run = false;
+            rootCommand.AddCommand(helpCommand);
+            rootCommand.AddCommand(availableActionsCommand);
 
-                        if (key.Key == ConsoleKey.R || key.Key == ConsoleKey.Q)
-                            break;
-                    }
-
-                    foreach (var device in devices)
-                    {
-                        if (!notLoadedDevices.Contains(device))
-                        {
-                            device.ActionThrownAnException -= Device_ActionThrownAnException;
-                            device.Disconnect();
-                        }
-                    }
-                }
-                finally
-                {
-                    foreach (var device in devices)
-                        device.Dispose();
-                }
-            }
+            var parser = new CommandLineBuilder(rootCommand)
+                .UseDefaults()
+                .UseHelp()
+                .Build();
+            
+            return await parser.InvokeAsync(args);
         }
 
-        private static void Device_ActionThrownAnException(object? sender, PluginActionExceptionEventArgs e)
-        {
-            PrintInColor("An action thrown an exception!\n" +
-                $"Device:    {e.DeviceNumber}, Input: {e.InputId}\n" +
-                $"Action:    {e.ActionName}\n" +
-                $"Exception: {e.Exception.Message}\n",
-                
-                ConsoleColor.Yellow);
-        }
-
-        private static void PrintInColor(string message, ConsoleColor foreground, ConsoleColor? background = null)
+        public static void PrintInColor(string message, ConsoleColor foreground, ConsoleColor? background = null)
         {
             var tempFg = Console.ForegroundColor;
             var tempBg = Console.BackgroundColor;
