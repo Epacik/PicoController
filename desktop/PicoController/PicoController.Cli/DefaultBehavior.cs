@@ -112,7 +112,7 @@ internal static class DefaultBehavior
     private static async Task<RequestedAction> GetAction()
     {
         await Task.Yield();
-        while (_requestedAction == RequestedAction.None) { }
+        while (_requestedAction == RequestedAction.None) { await Task.Delay(500); }
         return _requestedAction;
     }
 
@@ -120,7 +120,7 @@ internal static class DefaultBehavior
     private static async Task<RequestedAction> GetOnResume()
     {
         await Task.Yield();
-        while (!_resumeFromSleep) { }
+        while (!_resumeFromSleep) { await Task.Delay(500); }
         return RequestedAction.Reload;
     }
 
