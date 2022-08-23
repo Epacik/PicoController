@@ -1,4 +1,4 @@
-﻿namespace PicoController.Plugin;
+﻿namespace PicoController.Core;
 
 public interface IValidValues
 {

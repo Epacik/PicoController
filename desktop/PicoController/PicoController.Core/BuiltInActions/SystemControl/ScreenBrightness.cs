@@ -1,4 +1,4 @@
-﻿using PicoController.Plugin;
+﻿using PicoController.Core;
 using System.Management;
 
 namespace PicoController.Core.BuiltInActions.SystemControl;
@@ -7,11 +7,6 @@ namespace PicoController.Core.BuiltInActions.SystemControl;
 
 internal class ScreenBrightness : IPluginAction
 {
-    public void Execute(string? argument)
-    {
-        ChangeBrightness(argument);
-    }
-
     public async Task ExecuteAsync(string? argument)
     {
         await Task.Yield();

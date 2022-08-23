@@ -1,5 +1,5 @@
 ﻿using Neo.IronLua;
-using PicoController.Plugin;
+using PicoController.Core;
 
 namespace PicoController.Core.BuiltInActions.Scripting;
 
@@ -23,10 +23,6 @@ public abstract class NeoLuaBase : IPluginAction, IDisposable
     {
         _lua = new Lua();
         _useFile = useFile;
-    }
-    public void Execute(string? argument)
-    {
-        ExecuteInternal(argument);
     }
 
     public async Task ExecuteAsync(string? argument)

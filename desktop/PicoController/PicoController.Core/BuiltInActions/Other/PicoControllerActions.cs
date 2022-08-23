@@ -1,11 +1,4 @@
-﻿using PicoController.Plugin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PicoController.Core.BuiltInActions.Other;
+﻿namespace PicoController.Core.BuiltInActions.Other;
 
 public enum RequestedAction
 {
@@ -27,11 +20,6 @@ public class RequestedActionEventArgs : EventArgs
 public class PicoControllerActions : IPluginAction
 {
     public static event EventHandler<RequestedActionEventArgs>? ActionRequested;
-
-    public void Execute(string? argument)
-    {
-        ActionRequested?.Invoke(this, new(Enum.Parse<RequestedAction>(argument ?? "None")));
-    }
 
     public async Task ExecuteAsync(string? argument)
     {

@@ -29,6 +29,7 @@ internal static class DefaultBehavior
 
                 continue;
             }
+
             Plugins.UnloadPlugins();
             Plugins.LoadPlugins();
 

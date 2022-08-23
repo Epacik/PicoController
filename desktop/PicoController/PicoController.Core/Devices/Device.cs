@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using Encoder = PicoController.Core.Devices.Inputs.Encoder;
-using PicoController.Plugin;
+using PicoController.Core;
 
 namespace PicoController.Core.Devices
 {

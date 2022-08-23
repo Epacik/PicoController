@@ -1,5 +1,5 @@
 ﻿using Microsoft.Scripting.Hosting;
-using PicoController.Plugin;
+using PicoController.Core;
 using IP = IronPython;
 
 namespace PicoController.Core.BuiltInActions.Scripting;
@@ -23,10 +23,6 @@ public abstract class IronPythonBase : IPluginAction
     {
         _engine = IP.Hosting.Python.CreateEngine();
         _useFile = useFile;
-    }
-    public void Execute(string? argument)
-    {
-        ExecuteInternal(argument);
     }
 
     public async Task ExecuteAsync(string? argument)

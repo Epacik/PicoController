@@ -1,4 +1,4 @@
-﻿using PicoController.Plugin;
+﻿using PicoController.Core;
 
 namespace PicoController.Core.BuiltInActions.SystemControl;
 
@@ -15,13 +15,6 @@ internal class Volume : IPluginAction
     public Volume()
     {
         deviceEnumerator = new MMDeviceEnumerator();
-    }
-    public void Execute(string? argument)
-    {
-        if (string.IsNullOrWhiteSpace(argument))
-            return;
-
-        ChangeVolume(argument);
     }
 
     public async Task ExecuteAsync(string? argument)

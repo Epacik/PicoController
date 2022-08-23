@@ -1,7 +1,9 @@
 ﻿using McMaster.NETCore.Plugins;
-using PicoController.Plugin;
+using PicoController.Core;
+using SuccincT.Functional;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -13,6 +15,7 @@ namespace PicoController.Core
     {
         private static Dictionary<string, PluginLoader> _loaders = new();
         private static List<Assembly> _assemblies = new();
+        public static bool AreLoaded { get; private set; }
         public static void LoadPlugins()
         {
             var directory = Path.Combine(Config.Config.ConfigDirectory(), "Plugins");
@@ -33,6 +36,7 @@ namespace PicoController.Core
                     _loaders.Add(dirName, loader);
                 }
             }
+            AreLoaded = true;
         }
 
         public static void UnloadPlugins()
@@ -44,6 +48,7 @@ namespace PicoController.Core
             }
             _loaders.Clear();
             ClearLookups();
+            AreLoaded = true;
         }
 
         private static void ClearLookups()
@@ -146,6 +151,45 @@ namespace PicoController.Core
             }
 
             return result;
+        }
+        public static HandlerInfo? GetHandlerInfo(string handler)
+        {
+            TypeInfo? ha = handler.StartsWith('/')
+                ? GetBuiltInHandlerInfo(handler)
+                : GetPluginHandlerInfo(handler);
+            if (ha is null)
+                return null;
+
+            var description = ha.GetCustomAttribute<DescriptionAttribute>()?.Description;
+            IDictionary<string, string>? validValues = null;
+
+            if (typeof(IValidValues).IsAssignableFrom(ha))
+            {
+                var instance = (IValidValues?)Activator.CreateInstance(ha);
+                if(instance is not null)
+                {
+                    validValues = instance.ValidValues;
+                }
+            }
+
+            return new(description, validValues);
+        }
+
+        private static TypeInfo? GetBuiltInHandlerInfo(string handler) =>
+            Assembly.GetExecutingAssembly()
+                .DefinedTypes
+                .FirstOrDefault(
+                    x => IsPluginAction(x) 
+                      && string.Equals(
+                            x.Name,
+                            handler.Trim('/'), 
+                            StringComparison.CurrentCultureIgnoreCase));
+
+        private static TypeInfo? GetPluginHandlerInfo(string handler)
+        {
+            var (plugin, action) = handler.Split('/');
+
+            throw new NotImplementedException();
         }
     }
 }

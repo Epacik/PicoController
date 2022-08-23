@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OSVersionExt" Version="1.0.1" />
+    <PackageReference Include="VirtualDesktop" Version="5.0.5" />
+    <PackageReference Include="VirtualDesktop.WPF" Version="5.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
+  </ItemGroup>
+
+</Project>

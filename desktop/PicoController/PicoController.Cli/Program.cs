@@ -1,52 +1,60 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
-using System.Text.Json;
-using Microsoft.Win32;
-using PicoController.Core;
-using PicoController.Core.BuiltInActions.Other;
 
-namespace PicoController.Cli
+namespace PicoController.Cli;
+
+internal static class Program
 {
-    internal class Program
+    private static ConsoleColor _defaultForeground;
+    private static ConsoleColor _defaultBackground;
+
+    static async Task<int> Main(string[] args)
     {
-        static async Task<int> Main(string[] args)
+        _defaultForeground = Console.ForegroundColor;
+        _defaultBackground = Console.BackgroundColor;
+        var rootCommand = new RootCommand("Program communicating with a PicoController");
+        rootCommand.SetHandler(handler => DefaultBehavior.Run());
+
+        var handlersCommand = new Command("handlers", "Show all available handlers");
+        handlersCommand.SetHandler(handler => Handlers.ShowActions(handler));
+
+        var handlerCommand = new Command("handler", "Show informations about specific handler");
+        
+        var handlerArgument = new Argument<string>("handler")
         {
-            var rootCommand = new RootCommand("Program communicating with a PicoController");
-            rootCommand.SetHandler(handler => DefaultBehavior.Run());
+            Arity = ArgumentArity.ExactlyOne,
+        };
 
-            var helpCommand = new Command("--help-all", "Show help, and help for all available actions");
-            helpCommand.AddAlias("-ha");
-            helpCommand.SetHandler(handler => Help.ShowAll(handler));
+        handlerCommand.Add(handlerArgument);
+        handlerCommand.SetHandler(
+            (handler) => Handlers.Handler(handler),
+            new Handlers.HandlerBinder(handlerArgument));
+        
 
-            var availableActionsCommand = new Command("--available-handlers", "Show all available handlers");
-            availableActionsCommand.AddAlias("--handlers");
-            availableActionsCommand.AddAlias("-H");
-            availableActionsCommand.SetHandler(handler => Help.ShowActions(handler));
+        rootCommand.AddCommand(handlersCommand);
+        rootCommand.AddCommand(handlerCommand);
 
-            rootCommand.AddCommand(helpCommand);
-            rootCommand.AddCommand(availableActionsCommand);
+        var builder = new CommandLineBuilder(rootCommand)
+            .UseDefaults()
+            .UseHelp();
 
-            var parser = new CommandLineBuilder(rootCommand)
-                .UseDefaults()
-                .UseHelp()
-                .Build();
-            
-            return await parser.InvokeAsync(args);
-        }
+        var parser = builder.Build();
+        
+        return await parser.InvokeAsync(args);
+    }
 
-        public static void PrintInColor(string message, ConsoleColor foreground, ConsoleColor? background = null)
-        {
-            var tempFg = Console.ForegroundColor;
-            var tempBg = Console.BackgroundColor;
-            Console.ForegroundColor = foreground;
 
-            if (background is not null)
-                Console.BackgroundColor = (ConsoleColor)background;
+    public static void PrintInColor(string message, ConsoleColor? foreground = null, ConsoleColor? background = null)
+    {
+        if (foreground is not null)
+            Console.ForegroundColor = (ConsoleColor)foreground;
 
-            Console.WriteLine(message);
-            Console.ForegroundColor = tempFg;
-            Console.BackgroundColor = tempBg;
-        }
+        if (background is not null)
+            Console.BackgroundColor = (ConsoleColor)background;
+
+        Console.WriteLine(message);
+        Console.ForegroundColor = _defaultForeground;
+        Console.BackgroundColor = _defaultBackground;
     }
 }
