@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using Encoder = PicoController.Core.Devices.Inputs.Encoder;
 using PicoController.Core;
+using Tiger.Clock;
 
 namespace PicoController.Core.Devices
 {

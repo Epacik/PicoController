@@ -1,0 +1,1 @@
+dotnet publish --self-contained true -o $env:userprofile\.picoController\Plugins\PicoController.VirtualDesktop.Windows

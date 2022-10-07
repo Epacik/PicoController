@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using Tiger.Clock;
 
 namespace PicoController.Core.Devices.Inputs;
 

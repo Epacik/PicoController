@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tiger.Clock;
 
 namespace PicoController.Core.Devices.Inputs
 {
@@ -21,21 +22,29 @@ namespace PicoController.Core.Devices.Inputs
             _maxDelayBetweenClicks = maxDelayBetweenClicks;
             _timer = new System.Timers.Timer(_maxDelayBetweenClicks);
             _timer.Elapsed += _timer_Elapsed;
+            _timer.AutoReset = false;
         }
 
         private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            switch (_presses)
+            void invoke(int presses)
             {
-                case 1:
-                    InvokeAction(actionPress); break;
-                case 2:
-                    InvokeAction(actionDoublePress); break;
-                case > 2:
-                    InvokeAction(actionTriplePress); break;
+                switch (presses)
+                {
+                    case 1:
+                        InvokeAction(actionPress); break;
+                    case 2:
+                        InvokeAction(actionDoublePress); break;
+                    case 3:
+                        InvokeAction(actionTriplePress); break;
+                    case > 3:
+                        InvokeAction(actionTriplePress);
+                        invoke(presses - 3);
+                        break;
+                }
             }
-            _presses = 0;
-            _timer.Stop();
+            
+            invoke(Interlocked.Exchange(ref _presses, 0));
         }
 
         private bool IsPressed;
@@ -47,8 +56,8 @@ namespace PicoController.Core.Devices.Inputs
             if (IsPressed && message.Value == Released)
             {
                 IsPressed = false;
-                _presses++;
-                //InvokeAction(actionPress);
+                Interlocked.Increment(ref _presses);
+
                 _timer.Stop();
                 _timer.Start();
             }

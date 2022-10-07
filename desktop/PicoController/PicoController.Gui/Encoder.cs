@@ -8,7 +8,7 @@ namespace SerialControler.Gui
 {
     public class Encoder
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public string? Turn { get; set; }
         public string? PressAndTurn { get; set; }
         public string? Press { get; set; }

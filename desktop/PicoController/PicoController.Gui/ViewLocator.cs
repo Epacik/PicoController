@@ -7,12 +7,17 @@ namespace SerialControler.Gui
 {
     public class ViewLocator : IDataTemplate
     {
-        public IControl Build(object data)
+        public IControl Build(object? data)
         {
+            if (data is null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
             var name = data.GetType().FullName!.Replace("ViewModel", "View");
             var type = Type.GetType(name);
 
-            if (type != null)
+            if (type is not null)
             {
                 return (Control)Activator.CreateInstance(type)!;
             }
@@ -22,7 +27,7 @@ namespace SerialControler.Gui
             }
         }
 
-        public bool Match(object data)
+        public bool Match(object? data)
         {
             return data is ViewModelBase;
         }
