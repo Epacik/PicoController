@@ -24,7 +24,7 @@ void UserInteractions::Entry()
 
     while(true) {
         // wait until at least next half of a ms to help with debounce buttons a bit
-        if(time + 500 >= UsSinceBoot()) {
+        if(time + 200 >= UsSinceBoot()) {
             continue;
         }
 

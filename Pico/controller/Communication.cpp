@@ -12,9 +12,9 @@ void Communication::Entry()
 
     while (true)
     {
-        sleep_ms(100);
+        //sleep_ms(100);
         
-        while(!messageQueue1.empty())
+        if(!messageQueue1.empty())
         {
             IO::Input::Message* msg;
             messageQueue1.pop_into(msg);
@@ -30,7 +30,7 @@ void Communication::Entry()
                     static_cast<uint16_t>(msg->InputType),
                     msg->Value);
 
-                printf(outputBuffer);
+                printf("%s", outputBuffer);
             }
             delete msg;
         }
