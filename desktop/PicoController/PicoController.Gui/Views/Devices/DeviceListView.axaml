@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PicoController.Gui.ViewModels.Devices"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="150"
+             Background="Transparent"
+             x:Class="PicoController.Gui.Views.Devices.DeviceListView">
+
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Devices/DeviceList.axaml"/>
+    </UserControl.Styles>
+    
+    <Design.DataContext>
+        <vm:DeviceListViewModel/>
+    </Design.DataContext>
+
+    <ListBox SelectionMode="Single"
+             Classes="Devices"
+             Items="{Binding Devices}"
+             SelectedItem="{Binding SelectedDevice}"
+             Background="Transparent"
+             SelectionChanged="ListBox_SelectionChanged"/>
+</UserControl>

@@ -1,0 +1,119 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:local="using:PicoController.Gui.Styles.Devices"
+        xmlns:devViews="using:PicoController.Gui.Views.Devices"
+        xmlns:conv="using:PicoController.Gui.Converters"
+        xmlns:pg="using:PicoController.Gui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+        xmlns:ir="clr-namespace:Avalonia.Xaml.Interactions.Responsive;assembly=Avalonia.Xaml.Interactions"
+        xmlns:reactive="using:System.Reactive"
+        xmlns:dw="using:PicoController.Gui.Views.Devices">
+    <Design.PreviewWith>
+        <Border Padding="20" Width="500">
+            <!-- Add Controls for Previewer Here -->
+            <ListBox Classes="Inputs" Items="{x:Static local:DeviceListTest.TestInputs}"/>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="ListBox.Inputs">
+        <Setter 
+            Property="VirtualizationMode"
+            Value="None"/>
+        <Setter Property="CornerRadius"
+                Value="5"/>
+        
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Grid RowDefinitions="30,5,*" ColumnDefinitions="30,5,*" MinHeight="50">
+                        <TextBlock Text="{Binding Id}" Padding="5"/>
+                        <TextBlock Grid.Column="2"
+                                   Padding="5"
+                                   Text="{Binding Type, Converter={x:Static conv:Converters.InputTypeToStringConverter}}"/>
+
+                        <ListBox Items="{Binding Actions}"
+                                 Classes="InputActions"
+                                 Grid.Row="2"
+                                 Grid.ColumnSpan="3">
+                            
+                            <i:Interaction.Behaviors>
+                                <ia:EventTriggerBehavior EventName="SelectionChanged" SourceObject="ChangeProperty" >
+                                    <ia:InvokeCommandAction Command="{Binding DataContext.SelectedInputChangedCommand, 
+                                                            RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dw:DeviceView} }}"
+                                                            PassEventArgsToCommand="True"/>
+                                </ia:EventTriggerBehavior>
+                            </i:Interaction.Behaviors>
+                        </ListBox>
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style Selector="^ ListBoxItem">
+        </Style>
+        
+        <Style Selector="^>ListBoxItem">
+        </Style>
+        
+        <Style Selector="^ ListBoxItem:selected">
+        </Style>
+
+        <Style Selector="^ ListBoxItem:pointerover">
+        </Style>
+
+        <Style Selector="^ ListBoxItem">
+            <Setter Property="Template">
+                <ControlTemplate>
+                        <ContentPresenter 
+                            Name="PART_ContentPresenter"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Content="{TemplateBinding Content}"
+                            Padding="{TemplateBinding Padding}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            CornerRadius="{DynamicResource ControlCornerRadius}"
+                            Margin="2"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style Selector="^ ListBox.InputActions">
+            
+            <Setter Property="CornerRadius"
+                    Value="5"/>
+            <Setter Property="IsEnabled"
+                    Value="{Binding !DataContext.Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
+            
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid IsEnabled="{Binding !Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                              ColumnDefinitions="120,*"
+                              RowDefinitions="*,5,*,5,*">
+                            <TextBlock>Action</TextBlock>
+                            <TextBlock 
+                                Grid.Column="1"
+                                Text="{Binding Key}"/>
+
+                            <TextBlock Grid.Row="2">Handler</TextBlock>
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Text="{Binding Value.Handler}"/>
+
+                            <TextBlock Grid.Row="4">Value</TextBlock>
+                            <TextBlock
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Text="{Binding Value.Data}"/>
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Style>
+</Styles>

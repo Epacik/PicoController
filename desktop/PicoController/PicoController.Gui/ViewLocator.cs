@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using SerialControler.Gui.ViewModels;
+using PicoController.Gui.ViewModels;
 using System;
 
-namespace SerialControler.Gui
+namespace PicoController.Gui
 {
     public class ViewLocator : IDataTemplate
     {

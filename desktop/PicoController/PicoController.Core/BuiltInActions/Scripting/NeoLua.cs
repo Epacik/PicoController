@@ -1,5 +1,6 @@
 ﻿using Neo.IronLua;
 using PicoController.Core;
+using PicoController.Plugin.Attributes;
 
 namespace PicoController.Core.BuiltInActions.Scripting;
 
@@ -13,6 +14,7 @@ public class NeoLuaFile : NeoLuaBase
     public NeoLuaFile() : base(true) { }
 }
 
+[HideHandler]
 public abstract class NeoLuaBase : IPluginAction, IDisposable
 {
     private readonly bool _useFile;

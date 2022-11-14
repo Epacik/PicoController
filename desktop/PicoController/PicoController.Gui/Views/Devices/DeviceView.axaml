@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vmd="using:PicoController.Gui.ViewModels.Devices"
+             xmlns:vm="using:PicoController.Gui.ViewModels"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+             xmlns:ir="clr-namespace:Avalonia.Xaml.Interactions.Responsive;assembly=Avalonia.Xaml.Interactions"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PicoController.Gui.Views.Devices.DeviceView"
+             VerticalAlignment="Stretch">
+
+    <Design.DataContext>
+        <vmd:DeviceViewModel/>
+    </Design.DataContext>
+    
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Devices/Device.axaml"/>
+    </UserControl.Styles>
+    <Grid ColumnDefinitions="*">
+        <Grid RowDefinitions="70,20,*"
+              Margin="5">
+            <Grid ColumnDefinitions="60,*"
+                  RowDefinitions="*,*">
+                <Rectangle Stroke="{DynamicResource ListBoxForeground}"
+                           StrokeThickness="2"
+                           Margin="10,5"
+                           RadiusX="2"
+                           RadiusY="2"
+                           Grid.RowSpan="2"/>
+                <TextBlock VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Text="{Binding Device.Interface.Type}"
+                           FontSize="15"
+                           Grid.RowSpan="2"/>
+
+                <TextBlock FontSize="20"
+                           FontWeight="SemiBold"
+                           Text="{Binding Device.Name}"
+                           Grid.Column="1"/>
+
+                <StackPanel Orientation="Horizontal"
+                            Grid.Column="1"
+                            Grid.Row="1"
+                            Spacing="5">
+                    <TextBlock Text="Interface:"/>
+                    <TextBlock Text="{Binding Device.Interface.Type}"/>
+                </StackPanel>
+            </Grid>
+
+            <ListBox Classes="Inputs"
+                     Grid.Row="2"
+                     Items="{Binding Inputs}">
+                
+            </ListBox>
+        </Grid>
+    </Grid>
+</UserControl>

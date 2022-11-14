@@ -1,10 +1,10 @@
 ﻿namespace PicoController.Core;
 
-internal static class DeconstructExtensions
+public static class DeconstructExtensions
 {
-    public static void Deconstruct(this string[] array, out string? item1, out string? item2)
+    public static void Deconstruct<T>(this T[] array, out T? item1, out T? item2)
     {
-        item1 = array.Length > 0 ? array[0] : null;
-        item2 = array.Length > 1 ? array[1] : null;
+        item1 = array.Length > 0 ? array[0] : default;
+        item2 = array.Length > 1 ? array[1] : default;
     }
 }

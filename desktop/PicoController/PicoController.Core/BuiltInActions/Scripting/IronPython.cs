@@ -1,5 +1,6 @@
 ﻿using Microsoft.Scripting.Hosting;
 using PicoController.Core;
+using PicoController.Plugin.Attributes;
 using IP = IronPython;
 
 namespace PicoController.Core.BuiltInActions.Scripting;
@@ -14,6 +15,7 @@ public class IronPythonFile : IronPythonBase
     public IronPythonFile() : base(true) { }
 }
 
+[HideHandler]
 public abstract class IronPythonBase : IPluginAction
 {
     private readonly bool _useFile;

@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using PicoController.Core.Devices.Inputs;
+using PicoController.Core.Misc;
 
 namespace PicoController.Core.Config
 {
-    public class Input
+    public class Input : ICloneable<Input>
     {
         [JsonConstructor]
-        public Input(byte id, InputType type, Dictionary<string, Action> actions)
+        public Input(byte id, InputType type, Dictionary<string, InputAction> actions)
         {
             Id = id;
             Type = type;
@@ -27,6 +28,18 @@ namespace PicoController.Core.Config
         public InputType Type { get; set; }
 
         [JsonPropertyName("actions")]
-        public Dictionary<string, Action> Actions { get; set; }
+        public Dictionary<string, InputAction> Actions { get; set; }
+
+        public Input Clone() =>
+            new Input(
+                Id,
+                Type,
+                Actions.Select(x => (x.Key, Value: x.Value.Clone()))
+                       .ToDictionary(x => x.Key, x => x.Value));
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Type: {Type}\n\n{string.Join("\n", Actions.Select(x => $"{x.Key}: {x.Value.Handler}({x.Value.Data})"))}";
+        }
     }
 }

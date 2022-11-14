@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoreAudio" Version="1.16.0" />
-    <PackageReference Include="System.IO.Ports" Version="7.0.0-rc.1.22426.10" />
+    <PackageReference Include="CoreAudio" Version="1.19.0" />
+    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

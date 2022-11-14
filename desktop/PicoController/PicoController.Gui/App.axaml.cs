@@ -1,23 +1,44 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using SerialControler.Gui.ViewModels;
-using SerialControler.Gui.Views;
+using PicoController.Gui.Helpers;
+using PicoController.Gui.ViewModels;
+using PicoController.Gui.Views;
+using Splat;
+using System;
 
-namespace SerialControler.Gui
+namespace PicoController.Gui
 {
     public class App : Application
     {
         public override void Initialize()
         {
+            Locator.CurrentMutable.RegisterLazySingleton(() => new Core.Config.ConfigRepository(), typeof(Core.Config.IConfigRepository));
             AvaloniaXamlLoader.Load(this);
+        }
+
+        public static IClassicDesktopStyleApplicationLifetime? DesktopApplicationLifetime => Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+        private static MainWindow? MainWindow => DesktopApplicationLifetime?.MainWindow as MainWindow;
+
+        public void ShowWindow_Click(object? sender, EventArgs e)
+        {
+            MainWindow?.RestoreWindowState();
+        }
+
+        public void ExitApp_Click(object? sender, EventArgs e)
+        {
+            DesktopApplicationLifetime?.Shutdown();
         }
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            Locator.CurrentMutable.RegisterLazySingleton<IRepositoryHelper>(() => new RepositoryHelper());
+            Locator.CurrentMutable.RegisterLazySingleton<Themes.ThemeManager>(Themes.ThemeManager.CreateManager);
+
+            if (DesktopApplicationLifetime is not null)
             {
-                desktop.MainWindow = new MainWindow
+                DesktopApplicationLifetime.MainWindow = new MainWindow
                 {
                     DataContext = new MainWindowViewModel(),
                 };

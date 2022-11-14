@@ -11,18 +11,20 @@ internal static class DefaultBehavior
 
         PicoControllerActions.ActionRequested += PicoControllerActions_ActionRequested;
 #if OS_WINDOWS
-#pragma warning disable CA1416 // Walidacja zgodności z platformą
+#pragma warning disable CA1416 // Platform compatibility validation
         Microsoft.Win32.SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
-#pragma warning restore CA1416 // Walidacja zgodności z platformą
+#pragma warning restore CA1416 // Platform compatibility validation
 #endif
 
         while (run)
         {
-            var config = Core.Config.Config.Read();
+            var rep = new Core.Config.ConfigRepository();
+            var config = rep.Read();
             if (config is null)
             {
-                Core.Config.Config.SaveExampleConfig();
-                Console.WriteLine($"No config was found, and empty one was created at {Core.Config.Config.ConfigPath()}");
+                rep.Save(Core.Config.Config.ExampleConfig());
+
+                Console.WriteLine($"No config was found, and empty one was created at {Core.Config.ConfigRepository.ConfigPath()}");
                 Console.WriteLine("complete the config and reload");
                 Console.WriteLine("Press any key to continue");
                 Console.ReadKey();

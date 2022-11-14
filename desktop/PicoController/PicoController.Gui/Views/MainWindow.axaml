@@ -1,95 +1,141 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:SerialControler.Gui.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ctrl="clr-namespace:Avalonia.Controls"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="SerialControler.Gui.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="SerialControler.Gui">
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:PicoController.Gui.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctrl="clr-namespace:Avalonia.Controls"
+    xmlns:dev="using:PicoController.Gui.ViewModels.Devices"
+    xmlns:conv="using:PicoController.Gui.Converters"
+    xmlns:local="using:PicoController.Gui.Views"
+    xmlns:fa="using:FluentAvalonia.UI.Controls"
+    xmlns:sty="using:FluentAvalonia.Styling"
+    xmlns:ui="using:FluentAvalonia.UI.Controls"
+    xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+    mc:Ignorable="d"
+    MinWidth="600"
+    MinHeight="300"
+    d:DesignWidth="800"
+    d:DesignHeight="450"
+    x:Class="PicoController.Gui.Views.MainWindow"
+    Icon="/Assets/avalonia-logo.ico"
+    Title="Pico Controller">
 
-    <Window.Styles>
-        <Style Selector="StackPanel.header TextBlock" x:DataType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-        </Style>
-
-        <Style Selector="StackPanel.header" x:DataType="StackPanel">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
-        <Style Selector="TextBlock.rowLabel" x:DataType="TextBlock" >
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-    </Window.Styles>
-    <!--<Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>-->
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
+    
+    <Window.Resources>
+        <conv:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter"/>
+        <conv:DeviceToDeviceViewModelConverter x:Key="DeviceToDeviceViewModelConverter"/>
+    </Window.Resources>
 
-    <Grid ShowGridLines="True">
+    <Window.Styles>
+        <StyleInclude Source="/Styles/MainWindow.axaml"/>
+    </Window.Styles>
+
+    <Grid Background="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}" x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition/>
+            <RowDefinition MinHeight="150"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="{Binding ShowOutput, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter={x:Static local:MainWindow.OutputHeight}}" />
         </Grid.RowDefinitions>
-        
-        <TextBlock Text="{Binding Greeting}" VerticalAlignment="Center" Grid.Row="0"/>
 
-        <DataGrid Grid.Row="1"
-                  CanUserReorderColumns="False"
-                  CanUserResizeColumns="False"
-                  CanUserSortColumns="False"
-                  SelectionMode="Single"
-                  IsReadOnly="True"
-                  AutoGenerateColumns="False"
-                  
-                  Items="{Binding Encoders}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Encoder" Binding="{Binding Name}" Width="1*" />
-                <DataGridTextColumn Header="Turn" Binding="{Binding Turn}" Width="1*"/>
-                <DataGridTextColumn Header="Press and turn" Binding="{Binding PressAndTurn}" Width="1*"/>
-                <DataGridTextColumn Header="Press" Binding="{Binding Press}" Width="1*"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        
-        <!--<Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding MenuButtonToggle, Converter={StaticResource BooleanToGridLengthConverter}}"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
 
-        <StackPanel Classes="header" Grid.Column="1">
-            <TextBlock>Hold and turn</TextBlock>
-        </StackPanel>
+        <ToggleButton
+            IsChecked="{Binding MenuButtonToggle}"
+            Classes="Hamburger"/>
 
-        <StackPanel Classes="header" Grid.Column="2">
-            <TextBlock>Turn</TextBlock>
-        </StackPanel>
-
-        <StackPanel Classes="header" Grid.Column="3">
-            <TextBlock>Press</TextBlock>
-        </StackPanel>
+        <ContentControl Grid.Row="1"
+                        Grid.RowSpan="3"
+                        HorizontalAlignment="Left"
+                        HorizontalContentAlignment="Left"
+                        Name="DeviceList"
+                        Content="{Binding Devices}"/>
         
-        <TextBlock Classes="rowLabel" Grid.Row="1" Text="Encoder 0"/>
-        <TextBlock Classes="rowLabel" Grid.Row="2" Text="Encoder 1"/>
-        <TextBlock Classes="rowLabel" Grid.Row="3" Text="Encoder 2"/>
-        <TextBlock Classes="rowLabel" Grid.Row="4" Text="Encoder 3"/>
-        <TextBlock Classes="rowLabel" Grid.Row="5" Text="Encoder 4"/>-->
+        <GridSplitter Grid.Row="2"
+                      Grid.Column="1"
+                      IsEnabled="{Binding ShowOutput}"/>
         
+        <!--<ToggleButton 
+            IsChecked="{Binding ShowOutput}"
+            Height="20"
+            Grid.Row="2"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            Padding="1"
+            FontSize="12">
+            Toggle output
+        </ToggleButton>-->
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="5"
+                    HorizontalAlignment="Right"
+                    Grid.Column="1" 
+                    Margin="5,0">
+
+            <Button 
+                Content="Save config"
+                IsEnabled="{Binding SaveEnabled}"
+                Command="{Binding SaveConfigCommand}"/>
+            <Button 
+                IsEnabled="{Binding !Run}"
+                Content="Reload config"
+                Command="{Binding RequestReload}"/>
+
+            <Button IsEnabled="{Binding !Run}" Command="{Binding ReloadPlugins}">Reload Plugins</Button>
+            
+            <Button
+                IsEnabled="{Binding CreateNewConfingEnabled}"
+                IsVisible="{Binding ConfigNotFound}"
+                Command="{Binding CreateNewConfig}">
+                Configuration file was not found. Click here to create one
+            </Button>
+
+            <Button 
+                IsVisible="{Binding Run}"
+                Command="{Binding RestartDevices}">
+                🔄️
+            </Button>
+
+            <ToggleButton
+                Width="80"
+                IsChecked="{Binding Run}"
+                IsEnabled="{Binding RunEnabled}"
+                Command="{Binding ToggleRunning}">
+                <Grid>
+                    <TextBlock IsVisible="{Binding Run}">⏹️ Stop</TextBlock>
+                    <TextBlock IsVisible="{Binding !Run}">▶️ Run</TextBlock>
+                </Grid>
+            </ToggleButton>
+            
+        </StackPanel>
+
+        <Border Grid.Column="1"
+                Grid.Row="1"
+                Background="{DynamicResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
+                CornerRadius="5,0,0,5">
+            <Grid ColumnDefinitions="*,0,0">
+                <!-- 5,200 -->
+                <ContentControl Content="{Binding Devices.SelectedDevice, Converter={StaticResource DeviceToDeviceViewModelConverter}}"/>
+
+                <GridSplitter Grid.Column="1"/>
+
+                <!--<ContentControl Grid.Column="2" Content="{Binding Handlers}">
+                    <vm:HandlersViewModel/>
+                </ContentControl>-->
+            </Grid>
+        </Border>
+        
+        <Border Grid.Column="1" Grid.Row="3" Background="{DynamicResource LayerOnMicaBaseAltFillColorSecondaryBrush}" CornerRadius="5,0,0,0">
+                <TextBlock x:Name="Output"
+                           VerticalAlignment="Bottom"/>
+        </Border>
     </Grid>
 
 </Window>

@@ -1,0 +1,40 @@
+<UserControl 
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:PicoController.Gui.Views"
+    xmlns:viewModels="using:PicoController.Gui.ViewModels"
+    mc:Ignorable="d" 
+    x:Class="PicoController.Gui.Views.HandlerEditorView"
+    MinWidth="500">
+    <Grid Margin="5" RowDefinitions="30,30,5,30,30,5,30,250" VerticalAlignment="Stretch">
+        <!--<Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="200" MinWidth="100"/>
+        </Grid.ColumnDefinitions>-->
+
+        <!--<GridSplitter Grid.Column="1" Grid.RowSpan="5" Margin="5,0"/>-->
+        
+        <TextBlock>Handler:</TextBlock>
+        <TextBox 
+            Grid.Row="1" 
+            Text="{Binding HandlerId}"
+            x:Name="HandlerId"
+            DragDrop.AllowDrop="True"/>
+
+        <TextBlock Grid.Row="3">Data: </TextBlock>
+        <TextBox Grid.Row="4" Text="{Binding HandlerData}" />
+
+        <TextBlock FontSize="16" FontWeight="SemiBold" Grid.Row="6">Avaliable handlers</TextBlock>
+        <!--Grid.RowSpan="6" MinWidth="120" Grid.Column="2"-->
+        <ScrollViewer Grid.Row="7">
+            <views:HandlersView>
+                <views:HandlersView.DataContext>
+                    <viewModels:HandlersViewModel/>
+                </views:HandlersView.DataContext>
+            </views:HandlersView>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

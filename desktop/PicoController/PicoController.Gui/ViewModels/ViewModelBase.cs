@@ -1,12 +1,12 @@
-using ReactiveUI;
+﻿using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace SerialControler.Gui.ViewModels
+namespace PicoController.Gui.ViewModels;
+
+public class ViewModelBase : ReactiveObject
 {
-    public class ViewModelBase : ReactiveObject
-    {
-
-    }
 }

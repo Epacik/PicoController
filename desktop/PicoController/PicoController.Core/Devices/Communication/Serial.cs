@@ -69,6 +69,4 @@ public class Serial : InterfaceBase
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
-    
 }

@@ -1,5 +1,8 @@
-﻿using System;
+﻿using PicoController.Core.Devices.Inputs;
+using PicoController.Core.Misc;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -8,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core.Config
 {
-    public class Config
+    public class Config : ICloneable<Config>
     {
         [JsonConstructor]
-        public Config() {}
+        public Config() { }
 
         public Config(List<Device> devices)
         {
@@ -23,250 +26,135 @@ namespace PicoController.Core.Config
 
         [JsonPropertyName("devices")]
         public List<Device> Devices { get; set; } = new List<Device>();
-        public static Config? Read()
-        {
-            var configPath = ConfigPath();
-            if (!File.Exists(configPath))
-                return null;
 
-            var json = File.ReadAllText(configPath) ?? "";
-            var options = new JsonSerializerOptions()
+        public static Config ExampleConfig()
+        {
+            byte inputId = 0;
+            return new()
             {
-                ReadCommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true,
-                Converters =
+                MaxDelayBetweenClicks = 50,
+                Devices = new()
                 {
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
+                    new Device
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = "Example device",
+                        Interface = new(InterfaceType.COM, new()
+                        {
+                            { "port", JsonSerializer.SerializeToElement("COM6") },
+                            { "rate", JsonSerializer.SerializeToElement(115200) },
+                            { "dataBits", JsonSerializer.SerializeToElement(8) },
+                            { "stopBits", JsonSerializer.SerializeToElement(1) },
+                            { "parity", JsonSerializer.SerializeToElement(0) }
+                        }),
+                        Inputs = new Input[]
+                        {
+                            GetExampleInput(inputId++, InputType.Button),
+                            GetExampleInput(inputId++, InputType.Button),
+                            GetExampleInput(inputId++, InputType.Button),
+                            GetExampleInput(inputId++, InputType.Button),
+                            GetExampleInput(inputId++, InputType.EncoderWithButton),
+                            GetExampleInput(inputId++, InputType.EncoderWithButton),
+                            GetExampleInput(inputId++, InputType.EncoderWithButton),
+                            GetExampleInput(inputId++, InputType.EncoderWithButton),
+                            GetExampleInput(inputId++, InputType.EncoderWithButton),
+                        },
+                    }
                 }
             };
-            return JsonSerializer.Deserialize<Config>(json, options) ?? new Config();
         }
 
-        public static void Save(Config config)
+        public static Config ExampleConfig(int numberOfDevices)
         {
-            var configPath = ConfigPath();
-            var options = new JsonSerializerOptions()
+            var rand = new Random();
+            
+            var devices = new Device[numberOfDevices];
+
+            for (int i = 0; i < numberOfDevices; i++)
             {
-                ReadCommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true,
-                WriteIndented = true,
-                Converters =
+                var type = (InterfaceType)rand.Next(1, 3);
+                Debug.WriteLine($"Device interface type: {type}");
+
+                var inputs = new Input[rand.Next(2, 20)];
+
+                for (int j = 0; j < inputs.Length; j++)
                 {
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
+                    inputs[j] = GetExampleInput((byte)j, (InputType)rand.Next(1, (int)InputType.MAX));
                 }
+
+                devices[i] = new()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = $"Example device {i}",
+                    Interface = new(type, type switch
+                    {
+                        InterfaceType.COM => new()
+                        {
+                            { "port",     JsonSerializer.SerializeToElement($"COM{rand.Next(0, 9)}") },
+                            { "rate",     JsonSerializer.SerializeToElement(115200) },
+                            { "dataBits", JsonSerializer.SerializeToElement(8) },
+                            { "stopBits", JsonSerializer.SerializeToElement(1) },
+                            { "parity",   JsonSerializer.SerializeToElement(0) }
+                        },
+                        InterfaceType.WiFi => new()
+                        {
+                            { "ip", JsonSerializer.SerializeToElement($"192.168.1.{rand.Next(1, 254)}") },
+                        },
+                        InterfaceType.Bluetooth => new()
+                        {
+                            { "name", JsonSerializer.SerializeToElement($"Device {rand.Next(1, 254)}") }
+                        },
+                        InterfaceType.None => new() { },
+                        _ => throw new NotImplementedException(),
+                    }),
+                    Inputs = inputs,
+                };
+
+            }
+
+            return new()
+            {
+                MaxDelayBetweenClicks = 50,
+                Devices = devices.ToList(),
             };
-            var json = JsonSerializer.Serialize(config, options);
-            Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
-            File.WriteAllText(configPath, json);
         }
 
-        public static void SaveExampleConfig()
+        private static Input GetExampleInput(byte id, InputType type) => new Input(id, type, GetExampleActions(type));
+
+        private static Dictionary<string, InputAction> GetExampleActions(InputType type) => type switch
         {
-            var configPath = ConfigPath();
-            Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
-            File.WriteAllText(configPath, exampleConfig);
-        }
+            InputType.Button => new()
+            {
+                { "press", new InputAction() },
+                { "doublePress", new InputAction() },
+                { "triplePress", new InputAction() },
+            },
+            InputType.Encoder => new()
+            {
+                { "rotationClockwise", new InputAction() },
+                { "rotationCounterClockwise", new InputAction() },
+                { "pressedRotationClockwise", new InputAction() },
+                { "pressedRotationCounterClockwise", new InputAction() },
+            },
+            InputType.EncoderWithButton | InputType.MAX => new()
+            {
+                { "press", new InputAction() },
+                { "doublePress", new InputAction() },
+                { "triplePress", new InputAction() },
+                { "rotationClockwise", new InputAction() },
+                { "rotationCounterClockwise", new InputAction() },
+                { "pressedRotationClockwise", new InputAction() },
+                { "pressedRotationCounterClockwise", new InputAction() },
+            },
 
-        public static string ConfigDirectory()
+            _ => throw new NotImplementedException(),
+        };
+
+        public Config Clone()
         {
-            var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            return Path.Combine(userFolder, ".picoController");
+            var config = (Config)MemberwiseClone();
+            config.Devices = Devices.ConvertAll(x => x.Clone());
+            return config;
         }
-        public static string ConfigPath()
-        {
-            var configPath = Path.Combine(ConfigDirectory(), "config.json");
-            return configPath;
-        }
-
-
-        private const string exampleConfig = @"{
-    ""maxDelayBetweenClicks"": 50,
-    ""devices"": [
-      {
-        ""interface"": {
-          ""type"": ""COM"",
-          ""data"": {
-            ""port"": ""COM6"",
-            ""rate"": 115200,
-            ""dataBits"": 8,
-            ""stopBits"": 1,
-            ""parity"": 0
-          }
-        },
-        ""inputs"": [
-          {
-            ""id"": 0,
-            ""type"": ""button"",
-            ""actions"": {
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 1,
-            ""type"": ""button"",
-            ""actions"": {
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 2,
-            ""type"": ""button"",
-            ""actions"": {
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 3,
-            ""type"": ""button"",
-            ""actions"": {
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 4,
-            ""type"": ""encoderWithButton"",
-            ""actions"": {
-              ""rotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""rotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 5,
-            ""type"": ""encoderWithButton"",
-            ""actions"": {
-              ""rotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""rotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 6,
-            ""type"": ""encoderWithButton"",
-            ""actions"": {
-              ""rotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""rotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 7,
-            ""type"": ""encoderWithButton"",
-            ""actions"": {
-              ""rotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""rotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          },
-          {
-            ""id"": 8,
-            ""type"": ""encoderWithButton"",
-            ""actions"": {
-              ""rotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""rotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationCounterClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""pressedRotationClockwise"": {
-                ""handler"": null,
-                ""data"": null
-              },
-              ""press"": {
-                ""handler"": null,
-                ""data"": null
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }";
     }
 }

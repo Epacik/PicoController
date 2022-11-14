@@ -1,0 +1,64 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pc="using:PicoController.Gui"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:ir="clr-namespace:Avalonia.Xaml.Interactions.Responsive;assembly=Avalonia.Xaml.Interactions">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <ToggleButton Classes="Hamburger" IsChecked="true" IsThreeState="False" />
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="ToggleButton.Hamburger">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="Padding" Value="1,-5"/>
+        <Setter Property="FontSize" Value="30"/>
+        <Setter Property="Width" Value="38"/>
+        <Setter Property="Height" Value="38"/>
+        <Setter Property="Content" Value="≡"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Style Selector="^:unchecked">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+        </Style>
+
+        <Style Selector="^:checked">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+            
+            <Style Selector="^ ContentPresenter">
+                <Setter Property="Background"
+                        Value="Transparent"/>
+                
+                <Setter Property="Foreground" 
+                        Value="{DynamicResource ToggleButtonForeground}"/>
+            </Style>
+        </Style>
+
+        <Style Selector="^:pointerover">
+            <Style Selector="^ ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource LayerOnMicaBaseAltFillColorSecondaryBrush}"/>
+            </Style>
+        </Style>
+
+        <Style Selector="^:pressed">
+            <Style Selector="^ ContentPresenter">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource ToggleButtonForegroundPressed}"/>
+            </Style>
+        </Style>
+    </Style>
+
+    <Style Selector="Window.mica:focus, Window.mica:focus-within">
+        <Setter Property="Background"
+                Value="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
+    </Style>
+
+
+    <!--<Style Selector=".Window.unfocused">
+        
+    </Style>-->
+</Styles>

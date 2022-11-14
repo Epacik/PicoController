@@ -58,8 +58,8 @@ namespace PicoController.Core.Devices
                 var deviceId = i;
                 InterfaceBase ifc = dev.Interface.Type switch
                 {
-                    "COM" => new Serial(dev.Interface.Data),
-                    "WiFi" => new WiFi(dev.Interface.Data),
+                    Config.InterfaceType.COM => new Serial(dev.Interface.Data),
+                    Config.InterfaceType.WiFi => new WiFi(dev.Interface.Data),
                     _ => throw new InvalidDataException(),
                 };
 

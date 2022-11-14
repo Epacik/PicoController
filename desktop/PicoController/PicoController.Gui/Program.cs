@@ -1,11 +1,12 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
+using PicoController.Gui.Converters;
 using System;
 
-namespace SerialControler.Gui
+namespace PicoController.Gui
 {
-    internal class Program
+    internal static class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -18,6 +19,9 @@ namespace SerialControler.Gui
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
+                .With(new Win32PlatformOptions { UseCompositor = true })
+                .With(new X11PlatformOptions { UseCompositor = true })
+                .With(new AvaloniaNativePlatformOptions { UseCompositor = true })
                 .LogToTrace()
                 .UseReactiveUI();
     }

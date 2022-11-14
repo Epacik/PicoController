@@ -1,5 +1,6 @@
 ﻿using McMaster.NETCore.Plugins;
 using PicoController.Core;
+using PicoController.Plugin.Attributes;
 using SuccincT.Functional;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace PicoController.Core
         public static bool AreLoaded { get; private set; }
         public static void LoadPlugins()
         {
-            var directory = Path.Combine(Config.Config.ConfigDirectory(), "Plugins");
+            var directory = Path.Combine(Config.ConfigRepository.ConfigDirectory(), "Plugins");
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
@@ -65,7 +66,7 @@ namespace PicoController.Core
             LoadedActions.Clear();
         }
 
-        internal static Func<Task>? LookupActions(Config.Action value)
+        internal static Func<Task>? LookupActions(Config.InputAction value)
         {
             if (string.IsNullOrWhiteSpace(value.Handler))
                 return null;
@@ -88,7 +89,7 @@ namespace PicoController.Core
             }
         }
 
-        private static Func<Task>? LookupPluginAction(Config.Action value, string handler)
+        private static Func<Task>? LookupPluginAction(Config.InputAction value, string handler)
         {
             var splittedHandler = handler.Split('/');
             var (assemblyName, typename) = (splittedHandler[0], splittedHandler[1]);
@@ -105,7 +106,7 @@ namespace PicoController.Core
             }
         }
 
-        private static Func<Task>? LookupBuildtInAction(Config.Action value, string handler)
+        private static Func<Task>? LookupBuildtInAction(Config.InputAction value, string handler)
         {
             var typename = handler.TrimStart('/');
             var assembly = Assembly.GetExecutingAssembly();
@@ -113,7 +114,7 @@ namespace PicoController.Core
             return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
         }
 
-        private static Func<Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.Action value, string typename, string handler)
+        private static Func<Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler)
         {
             if (allActionsInAssembly is null)
                 return null;
@@ -131,23 +132,31 @@ namespace PicoController.Core
         }
 
         private static bool IsPluginAction(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);
+        private static bool IsVisiblePluginAction(TypeInfo t) => 
+            IsPluginAction(t) && t.GetCustomAttribute<HideHandlerAttribute>(false) is null;
 
-        private static Func<Task> IPluginActionToFuncOfTask(Config.Action value, IPluginAction action)
+        private static Func<Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
         {
             return async () => await action.ExecuteAsync(value.Data);
         }
 
-        private static Dictionary<string, IPluginAction> LoadedActions = new Dictionary<string, IPluginAction>();
+        private static readonly Dictionary<string, IPluginAction> LoadedActions = new();
 
         public static IEnumerable<string> AllAvailableActions()
         {
             var result = new List<string>();
 
-            result.AddRange(Assembly.GetExecutingAssembly().DefinedTypes.Where(IsPluginAction).Select(x => "/" + x.Name));
+            result.AddRange(
+                Assembly.GetExecutingAssembly().DefinedTypes
+                    .Where(IsVisiblePluginAction).Select(x => "/" + x.Name));
 
             foreach(var loader in _loaders)
             {
-                result.AddRange(loader.Value.LoadDefaultAssembly().DefinedTypes.Where(IsPluginAction).Select(x => $"{loader.Key}/{x.Name}"));
+                result.AddRange(
+                    loader.Value
+                        .LoadDefaultAssembly().DefinedTypes
+                        .Where(IsVisiblePluginAction)
+                        .Select(x => $"{loader.Key}/{x.Name}"));
             }
 
             return result;
