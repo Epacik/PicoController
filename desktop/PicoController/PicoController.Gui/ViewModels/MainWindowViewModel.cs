@@ -7,6 +7,7 @@ using PicoController.Gui.Helpers;
 using System.Threading.Tasks;
 using PicoController.Core.BuiltInActions.Other;
 using Microsoft.Win32;
+using PicoController.Gui.ViewModels.Devices;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -118,6 +119,13 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
     }
 
+    private DevicesOutputViewModel _output = new();
+    public DevicesOutputViewModel Output
+    {
+        get => _output;
+        set => this.RaiseAndSetIfChanged(ref _output, value);
+    }
+
     public bool RunEnabled => !ConfigNotFound && !_repositoryHelper.IsDirty;
     public bool SaveEnabled => !Run && _repositoryHelper.IsDirty;
 
@@ -129,7 +137,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private void Device_ActionThrownAnException(object? sender, Core.PluginActionExceptionEventArgs e)
     {
-
+        Output.ActionThrownAnException(e);
     }
 
     private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)

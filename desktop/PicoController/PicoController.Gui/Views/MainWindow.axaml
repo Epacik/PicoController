@@ -133,8 +133,7 @@
         </Border>
         
         <Border Grid.Column="1" Grid.Row="3" Background="{DynamicResource LayerOnMicaBaseAltFillColorSecondaryBrush}" CornerRadius="5,0,0,0">
-                <TextBlock x:Name="Output"
-                           VerticalAlignment="Bottom"/>
+                <ContentControl Content="{Binding Output}"/>
         </Border>
     </Grid>
 

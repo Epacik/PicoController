@@ -5,5 +5,6 @@ public partial class DevicesOutputView : UserControl
     public DevicesOutputView()
     {
         InitializeComponent();
+
     }
 }

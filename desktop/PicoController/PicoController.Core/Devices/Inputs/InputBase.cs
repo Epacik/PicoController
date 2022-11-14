@@ -35,6 +35,7 @@ public abstract class InputBase
 
     protected async void InvokeAction(string actionName)
     {
+        RemoveLater.Output.SendMessage(deviceId, Id, actionName);
         Console.WriteLine($" device: {deviceId}, input: {Id}, action: {actionName}");
 
         if (Actions.ContainsKey(actionName) && Actions[actionName] is not null)
