@@ -21,9 +21,9 @@
     Icon="/Assets/avalonia-logo.ico"
     Title="Pico Controller">
 
-    <Window.DataContext>
+    <!--<Window.DataContext>
         <vm:MainWindowViewModel/>
-    </Window.DataContext>
+    </Window.DataContext>-->
     
     <Window.Resources>
         <conv:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter"/>
@@ -124,7 +124,7 @@
                 <!-- 5,200 -->
                 <ContentControl Content="{Binding Devices.SelectedDevice, Converter={StaticResource DeviceToDeviceViewModelConverter}}"/>
 
-                <GridSplitter Grid.Column="1"/>
+                <GridSplitter Grid.Column="1" Background="Transparent" Foreground="Transparent"/>
 
                 <!--<ContentControl Grid.Column="2" Content="{Binding Handlers}">
                     <vm:HandlersViewModel/>

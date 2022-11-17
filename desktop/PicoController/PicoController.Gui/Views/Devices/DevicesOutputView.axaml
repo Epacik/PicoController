@@ -7,10 +7,11 @@
     <Grid RowDefinitions="30,*">
         <ListBox 
             Grid.Row="1"
-            SelectedItems="{x:Null}"
+            SelectedItem="{Binding LastItem}"
             VerticalAlignment="Stretch"
             x:Name="Output"
-            Items="{Binding Items}">
+            Items="{Binding Output}"
+            AutoScrollToSelectedItem="True">
             
         </ListBox>
     </Grid>

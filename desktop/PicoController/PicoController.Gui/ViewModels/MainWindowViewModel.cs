@@ -204,25 +204,28 @@ public class MainWindowViewModel : ViewModelBase
 
     private void StartDevices()
     {
+        if (_runningDevices is not null)
+            return;
+
         var config = _repositoryHelper.SavedConfigCopy;
         if (config is null)
             return;
 
-        _runningDevices = Core.Devices.Device.FromConfig(config);
+        var runningDevices = Core.Devices.Device.FromConfig(config);
         
-        foreach(var device in _runningDevices)
+        foreach(var device in runningDevices)
         {
             try
             {
                 device.Connect();
                 device.ActionThrownAnException += Device_ActionThrownAnException;
             }
-            catch (Exception )
+            catch (Exception ex)
             {
-
+                Output.OtherException(ex);
             }
         }
-
+        _runningDevices = runningDevices;
     }
     private void StopDevices()
     {
