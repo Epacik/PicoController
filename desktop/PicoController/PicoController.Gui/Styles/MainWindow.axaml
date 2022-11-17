@@ -52,11 +52,14 @@
         </Style>
     </Style>
 
-    <Style Selector="Window.mica:focus, Window.mica:focus-within">
+    <Style Selector="Window.mica:focus">
         <Setter Property="Background"
                 Value="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
     </Style>
-
+    <Style Selector="Window.mica:focus-within">
+        <Setter Property="Background"
+                Value="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
+    </Style>
 
     <!--<Style Selector=".Window.unfocused">
         

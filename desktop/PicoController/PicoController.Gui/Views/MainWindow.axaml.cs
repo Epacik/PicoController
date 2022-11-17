@@ -39,6 +39,13 @@ public partial class MainWindow : Window
                 > 10000 => "mica", //"acrylic",
                 _ => "",
             });
+
+            if(build > 10000)
+            {
+                ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
+                ExtendClientAreaTitleBarHeightHint = 60;
+                //ExtendClientAreaToDecorationsHint = true;
+            }
         }
     }
 
