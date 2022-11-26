@@ -13,8 +13,14 @@ namespace PicoController.Core.Config
 {
     public class Config : ICloneable<Config>
     {
-        [JsonConstructor]
         public Config() { }
+
+        [JsonConstructor]
+        public Config(int maxDelayBetweenClicks, List<Device> devices)
+        {
+            MaxDelayBetweenClicks = maxDelayBetweenClicks;
+            Devices = devices;
+        }
 
         public Config(List<Device> devices)
         {

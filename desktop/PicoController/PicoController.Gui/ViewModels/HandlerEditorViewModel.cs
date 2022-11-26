@@ -1,4 +1,5 @@
 ﻿using PicoController.Core.Config;
+using PicoController.Gui.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,17 @@ namespace PicoController.Gui.ViewModels;
 
 public class HandlerEditorViewModel : ViewModelBase
 {
-    public HandlerEditorViewModel(KeyValuePair<string, InputAction> handler)
+    public HandlerEditorViewModel(ReactiveKeyValuePair<string, DeviceInputActionConfigModel> handler)
     {
-        Handler = handler;
-        HandlerName = handler.Key;
-        HandlerId = handler.Value.Handler;
-        HandlerData = handler.Value.Data;
+        Handler            = handler;
+        HandlerName        = handler.Key;
+        HandlerId          = handler.Value!.Handler;
+        HandlerData        = handler.Value!.Data;
+        OverrideValue      = handler.Value!.InputValueOverride is not null;
+        InputValueOverride = handler.Value!.InputValueOverride ?? 0;
     }
 
-    public KeyValuePair<string, InputAction> Handler { get; }
+    public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> Handler { get; }
 
     private string? _handlerName;
     public string? HandlerName
@@ -41,6 +44,22 @@ public class HandlerEditorViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _handlerData, value);
     }
 
-    public KeyValuePair<string, InputAction> GetHandler() => new(HandlerName ?? "", new(HandlerId ?? "", HandlerData ?? ""));
+    private bool _overrideValue;
+    public bool OverrideValue
+    {
+        get => _overrideValue;
+        set => this.RaiseAndSetIfChanged(ref _overrideValue, value);
+    }
+
+    private int _inputValueOverride;
+    public int InputValueOverride
+    {
+        get => _inputValueOverride;
+        set => this.RaiseAndSetIfChanged(ref _inputValueOverride, value);
+    }
+
+
+    public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> GetHandler() =>
+        new(HandlerName ?? "",new(HandlerId ?? "", HandlerData ?? "", OverrideValue ? InputValueOverride : null));
 
 }

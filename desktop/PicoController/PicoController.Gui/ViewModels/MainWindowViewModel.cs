@@ -29,7 +29,7 @@ public class MainWindowViewModel : ViewModelBase
         PicoControllerActions.ActionRequested += PicoControllerActions_ActionRequested;
 
         if (OperatingSystem.IsWindows())
-            Microsoft.Win32.SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
     }
 
     private readonly IConfigRepository _repository;

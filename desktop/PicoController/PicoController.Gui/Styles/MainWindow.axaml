@@ -40,7 +40,7 @@
         <Style Selector="^:pointerover">
             <Style Selector="^ ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource LayerOnMicaBaseAltFillColorSecondaryBrush}"/>
+                        Value="{DynamicResource ControlFillColorDefaultBrush}"/>
             </Style>
         </Style>
 
@@ -54,11 +54,11 @@
 
     <Style Selector="Window.mica:focus">
         <Setter Property="Background"
-                Value="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
+                Value="{DynamicResource ControlFillColorDefaultBrush}"/>
     </Style>
     <Style Selector="Window.mica:focus-within">
         <Setter Property="Background"
-                Value="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
+                Value="{DynamicResource ControlFillColorDefaultBrush}"/>
     </Style>
 
     <!--<Style Selector=".Window.unfocused">

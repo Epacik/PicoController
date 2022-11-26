@@ -20,6 +20,8 @@ public readonly struct InputMessage
         Value = value;
     }
 
+    public bool ValueHasBits(UInt32 bits) => (Value & bits) == bits;
+
     public static bool TryParse(string str, out InputMessage? message)
     {
         // Example message:

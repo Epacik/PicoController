@@ -8,7 +8,7 @@ namespace PicoController.VirtualDesktop.Windows;
 
 public class SwitchDesktop : IPluginAction
 {
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         argument = argument ?? throw new ArgumentNullException(nameof(argument));
         await Task.Yield();
@@ -28,6 +28,11 @@ public class SwitchDesktop : IPluginAction
             {
                 "left"  => current.GetLeft()  ?? WindowsDesktop.VirtualDesktop.GetDesktops().Last(),
                 "right" => current.GetRight() ?? WindowsDesktop.VirtualDesktop.GetDesktops().First(),
+                "switch" => inputValue switch
+                {
+                     > 0 => current.GetLeft() ?? WindowsDesktop.VirtualDesktop.GetDesktops().Last(),
+                     <= 0 => current.GetRight() ?? WindowsDesktop.VirtualDesktop.GetDesktops().First(),
+                },
                 _       => throw new NotImplementedException(),
             };
             desktop.Switch();

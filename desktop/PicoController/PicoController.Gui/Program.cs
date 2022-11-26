@@ -19,7 +19,12 @@ namespace PicoController.Gui
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .With(new Win32PlatformOptions { UseCompositor = true })
+                .With(new Win32PlatformOptions 
+                {
+                    UseCompositor = true,
+                    UseDeferredRendering = false,
+                    UseWindowsUIComposition = true,
+                })
                 .With(new X11PlatformOptions { UseCompositor = true })
                 .With(new AvaloniaNativePlatformOptions { UseCompositor = true })
                 .LogToTrace()

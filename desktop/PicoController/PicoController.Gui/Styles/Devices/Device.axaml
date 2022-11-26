@@ -26,16 +26,23 @@
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <Grid RowDefinitions="30,5,*" ColumnDefinitions="30,5,*" MinHeight="50">
+                    <Grid RowDefinitions="38,5,*" ColumnDefinitions="30,5,*,5,80,10" MinHeight="50">
                         <TextBlock Text="{Binding Id}" Padding="5"/>
                         <TextBlock Grid.Column="2"
                                    Padding="5"
                                    Text="{Binding Type, Converter={x:Static conv:Converters.InputTypeToStringConverter}}"/>
 
+                        <ToggleSwitch Grid.Column="4"
+                                      OnContent="Split"
+                                      OffContent="Split"
+                                      IsChecked="{Binding Split, TargetNullValue=false}"
+                                      IsEnabled="{Binding !DataContext.Run, 
+                                        RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
+                        
                         <ListBox Items="{Binding Actions}"
                                  Classes="InputActions"
                                  Grid.Row="2"
-                                 Grid.ColumnSpan="3">
+                                 Grid.ColumnSpan="6">
                             
                             <i:Interaction.Behaviors>
                                 <ia:EventTriggerBehavior EventName="SelectionChanged" SourceObject="ChangeProperty" >
@@ -91,7 +98,7 @@
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <Grid IsEnabled="{Binding !Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                        <Grid IsEnabled="{Binding !DataContext.Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
                               ColumnDefinitions="120,*"
                               RowDefinitions="*,5,*,5,*">
                             <TextBlock>Action</TextBlock>

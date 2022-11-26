@@ -25,6 +25,9 @@ namespace PicoController.Core.Config
         [JsonPropertyName("data")]
         public string? Data { get; set; }
 
+        [JsonPropertyName("inputValueOverride")]
+        public int? InputValueOverride { get; set; }
+
         public InputAction Clone() => (InputAction)MemberwiseClone();
     }
 }

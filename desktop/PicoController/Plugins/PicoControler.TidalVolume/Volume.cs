@@ -83,7 +83,7 @@ internal class Volume : IPluginAction, IDisposable
         ChangeVolume(argument);
     }
 
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         if (string.IsNullOrWhiteSpace(argument))
             return;

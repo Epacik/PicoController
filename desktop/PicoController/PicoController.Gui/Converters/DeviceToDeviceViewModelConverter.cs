@@ -1,5 +1,7 @@
 ﻿using Avalonia.Data.Converters;
+using Mapster;
 using PicoController.Core.Config;
+using PicoController.Gui.Models;
 using PicoController.Gui.ViewModels.Devices;
 using System;
 using System.Collections.Generic;
@@ -16,8 +18,11 @@ public class DeviceToDeviceViewModelConverter : IValueConverter
     {
         if (value is null)
             return null;
-
-        return new DeviceViewModel((Device)value);
+        if(value is Device device)
+        {
+            return new DeviceViewModel(device.Adapt<DeviceConfigModel>());
+        }
+        return new DeviceViewModel((DeviceConfigModel)value);
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

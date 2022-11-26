@@ -99,7 +99,11 @@
                 Content="Reload config"
                 Command="{Binding RequestReload}"/>
 
-            <Button IsEnabled="{Binding !Run}" Command="{Binding ReloadPlugins}">Reload Plugins</Button>
+            <Button 
+                IsEnabled="{Binding !Run}" 
+                Command="{Binding ReloadPlugins}">
+                Reload Plugins
+            </Button>
             
             <Button
                 IsEnabled="{Binding CreateNewConfingEnabled}"

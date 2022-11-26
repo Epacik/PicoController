@@ -3,6 +3,8 @@ using PicoController.Core.Config;
 using System.Diagnostics;
 using PicoController.Gui.Helpers;
 using PicoController.Core.Extensions;
+using PicoController.Gui.Models;
+using Mapster;
 
 namespace PicoController.Gui.ViewModels.Devices;
 
@@ -23,9 +25,10 @@ public class DeviceListViewModel : ViewModelBase
 
         IEnumerable<Device>? dev = _repositoryHelper?.WorkingConfigCopy?.Devices;
         dev ??= Array.Empty<Device>();
-        Devices = new(dev);
+        Devices = new(dev.Select(x => x.Adapt<DeviceConfigModel>()));
     }
 
+    private IRepositoryHelper? _repositoryHelper;
     private void RepositoryHelper_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
@@ -48,7 +51,7 @@ public class DeviceListViewModel : ViewModelBase
     {
         IEnumerable<Device>? dev = _repositoryHelper?.WorkingConfigCopy?.Devices;
         dev ??= Array.Empty<Device>();
-        Devices = new(dev);
+        Devices = new(dev.Select(x => x.Adapt<DeviceConfigModel>()));
     }
 
     private bool expandMenuBar = true;
@@ -57,17 +60,16 @@ public class DeviceListViewModel : ViewModelBase
         get => expandMenuBar;
         set => this.RaiseAndSetIfChanged(ref expandMenuBar, value);
     }
-    private AvaloniaList<Device>? _devices;
-    public AvaloniaList<Device>? Devices
+    private AvaloniaList<DeviceConfigModel>? _devices;
+    public AvaloniaList<DeviceConfigModel>? Devices
     {
         get => _devices;
         set => this.RaiseAndSetIfChanged(ref _devices, value);
     }
 
-    private Device? _selectedDevice;
-    private IRepositoryHelper? _repositoryHelper;
+    private DeviceConfigModel? _selectedDevice;
 
-    public Device? SelectedDevice
+    public DeviceConfigModel? SelectedDevice
     {
         get => _selectedDevice;
         set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
@@ -76,6 +78,6 @@ public class DeviceListViewModel : ViewModelBase
     private void PopulateDesignData()
     {
         Debug.WriteLine("Showing example data");
-        Devices = new(Config.ExampleConfig(5).Devices);
+        Devices = new(Config.ExampleConfig(5).Devices.Select(x => x.Adapt<DeviceConfigModel>()));
     }
 }
