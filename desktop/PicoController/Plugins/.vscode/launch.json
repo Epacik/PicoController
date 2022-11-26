@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Build Plugins",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/buildTouserFolder.ps1",
+            "args": [ "-Plugins", "'PicoControler.TidalVolume',", "'PicoController.VirtualDesktop.Windows'" ]
+        }
+    ]
+}

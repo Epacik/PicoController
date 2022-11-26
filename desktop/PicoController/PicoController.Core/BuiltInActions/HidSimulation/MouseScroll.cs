@@ -18,7 +18,7 @@ internal class MouseScroll : IPluginAction
     }
 
     [SuppressUnmanagedCodeSecurity]
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         if (string.IsNullOrWhiteSpace(argument))
             return;
@@ -30,6 +30,6 @@ internal class MouseScroll : IPluginAction
         if (short.TryParse(amountStr, out short amount))
             _simulator.MouseScrollWheelScrolled(
                 axis switch { "x" => Axis.Horizontal, "y" => Axis.Vertical, _ => Axis.None },
-                amount);
+                (short)(amount * inputValue));
     }
 }

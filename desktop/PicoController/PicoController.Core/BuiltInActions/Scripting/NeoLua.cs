@@ -27,18 +27,17 @@ public abstract class NeoLuaBase : IPluginAction, IDisposable
         _useFile = useFile;
     }
 
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         await Task.Yield();
-        ExecuteInternal(argument);
-    }
 
-    private void ExecuteInternal(string? argument)
-    {
         if (argument is null)
             throw new ArgumentNullException("data");
 
         var env = _lua.CreateEnvironment();
+        env["__input_value__"] = inputValue;
+        //env["__user_argument__"] = argument;
+
         if (_useFile)
             env.DoChunk(argument);
         else

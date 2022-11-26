@@ -17,81 +17,98 @@ internal class Volume : IPluginAction
         deviceEnumerator = new MMDeviceEnumerator();
     }
 
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         if (string.IsNullOrWhiteSpace(argument))
             return;
 
         await Task.Yield();
-        ChangeVolume(argument);
-    }
 
-    private void ChangeVolume(string argument)
-    {
         float step = 0.01f;
         using var device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
         if (args.Length < 2)
         {
-            var volume = device.AudioEndpointVolume;
-
-            if (argument.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
-                device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
-
-            else if (int.TryParse(argument, out int value))
-            {
-                step *= value;
-                if (step > 0 && device.AudioEndpointVolume.MasterVolumeLevelScalar + step > 1)
-                    device.AudioEndpointVolume.MasterVolumeLevelScalar = 1;
-                else if (step < 0 && device.AudioEndpointVolume.MasterVolumeLevelScalar + step < 0)
-                    device.AudioEndpointVolume.MasterVolumeLevelScalar = 0;
-                else
-                    device.AudioEndpointVolume.MasterVolumeLevelScalar += step;
-            }
-            else
-                throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+            ChangeMasterVolume(argument, step, device);
         }
         else
         {
-            var appName = args[0];
-            var action = args[1];
-            var sessions = device.AudioSessionManager.Sessions;
-            for (int i = 0; i < sessions.Count; i++)
+            ChangeAppVolume(argument, step, device, args);
+        }
+    }
+
+    private void ChangeMasterVolume(string argument, float step, MMDevice device)
+    {
+
+        if (argument.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
+            device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
+
+        else if (int.TryParse(argument, out int value))
+        {
+            var v = device.AudioEndpointVolume;
+            SetVolume(
+                x => v.MasterVolumeLevel = x,
+                v.MasterVolumeLevelScalar,
+                step * value);
+        }
+        else
+            throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+
+    }
+
+    private void ChangeAppVolume(string? argument, float step, MMDevice device, string[] args)
+    {
+        var (appName, action) = (args[0], args[1]);
+
+        var sessions = device.AudioSessionManager.Sessions;
+        for (int i = 0; i < sessions.Count; i++)
+        {
+            var session = sessions[i];
+            string processName = session.GetSessionIdentifier;
+            var process = Process.GetProcessById((int)session.GetProcessID);
+
+            if (process.ProcessName.StartsWith("svchost", StringComparison.InvariantCultureIgnoreCase))
+                processName = GetServiceName(process);
+            else
+                processName = process.ProcessName;
+
+            if (string.IsNullOrWhiteSpace(processName))
+                continue;
+
+            if (processName.Contains(appName, StringComparison.InvariantCultureIgnoreCase))
             {
-                var session = sessions[i];
-                string processName = session.GetSessionIdentifier;
-                var process = Process.GetProcessById((int)session.GetProcessID);
+                if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
+                    session.SimpleAudioVolume.Mute = !session.SimpleAudioVolume.Mute;
 
-                if (process.ProcessName.StartsWith("svchost", StringComparison.InvariantCultureIgnoreCase))
-                    processName = GetServiceName(process);
-                else
-                    processName = process.ProcessName;
-
-                if (string.IsNullOrWhiteSpace(processName))
-                    continue;
-
-                if (processName.Contains(appName, StringComparison.InvariantCultureIgnoreCase))
+                else if (int.TryParse(args[1], out int value))
                 {
-                    if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
-                        session.SimpleAudioVolume.Mute = !session.SimpleAudioVolume.Mute;
-
-                    else if (int.TryParse(args[1], out int value))
-                    {
-                        step *= value;
-                        if (step > 0 && session.SimpleAudioVolume.Volume + step > 1)
-                            session.SimpleAudioVolume.Volume = 1;
-                        else if (step < 0 && session.SimpleAudioVolume.Volume + step < 0)
-                            session.SimpleAudioVolume.Volume = 0;
-                        else
-                            session.SimpleAudioVolume.Volume += step;
-                    }
-                    else
-                        throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
-
+                    var v = session.SimpleAudioVolume;
+                    SetVolume(
+                        x => v.Volume = x,
+                        v.Volume,
+                        step * value);
                 }
+                else
+                    throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+
             }
         }
+
+    }
+
+    private void SetVolume(Action<float> set, float currentValue, float step)
+    {
+
+        if (step > 0 && currentValue + step > 1)
+            set(1);
+
+        else if (step < 0 && currentValue + step < 0)
+            set(0);
+
+        else
+            set(currentValue + step);
     }
 
     private static Dictionary<int, (string Name, DateTime DateStamp)> ServicesCache = new();

@@ -6,18 +6,21 @@ namespace PicoController.Core.Devices.Inputs;
 
 public abstract class InputBase
 {
-    private readonly int deviceId;
-    public readonly byte Id;
-    public readonly InputType Type;
-    public readonly Dictionary<string, Func<Task>?> Actions = new();
-    public readonly ImmutableArray<string> AvailableActions;
+    private readonly int _deviceId;
+    public byte Id { get; }
+    public InputType Type { get; }
+    public Dictionary<string, Func<int, Task>?> Actions { get; } = new();
+    public bool Split { get;}
 
-    public InputBase(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<Task>?> actions)
+    public ImmutableArray<string> AvailableActions { get; }
+
+    protected InputBase(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, bool split = false)
     {
-        this.deviceId = deviceId;
+        _deviceId = deviceId;
         Id = inputId;
         Type = type;
         Actions = actions;
+        Split = split;
         AvailableActions = availableActions.ToImmutableArray();
     }
 
@@ -33,20 +36,20 @@ public abstract class InputBase
 
     protected abstract void ExecuteInternal(InputMessage message);
 
-    protected async void InvokeAction(string actionName)
+    protected async void InvokeAction(int inputValue, string actionName)
     {
-        RemoveLater.Output.SendMessage(deviceId, Id, actionName);
-        Console.WriteLine($" device: {deviceId}, input: {Id}, action: {actionName}");
+        RemoveLater.Output.SendMessage(_deviceId, Id, actionName);
+        Console.WriteLine($" device: {_deviceId}, input: {Id}, action: {actionName}");
 
         if (Actions.ContainsKey(actionName) && Actions[actionName] is not null)
         {
             try
             {
-                await Actions[actionName]!.Invoke();
+                await Actions[actionName]!.Invoke(inputValue);
             }
             catch (Exception ex)
             {
-                ActionThrownAnException?.Invoke(this, new(deviceId, Id, actionName, ex));
+                ActionThrownAnException?.Invoke(this, new(_deviceId, Id, actionName, ex));
             }
         }
     }

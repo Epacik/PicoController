@@ -42,7 +42,7 @@ internal class KeyboardSequence : IPluginAction, IValidValues
     private PeriodicTimer _timer;
     private Thread _sequenceRunner;
 
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         if (string.IsNullOrWhiteSpace(argument))
             return;

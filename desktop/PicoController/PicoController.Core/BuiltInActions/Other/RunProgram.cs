@@ -6,7 +6,7 @@ namespace PicoController.Core.BuildtInActions.Other;
 internal class RunProgram : IPluginAction
 {
 
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         if(argument is null)
             throw new ArgumentNullException("data");

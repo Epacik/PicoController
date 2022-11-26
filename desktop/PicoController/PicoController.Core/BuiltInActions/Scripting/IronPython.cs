@@ -27,18 +27,18 @@ public abstract class IronPythonBase : IPluginAction
         _useFile = useFile;
     }
 
-    public async Task ExecuteAsync(string? argument)
+    public async Task ExecuteAsync(int inputValue, string? argument)
     {
         await Task.Yield();
-        ExecuteInternal(argument);
-    }
 
-    private void ExecuteInternal(string? argument)
-    {
         if (argument is null)
             throw new ArgumentNullException("data");
 
         var scope = _engine.CreateScope();
+
+        scope.SetVariable("__input_value__", inputValue);
+        //scope.SetVariable("__user_argument__", argument);
+
         if (_useFile)
             _engine.ExecuteFile(argument, scope);
         else

@@ -66,7 +66,7 @@ namespace PicoController.Core
             LoadedActions.Clear();
         }
 
-        internal static Func<Task>? LookupActions(Config.InputAction value)
+        internal static Func<int, Task>? LookupActions(Config.InputAction value)
         {
             if (string.IsNullOrWhiteSpace(value.Handler))
                 return null;
@@ -89,7 +89,7 @@ namespace PicoController.Core
             }
         }
 
-        private static Func<Task>? LookupPluginAction(Config.InputAction value, string handler)
+        private static Func<int, Task>? LookupPluginAction(Config.InputAction value, string handler)
         {
             var splittedHandler = handler.Split('/');
             var (assemblyName, typename) = (splittedHandler[0], splittedHandler[1]);
@@ -106,7 +106,7 @@ namespace PicoController.Core
             }
         }
 
-        private static Func<Task>? LookupBuildtInAction(Config.InputAction value, string handler)
+        private static Func<int, Task>? LookupBuildtInAction(Config.InputAction value, string handler)
         {
             var typename = handler.TrimStart('/');
             var assembly = Assembly.GetExecutingAssembly();
@@ -114,7 +114,7 @@ namespace PicoController.Core
             return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
         }
 
-        private static Func<Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler)
+        private static Func<int, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler)
         {
             if (allActionsInAssembly is null)
                 return null;
@@ -135,9 +135,9 @@ namespace PicoController.Core
         private static bool IsVisiblePluginAction(TypeInfo t) => 
             IsPluginAction(t) && t.GetCustomAttribute<HideHandlerAttribute>(false) is null;
 
-        private static Func<Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
+        private static Func<int, Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
         {
-            return async () => await action.ExecuteAsync(value.Data);
+            return async inputValue => await action.ExecuteAsync(value.InputValueOverride ?? inputValue, value.Data);
         }
 
         private static readonly Dictionary<string, IPluginAction> LoadedActions = new();

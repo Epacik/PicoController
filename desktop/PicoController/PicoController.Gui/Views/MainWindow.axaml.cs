@@ -33,6 +33,7 @@ public partial class MainWindow : Window
                 _ => WindowTransparencyLevel.None,
             };
 
+
             Classes.Add(build switch
             {
                 > 20000 => "mica",
@@ -40,12 +41,7 @@ public partial class MainWindow : Window
                 _ => "",
             });
 
-            if(build > 10000)
-            {
-                ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
-                ExtendClientAreaTitleBarHeightHint = 60;
-                //ExtendClientAreaToDecorationsHint = true;
-            }
+            
         }
     }
 
@@ -68,6 +64,11 @@ public partial class MainWindow : Window
         ShowInTaskbar = true;
     }
 
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        //_timer.Start();
+    }
     protected override void OnClosing(CancelEventArgs e)
     {
         e.Cancel = true;
@@ -81,5 +82,145 @@ public partial class MainWindow : Window
         ForTrue = new GridLength(150),
         ForFalse = new GridLength(0)
     };
+    //private int index = 0;
+    //private readonly DispatcherTimer? _timer;
     private ThemeManager? _themeManager;
+
+    private string[] keys =
+    {
+        "TextFillColorPrimaryBrush",
+"TextFillColorSecondaryBrush",
+"TextFillColorTertiaryBrush",
+"TextFillColorDisabledBrush",
+"TextFillColorInverseBrush",
+"AccentTextFillColorPrimaryBrush",
+"AccentTextFillColorSecondaryBrush",
+"AccentTextFillColorTertiaryBrush",
+"AccentTextFillColorDisabledBrush",
+"TextOnAccentFillColorSelectedTextBrush",
+"TextOnAccentFillColorPrimaryBrush",
+"TextOnAccentFillColorSecondaryBrush",
+"TextOnAccentFillColorDisabledBrush",
+"ControlFillColorDefaultBrush",
+"ControlFillColorSecondaryBrush",
+"ControlFillColorTertiaryBrush",
+"ControlFillColorDisabledBrush",
+"ControlFillColorTransparentBrush",
+"ControlFillColorInputActiveBrush",
+"ControlStrongFillColorDefaultBrush",
+"ControlStrongFillColorDisabledBrush",
+"ControlSolidFillColorDefaultBrush",
+"SubtleFillColorTransparentBrush",
+"SubtleFillColorSecondaryBrush",
+"SubtleFillColorTertiaryBrush",
+"SubtleFillColorDisabledBrush",
+"ControlAltFillColorTransparentBrush",
+"ControlAltFillColorSecondaryBrush",
+"ControlAltFillColorTertiaryBrush",
+"ControlAltFillColorQuarternaryBrush",
+"ControlAltFillColorDisabledBrush",
+"ControlOnImageFillColorDefaultBrush",
+"ControlOnImageFillColorSecondaryBrush",
+"ControlOnImageFillColorTertiaryBrush",
+"ControlOnImageFillColorDisabledBrush",
+"AccentFillColorSelectedTextBackgroundBrush",
+"AccentFillColorDefaultBrush",
+"AccentFillColorSecondaryBrush",
+"AccentFillColorTertiaryBrush",
+"AccentFillColorDisabledBrush",
+"ControlStrokeColorDefaultBrush",
+"ControlStrokeColorSecondaryBrush",
+"ControlStrokeColorOnAccentDefaultBrush",
+"ControlStrokeColorOnAccentSecondaryBrush",
+"ControlStrokeColorOnAccentTertiaryBrush",
+"ControlStrokeColorOnAccentDisabledBrush",
+"ControlStrokeColorForStrongFillWhenOnImageBrush",
+"CardStrokeColorDefaultBrush",
+"CardStrokeColorDefaultSolidBrush",
+"ControlStrongStrokeColorDefaultBrush",
+"ControlStrongStrokeColorDisabledBrush",
+"SurfaceStrokeColorDefaultBrush",
+"SurfaceStrokeColorFlyoutBrush",
+"SurfaceStrokeColorInverseBrush",
+"DividerStrokeColorDefaultBrush",
+"FocusStrokeColorOuterBrush",
+"FocusStrokeColorInnerBrush",
+"CardBackgroundFillColorDefaultBrush",
+"CardBackgroundFillColorSecondaryBrush",
+"SmokeFillColorDefaultBrush",
+"LayerFillColorDefaultBrush",
+"LayerFillColorAltBrush",
+"LayerOnAcrylicFillColorDefaultBrush",
+"LayerOnAccentAcrylicFillColorDefaultBrush",
+"LayerOnMicaBaseAltFillColorDefaultBrush",
+"LayerOnMicaBaseAltFillColorSecondaryBrush",
+"LayerOnMicaBaseAltFillColorTertiaryBrush",
+"LayerOnMicaBaseAltFillColorTransparentBrush",
+"SolidBackgroundFillColorBaseBrush",
+"SolidBackgroundFillColorSecondaryBrush",
+"SolidBackgroundFillColorTertiaryBrush",
+"SolidBackgroundFillColorQuarternaryBrush",
+"SystemFillColorAttentionBrush",
+"SystemFillColorSuccessBrush",
+"SystemFillColorCautionBrush",
+"SystemFillColorCriticalBrush",
+"SystemFillColorNeutralBrush",
+"SystemFillColorSolidNeutralBrush",
+"SystemFillColorAttentionBackgroundBrush",
+"SystemFillColorSuccessBackgroundBrush",
+"SystemFillColorCautionBackgroundBrush",
+"SystemFillColorCriticalBackgroundBrush",
+"SystemFillColorNeutralBackgroundBrush",
+"SystemFillColorSolidAttentionBackgroundBrush",
+"SystemFillColorSolidNeutralBackgroundBrush",
+"SystemColorWindowTextColorBrush",
+"SystemColorWindowColorBrush",
+"SystemColorButtonFaceColorBrush",
+"SystemColorButtonTextColorBrush",
+"SystemColorHighlightColorBrush",
+"SystemColorHighlightTextColorBrush",
+"SystemColorHotlightColorBrush",
+"SystemColorGrayTextColorBrush",
+"SystemControlTransparentBrush",
+"SystemControlHighlightListAccentVeryHighBrush",
+"SystemControlHighlightListAccentMediumLowBrush",
+"ApplicationPageBackgroundThemeBrush",
+"AcrylicBackgroundFillColorDefaultBrush",
+"AcrylicInAppFillColorDefaultBrush",
+"AcrylicBackgroundFillColorDefaultInverseBrush",
+"AcrylicInAppFillColorDefaultInverseBrush",
+"AcrylicBackgroundFillColorBaseBrush",
+"AcrylicInAppFillColorBaseBrush",
+"AccentAcrylicBackgroundFillColorDefaultBrush",
+"AccentAcrylicInAppFillColorDefaultBrush",
+"AccentAcrylicBackgroundFillColorBaseBrush",
+"AccentAcrylicInAppFillColorBaseBrush",
+"DatePickerHeaderForegroundThemeBrush",
+"DatePickerForegroundThemeBrush",
+"ScrollBarButtonForegroundThemeBrush",
+"ScrollBarButtonPointerOverBackgroundThemeBrush",
+"ScrollBarButtonPointerOverBorderThemeBrush",
+"ScrollBarButtonPointerOverForegroundThemeBrush",
+"ScrollBarButtonPressedBackgroundThemeBrush",
+"ScrollBarButtonPressedBorderThemeBrush",
+"ScrollBarButtonPressedForegroundThemeBrush",
+"ScrollBarPanningBackgroundThemeBrush",
+"ScrollBarPanningBorderThemeBrush",
+"ScrollBarThumbBackgroundThemeBrush",
+"ScrollBarThumbBorderThemeBrush",
+"ScrollBarThumbPointerOverBackgroundThemeBrush",
+"ScrollBarThumbPointerOverBorderThemeBrush",
+"ScrollBarThumbPressedBackgroundThemeBrush",
+"ScrollBarThumbPressedBorderThemeBrush",
+"ScrollBarTrackBackgroundThemeBrush",
+"ScrollBarTrackBorderThemeBrush",
+"ColorControlLightSelectorBrush",
+"ColorControlDarkSelectorBrush",
+"ColorViewContentBackgroundBrush",
+"ColorViewContentBorderBrush",
+"ColorViewTabBorderBrush",
+"DataGridDropLocationIndicatorBackground",
+"DataGridDisabledVisualElementBackground",
+"TeachingTipTopHighlightBrush",
+    };
 }

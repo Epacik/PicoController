@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PicoController.Core.Config;
+using PicoController.Core.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -11,16 +13,14 @@ namespace PicoController.Core.Devices.Inputs
 {
     internal class EncoderWithButton : InputBase
     {
-        const string actionPress                         = "press";
-        const string actionDoublePress                   = "doublePress";
-        const string actionTriplePress                   = "triplePress";
-        const string actionRotateClockwise               = "rotationClockwise";
-        const string actionRotateCounterClockwise        = "rotationCounterClockwise";
-        const string actionRotateClockwisePressed        = "pressedRotationClockwise";
-        const string actionRotateCounterClockwisePressed = "pressedRotationCounterClockwise";
-        private static readonly string[] availableActions = 
-            { actionPress, actionDoublePress, actionTriplePress, actionRotateClockwise, actionRotateCounterClockwise, actionRotateClockwisePressed, actionRotateCounterClockwisePressed };
-        public EncoderWithButton(int deviceId, byte inputId, InputType type,  Dictionary<string, Func<Task>?> actions, int maxDelayBetweenClicks) : base(deviceId, inputId, type, availableActions, actions)
+        private EncoderWithButton(
+            int deviceId,
+            byte inputId,
+            IEnumerable<string> availableActions,
+            Dictionary<string, Func<int, Task>?> actions,
+            int maxDelayBetweenClicks,
+            bool split) 
+            : base(deviceId, inputId, InputType.EncoderWithButton, availableActions, actions, split)
         {
             _maxDelayBetweenClicks = maxDelayBetweenClicks;
             _timer = new System.Timers.Timer(_maxDelayBetweenClicks);
@@ -35,13 +35,13 @@ namespace PicoController.Core.Devices.Inputs
                 switch (presses)
                 {
                     case 1:
-                        InvokeAction(actionPress); break;
+                        InvokeAction(0, ActionNames.Press); break;
                     case 2:
-                        InvokeAction(actionDoublePress); break;
+                        InvokeAction(0, ActionNames.DoublePress); break;
                     case 3:
-                        InvokeAction(actionTriplePress); break;
+                        InvokeAction(0, ActionNames.TriplePress); break;
                     case > 3:
-                        InvokeAction(actionTriplePress);
+                        InvokeAction(0, ActionNames.TriplePress);
                         invoke(presses - 3);
                         break;
                 }
@@ -60,31 +60,94 @@ namespace PicoController.Core.Devices.Inputs
         {
             const int counterClockwise = 1, clockwise = 1 << 1, pressed = 1 << 2, released = 1 << 3;
 
-            if(!_isPressed && message.Value == pressed)
+            if (!_isPressed && message.ValueHasBits(pressed))
                 _isPressed = true;
 
-            if (_isPressed && message.Value == released && !_rotatedWhilePressed)
+            if (_isPressed && message.ValueHasBits(released) && !_rotatedWhilePressed)
             {
                 Interlocked.Increment(ref _presses);
                 _timer.Stop();
                 _timer.Start();
             }
 
-            if (_isPressed && message.Value == released)
+            if (_isPressed && message.ValueHasBits(released))
             {
                 _isPressed = false;
                 _rotatedWhilePressed = false;
             }
+            
+            if(message.ValueHasBits(clockwise) || message.ValueHasBits(counterClockwise))
+            {
+                _rotatedWhilePressed = true;
+                if (Split)
+                {
+                    var action = (message.ValueHasBits(clockwise), _isPressed) switch
+                    {
+                        (true, true)   => ActionNames.RotatePressedSplitC,
+                        (false, true)  => ActionNames.RotatePressedSplitCC,
+                        (true, false)  => ActionNames.RotateSplitC,
+                        (false, false) => ActionNames.RotateSplitCC,
+                    };
+                    InvokeAction(1, action);
+                }
+                else
+                {
+                    var value = message.ValueHasBits(clockwise) ? 1 : -1;
+                    var action = _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate;
+                    InvokeAction(value, action);
+                }
 
-            if (message.Value == clockwise)
-            {
-                _rotatedWhilePressed = true;
-                InvokeAction(_isPressed ? actionRotateClockwisePressed : actionRotateClockwise);
+                if (message.ValueHasBits(clockwise))
+                {
+                    InvokeAction(1, _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate);
+                }
+                else if (message.ValueHasBits(counterClockwise))
+                {
+                    InvokeAction(-1, _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate);
+                }
             }
-            else if (message.Value == counterClockwise)
+        }
+
+        public static EncoderWithButton Create(
+            int deviceId,
+            byte inputId,
+            Dictionary<string, Func<int, Task>?> actions,
+            int maxDelayBetweenClicks,
+            bool split)
+        {
+            if (split)
             {
-                _rotatedWhilePressed = true;
-                InvokeAction(_isPressed ? actionRotateCounterClockwisePressed : actionRotateCounterClockwise);
+                return new EncoderWithButton(
+                    deviceId,
+                    inputId,
+                    new string[] {
+                        ActionNames.Rotate,
+                        ActionNames.RotatePressed,
+                        ActionNames.Press,
+                        ActionNames.DoublePress,
+                        ActionNames.TriplePress
+                    },
+                    actions,
+                    maxDelayBetweenClicks,
+                    split);
+            }
+            else
+            {
+                return new EncoderWithButton(
+                    deviceId,
+                    inputId,
+                    new string[] {
+                        ActionNames.RotateSplitC,
+                        ActionNames.RotateSplitCC,
+                        ActionNames.RotatePressedSplitC,
+                        ActionNames.RotatePressedSplitCC,
+                        ActionNames.Press,
+                        ActionNames.DoublePress,
+                        ActionNames.TriplePress
+                    },
+                    actions,
+                    maxDelayBetweenClicks,
+                    split);
             }
         }
     }

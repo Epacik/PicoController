@@ -6,65 +6,70 @@ using System.Text;
 using System.Threading.Tasks;
 using Tiger.Clock;
 
-namespace PicoController.Core.Devices.Inputs
+namespace PicoController.Core.Devices.Inputs;
+
+internal class Button : InputBase
 {
-    internal class Button : InputBase
+    private readonly int _maxDelayBetweenClicks;
+    private readonly System.Timers.Timer _timer;
+
+    public Button(
+        int deviceId,
+        byte inputId,
+        Dictionary<string, Func<int, Task>?> actions,
+        int maxDelayBetweenClicks) 
+        : base(
+            deviceId,
+            inputId,
+            InputType.Button,
+            new string[] { ActionNames.Press, ActionNames.DoublePress, ActionNames.TriplePress },
+            actions)
     {
-        const string actionPress       = "press";
-        const string actionDoublePress = "doublePress";
-        const string actionTriplePress = "triplePress";
-        private static readonly string[] availableActions = { actionPress, actionDoublePress, actionTriplePress };
-        private readonly int _maxDelayBetweenClicks;
-        private readonly System.Timers.Timer _timer;
+        _maxDelayBetweenClicks = maxDelayBetweenClicks;
+        _timer = new System.Timers.Timer(_maxDelayBetweenClicks);
+        _timer.Elapsed += _timer_Elapsed;
+        _timer.AutoReset = false;
+    }
 
-        public Button(int deviceId, byte inputId, InputType type, Dictionary<string, Func<Task>?> actions, int maxDelayBetweenClicks) : base(deviceId, inputId, type, availableActions, actions)
+    private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        void invoke(int presses)
         {
-            _maxDelayBetweenClicks = maxDelayBetweenClicks;
-            _timer = new System.Timers.Timer(_maxDelayBetweenClicks);
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.AutoReset = false;
+            switch (presses)
+            {
+                case 1:
+                    InvokeAction(0, ActionNames.Press); break;
+                case 2:
+                    InvokeAction(0, ActionNames.DoublePress); break;
+                case 3:
+                    InvokeAction(0, ActionNames.TriplePress); break;
+                case > 3:
+                    InvokeAction(0, ActionNames.TriplePress);
+                    invoke(presses - 3);
+                    break;
+            }
         }
+        
+        invoke(Interlocked.Exchange(ref _presses, 0));
+    }
 
-        private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    private bool IsPressed;
+    private int _presses;
+
+    protected override void ExecuteInternal(InputMessage message)
+    {
+        const int Pressed = 1, Released = 1 << 1;
+        if (IsPressed && message.Value == Released)
         {
-            void invoke(int presses)
-            {
-                switch (presses)
-                {
-                    case 1:
-                        InvokeAction(actionPress); break;
-                    case 2:
-                        InvokeAction(actionDoublePress); break;
-                    case 3:
-                        InvokeAction(actionTriplePress); break;
-                    case > 3:
-                        InvokeAction(actionTriplePress);
-                        invoke(presses - 3);
-                        break;
-                }
-            }
-            
-            invoke(Interlocked.Exchange(ref _presses, 0));
+            IsPressed = false;
+            Interlocked.Increment(ref _presses);
+
+            _timer.Stop();
+            _timer.Start();
         }
-
-        private bool IsPressed;
-        private int _presses;
-
-        protected override void ExecuteInternal(InputMessage message)
+        else if(!IsPressed && message.Value == Pressed)
         {
-            const int Pressed = 1, Released = 1 << 1;
-            if (IsPressed && message.Value == Released)
-            {
-                IsPressed = false;
-                Interlocked.Increment(ref _presses);
-
-                _timer.Stop();
-                _timer.Start();
-            }
-            else if(!IsPressed && message.Value == Pressed)
-            {
-                IsPressed = true;
-            }
+            IsPressed = true;
         }
     }
 }

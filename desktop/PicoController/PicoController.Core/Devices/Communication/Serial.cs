@@ -53,8 +53,6 @@ public class Serial : InterfaceBase
                 _port.Dispose();
             }
 
-            // TODO: Zwolnić niezarządzane zasoby (niezarządzane obiekty) i przesłonić finalizator
-            // TODO: Ustawić wartość null dla dużych pól
             _isDisposed = true;
         }
     }

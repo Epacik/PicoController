@@ -67,7 +67,7 @@ namespace PicoController.Core.Devices
 
                 foreach(var inp in dev.Inputs)
                 {
-                    var actions = new Dictionary<string, Func<Task>?>();
+                    var actions = new Dictionary<string, Func<int, Task>?>();
 
                     foreach(var a in inp.Actions)
                     {
@@ -76,9 +76,9 @@ namespace PicoController.Core.Devices
 
                     inputs.Add(inp.Type switch
                     {
-                        InputType.Button            => new Button(deviceId, inp.Id, inp.Type, actions, config.MaxDelayBetweenClicks),
-                        InputType.Encoder           => new Encoder(deviceId, inp.Id, inp.Type, actions),
-                        InputType.EncoderWithButton => new EncoderWithButton(deviceId, inp.Id, inp.Type, actions, config.MaxDelayBetweenClicks),
+                        InputType.Button            => new Button(deviceId, inp.Id, actions, config.MaxDelayBetweenClicks),
+                        InputType.Encoder           => Encoder.Create(deviceId, inp.Id, actions, inp.Split == true),
+                        InputType.EncoderWithButton => EncoderWithButton.Create(deviceId, inp.Id,  actions, config.MaxDelayBetweenClicks, inp.Split == true),
                         _                           => throw new InvalidDataException(),
                     });
                 }
