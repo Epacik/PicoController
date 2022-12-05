@@ -43,8 +43,8 @@ public class MainWindowViewModel : ViewModelBase
     }
 
 
-    private Devices.DeviceListViewModel _devices = new();
-    public Devices.DeviceListViewModel Devices
+    private DeviceListViewModel _devices = new();
+    public DeviceListViewModel Devices
     {
         get => _devices;
         set => this.RaiseAndSetIfChanged(ref _devices, value);

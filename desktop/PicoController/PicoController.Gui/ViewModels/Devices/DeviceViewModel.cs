@@ -24,16 +24,21 @@ public class DeviceViewModel : ViewModelBase
         _repositoryHelper = Locator.Current.GetRequiredService<IRepositoryHelper>();
         _repositoryHelper.PropertyChanged += RepositoryHelper_PropertyChanged;
         SelectedInputChangedCommand = ReactiveCommand.Create<SelectionChangedEventArgs>(SelectedInputChanged);
+        SwitchChangedCommand = ReactiveCommand.Create<DeviceInputConfigModel>(SwitchChanged);
     }
 
     private void RepositoryHelper_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if(e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
-        {
-            this.RaisePropertyChanged(nameof(Device));
-            Inputs = Device.Inputs;
-            this.RaisePropertyChanged(nameof(Inputs));
-        }
+        //if(e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
+        //{
+        //    this.RaisePropertyChanged(nameof(Device));
+        //    Device.Inputs = _repositoryHelper.WorkingConfigCopy?.Devices
+        //        ?.FirstOrDefault(x => x.Id == Device.Id)?.Inputs
+        //        ?.Adapt<AvaloniaList<DeviceInputConfigModel>>();
+
+        //    Inputs = Device.Inputs;
+        //    this.RaisePropertyChanged(nameof(Inputs));
+        //}
     }
 
     public DeviceConfigModel Device { get; }
@@ -52,7 +57,7 @@ public class DeviceViewModel : ViewModelBase
 
     public async void SelectedInputChanged(SelectionChangedEventArgs args)
     {
-        if (args.AddedItems.Count == 0 && args.AddedItems[0] is not KeyValuePair<string, InputAction>)
+        if (args.AddedItems.Count == 0 || args.AddedItems[0] is not ReactiveKeyValuePair<string, DeviceInputActionConfigModel>)
         {
             return;
         }
@@ -62,7 +67,7 @@ public class DeviceViewModel : ViewModelBase
 
         var handler = (ReactiveKeyValuePair<string, DeviceInputActionConfigModel>)args.AddedItems[0]!;
        
-        var input = (args.Source as ListBox)?.FindAncestorOfType<ListBoxItem>(false)?.Content as Input;
+        var input = (args.Source as ListBox)?.FindAncestorOfType<ListBoxItem>(false)?.Content as DeviceInputConfigModel;
         var content = new HandlerEditorViewModel(handler);
 
         var dialog = new ContentDialog
@@ -77,14 +82,53 @@ public class DeviceViewModel : ViewModelBase
         };
         var result = await dialog.ShowAsync(ContentDialogPlacement.Popup);
 
-        if(result == ContentDialogResult.Primary)
+        if(result != ContentDialogResult.Primary)
         {
-            _repositoryHelper.AddChanges(
-                Device.Id!,
-                input?.Id ?? 0,
-                handler.Key!,
-                content.GetHandler().Value!.Adapt<InputAction>());
+            return;
         }
+
+        var inputId = input?.Id ?? 0;
+        var newValue = content.GetHandler().Value;
+        _repositoryHelper.AddChanges(
+            Device.Id!,
+            inputId,
+            handler.Key!,
+            newValue!.Adapt<InputAction>());
+
+        var inp = Device.Inputs?.FirstOrDefault(x => x.Id == inputId);
+        if (inp is null)
+        {
+            return;
+        }
+
+        var action = inp.Actions?.FirstOrDefault(x => x.Key == handler.Key);
+        if (action is null)
+        {
+            return;
+        }
+
+        if (action.Value is null)
+            action.Value = new();
+
+        action.Value.Data = newValue?.Data;
+        action.Value.Handler = newValue?.Handler;
+        action.Value.InputValueOverride = newValue?.InputValueOverride;
+    }
+
+    public ReactiveCommand<DeviceInputConfigModel, Unit> SwitchChangedCommand { get; }
+    public void SwitchChanged(DeviceInputConfigModel input)
+    {
+        if (input is null)
+            return;
+
+        var actions = input.GetPossibleActions();
+        var actions1 = actions.Where(x => !input.AllActions!.Any(y => y.Key == x));
+        foreach (var action in actions1)
+        {
+            input.AllActions!.Add(new(action, new()));
+        }
+
+        _repositoryHelper.AddChanges(Device.Id!, input!.Id, input!.Split);
 
     }
 }

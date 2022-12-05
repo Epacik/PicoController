@@ -31,10 +31,6 @@
             </BrushTransition>
         </Transitions>
     </Window.Transitions>
-
-    <!--<Window.DataContext>
-        <vm:MainWindowViewModel/>
-    </Window.DataContext>-->
     
     <Window.Resources>
         <conv:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter"/>

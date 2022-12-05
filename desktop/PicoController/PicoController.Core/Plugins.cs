@@ -79,7 +79,7 @@ namespace PicoController.Core
                 return IPluginActionToFuncOfTask(value, action);
             }
 
-            if (handler.StartsWith("/")) //buildt in actions
+            if (handler.StartsWith("/") || !value.Handler.Contains("/")) //built in actions
             {
                 return LookupBuildtInAction(value, handler);
             }

@@ -33,6 +33,7 @@
     <PackageReference Include="Mapster" Version="7.4.0-pre03" />
     <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="OneOf" Version="3.0.223" />
     <PackageReference Include="Splat" Version="14.4.1" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.4.2" />
   </ItemGroup>

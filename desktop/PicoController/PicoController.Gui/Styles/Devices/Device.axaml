@@ -37,7 +37,10 @@
                                       OffContent="Split"
                                       IsChecked="{Binding Split, TargetNullValue=false}"
                                       IsEnabled="{Binding !DataContext.Run, 
-                                        RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
+                                        RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                      Command="{Binding DataContext.SwitchChangedCommand,
+                                        RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dw:DeviceView}}}"
+                                      CommandParameter="{Binding .}"/>
                         
                         <ListBox Items="{Binding Actions}"
                                  Classes="InputActions"
@@ -103,6 +106,7 @@
                               RowDefinitions="*,5,*,5,*">
                             <TextBlock>Action</TextBlock>
                             <TextBlock 
+                                FontWeight="DemiBold"
                                 Grid.Column="1"
                                 Text="{Binding Key}"/>
 
