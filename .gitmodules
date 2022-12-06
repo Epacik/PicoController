@@ -1,0 +1,3 @@
+[submodule "Thirdparty/VirtualDesktop"]
+	path = Thirdparty/VirtualDesktop
+	url = https://github.com/maciej-makowski/VirtualDesktop
