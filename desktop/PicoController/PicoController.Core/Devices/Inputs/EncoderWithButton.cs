@@ -97,14 +97,14 @@ namespace PicoController.Core.Devices.Inputs
                     InvokeAction(value, action);
                 }
 
-                if (message.ValueHasBits(clockwise))
-                {
-                    InvokeAction(1, _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate);
-                }
-                else if (message.ValueHasBits(counterClockwise))
-                {
-                    InvokeAction(-1, _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate);
-                }
+                //if (message.ValueHasBits(clockwise))
+                //{
+                //    InvokeAction(1, _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate);
+                //}
+                //else if (message.ValueHasBits(counterClockwise))
+                //{
+                //    InvokeAction(-1, _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate);
+                //}
             }
         }
 

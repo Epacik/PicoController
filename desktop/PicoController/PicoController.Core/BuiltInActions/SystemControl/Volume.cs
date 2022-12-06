@@ -24,7 +24,7 @@ internal class Volume : IPluginAction
 
         await Task.Yield();
 
-        float step = 0.01f;
+        float step = 0.01f * (float)inputValue;
         using var device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
@@ -49,7 +49,7 @@ internal class Volume : IPluginAction
         {
             var v = device.AudioEndpointVolume;
             SetVolume(
-                x => v.MasterVolumeLevel = x,
+                x => v.MasterVolumeLevelScalar = x,
                 v.MasterVolumeLevelScalar,
                 step * value);
         }

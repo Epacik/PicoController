@@ -102,11 +102,11 @@
                 <Setter.Value>
                     <DataTemplate>
                         <Grid IsEnabled="{Binding !DataContext.Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-                              ColumnDefinitions="120,*"
-                              RowDefinitions="*,5,*,5,*">
-                            <TextBlock>Action</TextBlock>
+                              ColumnDefinitions="150,*"
+                              RowDefinitions="*,5,*,5,*,5,*">
+                            <TextBlock FontWeight="SemiLight">Action</TextBlock>
                             <TextBlock 
-                                FontWeight="DemiBold"
+                                FontWeight="SemiLight"
                                 Grid.Column="1"
                                 Text="{Binding Key}"/>
 
@@ -116,15 +116,34 @@
                                 Grid.Column="1"
                                 Text="{Binding Value.Handler}"/>
 
-                            <TextBlock Grid.Row="4">Value</TextBlock>
+                            <TextBlock Grid.Row="4">Data</TextBlock>
                             <TextBlock
                                 Grid.Row="4"
                                 Grid.Column="1"
                                 Text="{Binding Value.Data}"/>
+
+                            <TextBlock 
+                                Grid.Row="6" 
+                                IsVisible="{Binding Value.InputValueOverride, 
+                                    Converter={x:Static conv:Converters.ObjectToIsNullConverter},
+                                    ConverterParameter=True}">
+                                Input Value Override
+                            </TextBlock>
+                            <TextBlock
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Text="{Binding Value.InputValueOverride}"
+                                IsVisible="{Binding Value.InputValueOverride, 
+                                    Converter={x:Static conv:Converters.ObjectToIsNullConverter},
+                                    ConverterParameter=True}"/>
                         </Grid>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
+
+            <Style Selector="^ ListBoxItem">
+                <Setter Property="Margin" Value="5"/>
+            </Style>
         </Style>
     </Style>
 </Styles>
