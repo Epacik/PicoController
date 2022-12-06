@@ -23,7 +23,7 @@ public class DeviceListViewModel : ViewModelBase
         _repositoryHelper.PropertyChanging += RepositoryHelper_PropertyChanging;
         _repositoryHelper.PropertyChanged += RepositoryHelper_PropertyChanged;
 
-        IEnumerable<Device>? dev = _repositoryHelper?.WorkingConfigCopy?.Devices;
+        IEnumerable<Device>? dev = _repositoryHelper?.SavedConfigCopy?.Devices;
         dev ??= Array.Empty<Device>();
         Devices = new(dev.Select(x => x.Adapt<DeviceConfigModel>()));
     }
@@ -31,25 +31,25 @@ public class DeviceListViewModel : ViewModelBase
     private IRepositoryHelper? _repositoryHelper;
     private void RepositoryHelper_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
-        {
-            this.RaisePropertyChanging(nameof(Devices));
-            //this.RaisePropertyChanging(nameof(SelectedDevice));
-        }
+        //if (e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
+        //{
+        //    this.RaisePropertyChanging(nameof(Devices));
+        //    //this.RaisePropertyChanging(nameof(SelectedDevice));
+        //}
     }
 
     private void RepositoryHelper_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
-        if (e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
-        {
-            this.RaisePropertyChanged(nameof(Devices));
-            //this.RaisePropertyChanged(nameof(SelectedDevice));
-        }
+        //if (e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
+        //{
+        //    this.RaisePropertyChanged(nameof(Devices));
+        //    //this.RaisePropertyChanged(nameof(SelectedDevice));
+        //}
     }
 
     private void RepositoryHelper_ReloadRequested(object? sender, EventArgs e)
     {
-        IEnumerable<Device>? dev = _repositoryHelper?.WorkingConfigCopy?.Devices;
+        IEnumerable<Device>? dev = _repositoryHelper?.SavedConfigCopy?.Devices;
         dev ??= Array.Empty<Device>();
         Devices = new(dev.Select(x => x.Adapt<DeviceConfigModel>()));
     }
