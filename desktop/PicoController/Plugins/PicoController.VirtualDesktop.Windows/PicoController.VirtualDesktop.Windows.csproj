@@ -9,12 +9,27 @@
 
   <ItemGroup>
     <PackageReference Include="OSVersionExt" Version="2.0.0" />
-    <PackageReference Include="VirtualDesktop" Version="5.0.5" />
-    <PackageReference Include="VirtualDesktop.WPF" Version="5.0.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Lib\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="VirtualDesktop">
+      <HintPath>..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop\bin\Release\net6.0-windows10.0.19041.0\VirtualDesktop.dll</HintPath>
+    </Reference>
+    <Reference Include="VirtualDesktop.WPF">
+      <HintPath>..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop.WPF\bin\Release\net6.0-windows10.0.19041.0\VirtualDesktop.WPF.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet build -c release &quot;$(ProjectDir)..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop.sln&quot;" />
+  </Target>
 
 </Project>
