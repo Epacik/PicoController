@@ -185,7 +185,7 @@ internal class Volume : IPluginAction, IDisposable
             return "";
         }
         var name = data.Replace("\",\"", ";").Split(';')[2].Trim('"');
-        ServicesCache[process.Id] = (name, stamp.AddMilliseconds(500));
+        ServicesCache[process.Id] = (name, stamp.AddMilliseconds(5000));
 
         return name;
     }
