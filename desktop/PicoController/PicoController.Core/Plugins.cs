@@ -1,6 +1,8 @@
 ﻿using McMaster.NETCore.Plugins;
 using PicoController.Core;
+using PicoController.Plugin;
 using PicoController.Plugin.Attributes;
+using Splat;
 using SuccincT.Functional;
 using System;
 using System.Collections.Generic;
@@ -32,7 +34,7 @@ namespace PicoController.Core
                 {
                     var loader = PluginLoader.CreateFromAssemblyFile(
                         dllPath,
-                        sharedTypes: new Type[] { typeof(IPluginAction) },
+                        sharedTypes: new Type[] { typeof(IPluginAction), typeof(IDisplayInfo) },
                         config => { config.PreferSharedTypes = true; config.IsUnloadable = true; });
                     _loaders.Add(dirName, loader);
                 }
@@ -127,8 +129,31 @@ namespace PicoController.Core
             if (action is null)
                 return null;
 
+            InjectDependencies(action, actionType);
+
             LoadedActions[handler] = action;
             return IPluginActionToFuncOfTask(value, action);
+        }
+
+        private static void InjectDependencies(IPluginAction action, Type actionType)
+        {
+            var flags = BindingFlags.Public | BindingFlags.Instance;
+            var props = actionType.GetProperties(flags);
+            if (props is null)
+                return;
+
+            Type[] types = { typeof(IDisplayInfo), };
+
+            foreach (var type in types)
+            {
+                foreach (PropertyInfo prop in props.Where(x => x.PropertyType == type))
+                {
+                    var set = prop.GetSetMethod(true);
+                    var value = Locator.Current.GetService(type);
+                    if (set is not null && value is not null)
+                        set.Invoke(action, new[] { value });
+                }
+            }
         }
 
         private static bool IsPluginAction(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);

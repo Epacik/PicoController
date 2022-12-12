@@ -3,8 +3,10 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using PicoController.Gui.Helpers;
+using PicoController.Gui.Plugin;
 using PicoController.Gui.ViewModels;
 using PicoController.Gui.Views;
+using PicoController.Plugin;
 using Splat;
 using System;
 
@@ -35,6 +37,7 @@ namespace PicoController.Gui
         {
             Locator.CurrentMutable.RegisterLazySingleton<IRepositoryHelper>(() => new RepositoryHelper());
             Locator.CurrentMutable.RegisterLazySingleton<Themes.ThemeManager>(Themes.ThemeManager.CreateManager);
+            Locator.CurrentMutable.RegisterLazySingleton<IDisplayInfo>(() => new DisplayInfo());
 
             if (DesktopApplicationLifetime is not null)
             {

@@ -6,26 +6,66 @@ namespace PicoController.Core.BuiltInActions.SystemControl;
 #pragma warning disable CA1416 // Walidacja zgodności z platformą
 
 using NAudio.CoreAudioApi;
+using OneOf;
+using PicoController.Plugin;
+using PicoController.Plugin.DisplayInfos;
+using SecretNest.TaskSchedulers;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-internal class Volume : IPluginAction
+internal class Volume : IPluginAction, IDisposable
 {
-    private readonly MMDeviceEnumerator deviceEnumerator;
+    public IDisplayInfo? DisplayInfo { get; set; }
+
+    private readonly SequentialScheduler _scheduler;
+    private readonly TaskFactory _taskFactory;
+    private readonly MMDeviceEnumerator _deviceEnumerator;
 
     public Volume()
     {
-        deviceEnumerator = new MMDeviceEnumerator();
+        _scheduler = new SequentialScheduler();
+        _taskFactory = new TaskFactory(_scheduler);
+        _deviceEnumerator = new MMDeviceEnumerator();
+    }
+
+    private DateTime _getDeviceTimestamp;
+    private MMDevice? _device;
+    public MMDevice? Device
+    {
+        get
+        {
+            var now = DateTime.Now;
+            if (_device is not null && _getDeviceTimestamp.AddSeconds(5) < now)
+            {
+                _device.Dispose();
+                _device = null;
+            }
+            
+            if (_device is null)
+            {
+                _device = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                _getDeviceTimestamp = now;
+            }
+
+            return _device;
+        }
     }
 
     public async Task ExecuteAsync(int inputValue, string? argument)
     {
+        await Task.Yield();
+        _ = _taskFactory.StartNew(() => ExecuteInternal(inputValue, argument));
+    }
+
+    private void ExecuteInternal(int inputValue, string? argument)
+    {
         if (string.IsNullOrWhiteSpace(argument))
             return;
 
-        await Task.Yield();
-
         float step = 0.01f * (float)inputValue;
-        using var device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        var device = Device;
+        if(device is null)
+            return;
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
@@ -48,14 +88,13 @@ internal class Volume : IPluginAction
         else if (int.TryParse(argument, out int value))
         {
             var v = device.AudioEndpointVolume;
-            SetVolume(
-                x => v.MasterVolumeLevelScalar = x,
-                v.MasterVolumeLevelScalar,
-                step * value);
+            var newValue = NewVolume(v.MasterVolumeLevelScalar + (step * value));
+            v.MasterVolumeLevelScalar = newValue;
+            if(DisplayInfo is not null)
+                DisplayInfo.Display(GetDisplayInfo(device.FriendlyName, newValue));
         }
         else
             throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
-
     }
 
     private void ChangeAppVolume(string? argument, float step, MMDevice device, string[] args)
@@ -85,10 +124,10 @@ internal class Volume : IPluginAction
                 else if (int.TryParse(args[1], out int value))
                 {
                     var v = session.SimpleAudioVolume;
-                    SetVolume(
-                        x => v.Volume = x,
-                        v.Volume,
-                        step * value);
+                    var newValue = NewVolume(v.Volume + (step * value));
+                    v.Volume = newValue;
+                    if (DisplayInfo is not null)
+                        DisplayInfo.Display(GetDisplayInfo(processName, newValue));
                 }
                 else
                     throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
@@ -98,20 +137,31 @@ internal class Volume : IPluginAction
 
     }
 
-    private void SetVolume(Action<float> set, float currentValue, float step)
+    private float NewVolume(float newValue) => newValue switch
     {
+        < 0 => 0,
+        > 1 => 1,
+        _ => newValue,
+    };
 
-        if (step > 0 && currentValue + step > 1)
-            set(1);
 
-        else if (step < 0 && currentValue + step < 0)
-            set(0);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private OneOf<Text, ProgressBar>[] GetDisplayInfo(string friendlyName, float value)
+    {
+        OneOf<Text, ProgressBar>[] infos =
+        {
+            new Text("Volume", 18, 600),
+            new Text(friendlyName),
+            new Text($"{100 * value:0}%", fontWeight: 600),
+            new ProgressBar(0, 100, 100 * value),
+        };
 
-        else
-            set(currentValue + step);
+        return infos;
     }
 
     private static Dictionary<int, (string Name, DateTime DateStamp)> ServicesCache = new();
+    private bool disposedValue;
+
     private static string GetServiceName(Process process)
     {
         var stamp = DateTime.Now;
@@ -138,6 +188,28 @@ internal class Volume : IPluginAction
         ServicesCache[process.Id] = (name, stamp.AddMilliseconds(500));
 
         return name;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {}
+            _scheduler.Dispose();
+            disposedValue = true;
+        }
+    }
+
+    ~Volume()
+    {
+        Dispose(disposing: false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
 

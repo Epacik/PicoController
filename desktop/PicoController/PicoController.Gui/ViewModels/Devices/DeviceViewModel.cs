@@ -8,6 +8,7 @@ using PicoController.Core.Config;
 using PicoController.Core.Extensions;
 using PicoController.Gui.Helpers;
 using PicoController.Gui.Models;
+using PicoController.Gui.ViewModels.InterfaceEditors;
 using ReactiveUI;
 using System.Reactive;
 
@@ -42,6 +43,7 @@ public class DeviceViewModel : ViewModelBase
     }
 
     public DeviceConfigModel Device { get; }
+    private readonly IRepositoryHelper _repositoryHelper;
 
     //public Input[] Inputs => Device.Inputs;
 
@@ -52,9 +54,42 @@ public class DeviceViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _inputs, value);
     }
 
-    private readonly IRepositoryHelper _repositoryHelper;
-    public ReactiveCommand<SelectionChangedEventArgs, Unit> SelectedInputChangedCommand { get; }
+    public InterfaceType[] InterfaceTypes => _interfaceTypes;
+    private InterfaceType[] _interfaceTypes =
+    {
+        InterfaceType.Bluetooth,
+        InterfaceType.COM,
+        InterfaceType.WiFi,
+    };
 
+    private InterfaceType _selectedInterfaceType;
+    public InterfaceType SelectedInterfaceType
+    {
+        get => _selectedInterfaceType;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedInterfaceType, value);
+
+            var data = Device.Interface?.Data;
+
+            InterfaceEditor = _selectedInterfaceType switch
+            {
+                InterfaceType.COM => new COM(data),
+                InterfaceType.WiFi => new WiFi(data),
+                InterfaceType.Bluetooth => new Bluetooth(data),
+                _ => null,
+            };
+        }
+    }
+
+    private InterfaceEditorViewModel? _interfaceEditor;
+    public InterfaceEditorViewModel? InterfaceEditor
+    {
+        get => _interfaceEditor;
+        set => this.RaiseAndSetIfChanged(ref _interfaceEditor, value);
+    }
+
+    public ReactiveCommand<SelectionChangedEventArgs, Unit> SelectedInputChangedCommand { get; }
     public async void SelectedInputChanged(SelectionChangedEventArgs args)
     {
         if (args.AddedItems.Count == 0 || args.AddedItems[0] is not ReactiveKeyValuePair<string, DeviceInputActionConfigModel>)

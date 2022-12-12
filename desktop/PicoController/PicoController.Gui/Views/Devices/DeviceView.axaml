@@ -19,38 +19,63 @@
         <StyleInclude Source="/Styles/Devices/Device.axaml"/>
     </UserControl.Styles>
     <Grid ColumnDefinitions="*">
-        <Grid RowDefinitions="70,20,*"
+        <Grid RowDefinitions="auto,20,*"
               Margin="5">
-            <Grid ColumnDefinitions="60,*"
-                  RowDefinitions="*,*">
-                <Rectangle Stroke="{DynamicResource ListBoxForeground}"
-                           StrokeThickness="2"
-                           Margin="10,5"
-                           RadiusX="2"
-                           RadiusY="2"
-                           Grid.RowSpan="2"/>
-                <TextBlock VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           Text="{Binding Device.Interface.Type}"
-                           FontSize="15"
-                           Grid.RowSpan="2"/>
+            <Expander IsExpanded="true"
+                      IsEnabled="{Binding !DataContext.Run, 
+                        RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
+                <Expander.Header>
+                    <Grid
+                        ColumnDefinitions="60,*"
+                        RowDefinitions="*,*"
+                        Height="60">
+                        <Rectangle Stroke="{DynamicResource ListBoxForeground}"
+                                   StrokeThickness="2"
+                                   Margin="10,5"
+                                   RadiusX="2"
+                                   RadiusY="2"
+                                   Grid.RowSpan="2"/>
+                        <TextBlock VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   Text="{Binding Device.Interface.Type}"
+                                   FontSize="15"
+                                   Grid.RowSpan="2"/>
 
-                <TextBlock FontSize="20"
-                           FontWeight="SemiBold"
-                           Text="{Binding Device.Name}"
-                           Grid.Column="1"/>
+                        <TextBlock FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding Device.Name}"
+                                   Grid.Column="1"/>
 
-                <StackPanel Orientation="Horizontal"
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="1"
+                                    Grid.Row="1"
+                                    Spacing="5">
+                            <TextBlock Text="Interface:"/>
+                            <TextBlock Text="{Binding Device.Interface.Type}"/>
+                        </StackPanel>
+                    </Grid>
+                </Expander.Header>
+                <Expander.Content>
+                    <Grid 
+                        ShowGridLines="True"
+                        RowDefinitions="30,5,30,5,*"
+                        ColumnDefinitions="150,*">
+                        <TextBlock>Interface settings</TextBlock>
+                        <TextBlock Grid.Row="2">
+                            Interface type
+                        </TextBlock>
+                        
+                        <ComboBox 
+                            Grid.Row="2"
                             Grid.Column="1"
-                            Grid.Row="1"
-                            Spacing="5">
-                    <TextBlock Text="Interface:"/>
-                    <TextBlock Text="{Binding Device.Interface.Type}"/>
-                </StackPanel>
-            </Grid>
+                            Items="{Binding InterfaceTypes}"
+                            SelectedItem="{Binding SelectedInterfaceType}"/>
+                    </Grid>
+                </Expander.Content>
+            </Expander>
 
             <ListBox Classes="Inputs"
-                     Grid.Row="2"
+                     Grid.Row="4"
                      Items="{Binding Inputs}">
                 
             </ListBox>

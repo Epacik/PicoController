@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Lib\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="VirtualDesktop">
       <HintPath>..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop\bin\Release\net6.0-windows10.0.19041.0\VirtualDesktop.dll</HintPath>
     </Reference>
