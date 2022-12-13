@@ -31,34 +31,37 @@ internal class Button : InputBase
         _timer.AutoReset = false;
     }
 
-    private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    private async void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        void invoke(int presses)
+        async Task invoke(int presses)
         {
             switch (presses)
             {
                 case 1:
-                    InvokeAction(0, ActionNames.Press); break;
+                    await InvokeAction(0, ActionNames.Press); break;
                 case 2:
-                    InvokeAction(0, ActionNames.DoublePress); break;
+                    await InvokeAction(0, ActionNames.DoublePress); break;
                 case 3:
-                    InvokeAction(0, ActionNames.TriplePress); break;
+                    await InvokeAction(0, ActionNames.TriplePress); break;
                 case > 3:
-                    InvokeAction(0, ActionNames.TriplePress);
-                    invoke(presses - 3);
+                    await InvokeAction(0, ActionNames.TriplePress);
+                    await invoke(presses - 3);
                     break;
             }
         }
         
-        invoke(Interlocked.Exchange(ref _presses, 0));
+        await invoke(Interlocked.Exchange(ref _presses, 0));
     }
 
     private bool IsPressed;
     private int _presses;
 
-    protected override void ExecuteInternal(InputMessage message)
+    protected override async Task ExecuteInternal(InputMessage message)
     {
         const int Pressed = 1, Released = 1 << 1;
+
+        await Task.Yield();
+
         if (IsPressed && message.Value == Released)
         {
             IsPressed = false;

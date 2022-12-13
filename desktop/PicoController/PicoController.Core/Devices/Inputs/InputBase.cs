@@ -24,19 +24,19 @@ public abstract class InputBase
         AvailableActions = availableActions.ToImmutableArray();
     }
 
-    public void Execute(InputMessage message)
+    public async Task Execute(InputMessage message)
     {
         if (Id != message.InputId)
             throw new ArgumentException("Message Id does not match Input Id");
         if(Type != message.InputType)
             throw new ArgumentException("Message Type does not match Input Type");
 
-        ExecuteInternal(message);
+        await ExecuteInternal(message);
     }
 
-    protected abstract void ExecuteInternal(InputMessage message);
+    protected abstract Task ExecuteInternal(InputMessage message);
 
-    protected async void InvokeAction(int inputValue, string actionName)
+    protected async Task InvokeAction(int inputValue, string actionName)
     {
         RemoveLater.Output.SendMessage(_deviceId, Id, actionName);
         Console.WriteLine($" device: {_deviceId}, input: {Id}, action: {actionName}");
