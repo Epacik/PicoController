@@ -5,9 +5,9 @@ param (
 )
 
 if ($Plugins.Count -eq 0) {
-    $Plugins = (Get-ChildItem -Directory -Exclude .vscode).Name;
+    $Plugins = (Get-ChildItem -Directory -Exclude .vscode -Path $PSScriptRoot).Name;
 }
 
 foreach ($plugin in $Plugins) {
-    dotnet publish ./$plugin --self-contained true -o $env:userprofile\.picoController\Plugins\$plugin;
+    dotnet publish $PSScriptRoot/$plugin  -o $env:userprofile\.picoController\Plugins\$plugin;
 }
