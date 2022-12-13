@@ -9,5 +9,5 @@ if ($Plugins.Count -eq 0) {
 }
 
 foreach ($plugin in $Plugins) {
-    dotnet publish $PSScriptRoot/$plugin  -o $env:userprofile\.picoController\Plugins\$plugin;
+    dotnet publish $PSScriptRoot/$plugin --sc --os win -o $env:userprofile\.picoController\Plugins\$plugin;
 }
