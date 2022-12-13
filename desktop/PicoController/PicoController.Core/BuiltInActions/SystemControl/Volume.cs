@@ -35,6 +35,10 @@ internal class Volume : IPluginAction, IDisposable
 
     private void NotificationClient_DeviceNotification(object? sender, EventArgs e)
     {
+        if(Device.HasValue)
+        {
+            _device.Value.dev.Dispose();
+        }
         _device = null;
     }
 
