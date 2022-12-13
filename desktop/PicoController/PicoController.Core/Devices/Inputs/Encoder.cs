@@ -22,13 +22,13 @@ namespace PicoController.Core.Devices.Inputs
         {
         }
 
-        protected override void ExecuteInternal(InputMessage message)
+        protected override async Task ExecuteInternal(InputMessage message)
         {
             const int counterClockwise = 1, clockwise = 1 << 1;
             if (Split)
             {
                 var value = message.Value switch { counterClockwise => -1, clockwise => 1, _ => 0 };
-                InvokeAction(value, ActionNames.Rotate);
+                await InvokeAction(value, ActionNames.Rotate);
             }
             else
             {
@@ -39,7 +39,7 @@ namespace PicoController.Core.Devices.Inputs
                     _ => ""
                 };
 
-                InvokeAction(1, action);
+                await InvokeAction(1, action);
             }
         }
 

@@ -6,6 +6,7 @@ namespace PicoController.Core.BuiltInActions.SystemControl;
 #pragma warning disable CA1416 // Walidacja zgodności z platformą
 
 using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces;
 using OneOf;
 using PicoController.Plugin;
 using PicoController.Plugin.DisplayInfos;
@@ -20,31 +21,32 @@ internal class Volume : IPluginAction, IDisposable
     private readonly SequentialScheduler _scheduler;
     private readonly TaskFactory _taskFactory;
     private readonly MMDeviceEnumerator _deviceEnumerator;
+    private readonly NotificationClient _notificationClient;
 
     public Volume()
     {
+        _notificationClient = new NotificationClient();
+        _notificationClient.DeviceNotification += NotificationClient_DeviceNotification;
         _scheduler = new SequentialScheduler();
         _taskFactory = new TaskFactory(_scheduler);
         _deviceEnumerator = new MMDeviceEnumerator();
+        _deviceEnumerator.RegisterEndpointNotificationCallback(_notificationClient);
     }
 
-    private DateTime _getDeviceTimestamp;
-    private MMDevice? _device;
-    public MMDevice? Device
+    private void NotificationClient_DeviceNotification(object? sender, EventArgs e)
+    {
+        _device = null;
+    }
+
+    private (MMDevice dev, string name)? _device;
+    public (MMDevice dev, string name)? Device
     {
         get
         {
-            var now = DateTime.Now;
-            if (_device is not null && _getDeviceTimestamp.AddSeconds(5) < now)
-            {
-                _device.Dispose();
-                _device = null;
-            }
-            
             if (_device is null)
             {
-                _device = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-                _getDeviceTimestamp = now;
+                var dev = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                _device = (dev, dev.FriendlyName);
             }
 
             return _device;
@@ -53,70 +55,76 @@ internal class Volume : IPluginAction, IDisposable
 
     public async Task ExecuteAsync(int inputValue, string? argument)
     {
-        await Task.Yield();
-        _ = _taskFactory.StartNew(() => ExecuteInternal(inputValue, argument));
-    }
-
-    private void ExecuteInternal(int inputValue, string? argument)
-    {
         if (string.IsNullOrWhiteSpace(argument))
             return;
 
+        await Task.Yield();
+        
         float step = 0.01f * (float)inputValue;
         var device = Device;
-        if(device is null)
+        if (device is null)
             return;
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
         if (args.Length < 2)
         {
-            ChangeMasterVolume(argument, step, device);
+            ChangeMasterVolume(argument, step, device.Value);
         }
         else
         {
-            ChangeAppVolume(argument, step, device, args);
+            ChangeAppVolume(argument, step, device.Value, args);
         }
     }
 
-    private void ChangeMasterVolume(string argument, float step, MMDevice device)
-    {
 
+    private void ChangeMasterVolume(string argument, float step, (MMDevice dev, string name) device)
+    {
+        var (dev, name) = device;
         if (argument.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
-            device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
+            dev.AudioEndpointVolume.Mute = !dev.AudioEndpointVolume.Mute;
 
         else if (int.TryParse(argument, out int value))
         {
-            var v = device.AudioEndpointVolume;
-            var newValue = NewVolume(v.MasterVolumeLevelScalar + (step * value));
-            v.MasterVolumeLevelScalar = newValue;
-            if(DisplayInfo is not null)
-                DisplayInfo.Display(GetDisplayInfo(device.FriendlyName, newValue));
+            var newValue = NewVolume(dev.AudioEndpointVolume.MasterVolumeLevelScalar + (step * value));
+            dev.AudioEndpointVolume.MasterVolumeLevelScalar = newValue;
+            Display(name, newValue);
         }
         else
-            throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+        {
+            Throw(argument);
+        }
     }
-
-    private void ChangeAppVolume(string? argument, float step, MMDevice device, string[] args)
+    private void ChangeAppVolume(string? argument, float step, (MMDevice dev, string name) device, string[] args)
     {
+        var (dev, _) = device;
         var (appName, action) = (args[0], args[1]);
 
-        var sessions = device.AudioSessionManager.Sessions;
+        var sessions = dev.AudioSessionManager.Sessions;
         for (int i = 0; i < sessions.Count; i++)
         {
             var session = sessions[i];
-            string processName = session.GetSessionIdentifier;
+            var sessionId = session.GetSessionIdentifier;
+            (string name, string? displayName) proc = (session.GetSessionIdentifier, session.GetSessionIdentifier);
             var process = Process.GetProcessById((int)session.GetProcessID);
 
             if (process.ProcessName.StartsWith("svchost", StringComparison.InvariantCultureIgnoreCase))
-                processName = GetServiceName(process);
-            else
-                processName = process.ProcessName;
+            {
+                var p = GetServiceName(process.Id);
+                if (p is null)
+                    return;
+                proc = p.Value;
 
-            if (string.IsNullOrWhiteSpace(processName))
+            }
+            else
+                proc = (process.ProcessName, process.ProcessName);
+
+            var displayName = proc.displayName ?? proc.name;
+
+            if (string.IsNullOrWhiteSpace(displayName))
                 continue;
 
-            if (processName.Contains(appName, StringComparison.InvariantCultureIgnoreCase))
+            if (proc.name.Contains(appName, StringComparison.InvariantCultureIgnoreCase))
             {
                 if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
                     session.SimpleAudioVolume.Mute = !session.SimpleAudioVolume.Mute;
@@ -126,27 +134,37 @@ internal class Volume : IPluginAction, IDisposable
                     var v = session.SimpleAudioVolume;
                     var newValue = NewVolume(v.Volume + (step * value));
                     v.Volume = newValue;
-                    if (DisplayInfo is not null)
-                        DisplayInfo.Display(GetDisplayInfo(processName, newValue));
+                    Display(displayName, newValue);
                 }
                 else
-                    throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+                    Throw(argument);
 
             }
         }
 
     }
 
-    private float NewVolume(float newValue) => newValue switch
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float NewVolume(float newValue) => newValue switch
     {
         < 0 => 0,
         > 1 => 1,
         _ => newValue,
     };
 
+    private static void Throw(string? argument)
+    {
+        throw new ArgumentException($"'{argument}' is not a valid value. Expected value was one of: '+X', 'X', '-X', 'ToggleMute', 'AppName;+X', 'AppName;X', 'AppName;-X', 'AppName;ToggleMute', Where X is an integer value and AppName is a name of an application or service volume of which is to be changed ");
+    }
+
+    private void Display(string displayName, float value)
+    {
+        if (DisplayInfo is not null)
+            DisplayInfo.Display(GetDisplayInfo(displayName, value));
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private OneOf<Text, ProgressBar>[] GetDisplayInfo(string friendlyName, float value)
+    private static OneOf<Text, ProgressBar>[] GetDisplayInfo(string friendlyName, float value)
     {
         OneOf<Text, ProgressBar>[] infos =
         {
@@ -159,35 +177,42 @@ internal class Volume : IPluginAction, IDisposable
         return infos;
     }
 
-    private static Dictionary<int, (string Name, DateTime DateStamp)> ServicesCache = new();
     private bool disposedValue;
 
-    private static string GetServiceName(Process process)
+    private (string name, string displayName)? GetServiceName(int processId)
     {
-        var stamp = DateTime.Now;
-        if (ServicesCache.ContainsKey(process.Id) && ServicesCache[process.Id].DateStamp < stamp)
+        var service = Services?.FirstOrDefault(x => x.id == processId);
+
+        if (service == null)
+            return null;
+
+        return (service.Value.name, service.Value.displayName);
+    }
+
+    private (DateTime timestamp, IEnumerable<(uint id, string name, string displayName)> services)? _servicesCache;
+    private IEnumerable<(uint id, string name, string displayName)> Services
+    {
+        get
         {
-            return ServicesCache[process.Id].Name;
+            var now = DateTime.Now;
+
+            if(_servicesCache is not null && _servicesCache?.timestamp >= now)
+            {
+                return _servicesCache.Value.services;
+            }
+
+            List<(uint id, string name, string displayname)> services = new();
+            string qry = $"SELECT PROCESSID, NAME, DISPLAYNAME FROM WIN32_SERVICE";
+            System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher(qry);
+            foreach (System.Management.ManagementObject mngntObj in searcher.Get())
+            {
+                services.Add(((uint)mngntObj["PROCESSID"], (string)mngntObj["NAME"], (string)mngntObj["DISPLAYNAME"]));
+            }
+
+            _servicesCache = (now.AddSeconds(20), services);
+
+            return services;
         }
-
-        var prc = new Process();
-        prc.StartInfo = new ProcessStartInfo("tasklist", $"/svc /fi \"imagename eq svchost.exe\" /FI \"pid eq {process.Id}\" /FO CSV /NH")
-        {
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-        };
-        prc.Start();
-
-        var data = prc.StandardOutput.ReadLine();
-        prc.WaitForExit();
-        if (data is null || !data.StartsWith('"'))
-        {
-            return "";
-        }
-        var name = data.Replace("\",\"", ";").Split(';')[2].Trim('"');
-        ServicesCache[process.Id] = (name, stamp.AddMilliseconds(5000));
-
-        return name;
     }
 
     protected virtual void Dispose(bool disposing)
@@ -210,6 +235,34 @@ internal class Volume : IPluginAction, IDisposable
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+
+    private class NotificationClient : IMMNotificationClient
+    {
+        public event EventHandler? DeviceNotification;
+        public void OnDefaultDeviceChanged(DataFlow flow, Role role, string defaultDeviceId)
+        {
+            DeviceNotification?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnDeviceAdded(string pwstrDeviceId)
+        {
+            DeviceNotification?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnDeviceRemoved(string deviceId)
+        {
+            DeviceNotification?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnDeviceStateChanged(string deviceId, DeviceState newState)
+        {
+        }
+
+        public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
+        {
+        }
     }
 }
 

@@ -36,13 +36,13 @@ namespace PicoController.Core.Devices
 
         public event EventHandler<PluginActionExceptionEventArgs>? ActionThrownAnException;
 
-        private void Interface_NewMessage(object? sender, InterfaceMessageEventArgs e)
+        private async void Interface_NewMessage(object? sender, InterfaceMessageEventArgs e)
         {
             var input = Inputs.Find(x => x.Id == e.Message.InputId);
             if (input is null)
                 return;
 
-            input.Execute(e.Message);
+            await input.Execute(e.Message);
         }
 
         public void Connect() => Interface.Connect();

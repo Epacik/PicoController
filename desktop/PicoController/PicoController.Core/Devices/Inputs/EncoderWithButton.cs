@@ -28,26 +28,26 @@ namespace PicoController.Core.Devices.Inputs
             _timer.AutoReset = false;
         }
 
-        private void _timer_Elapsed(object? sender, ElapsedEventArgs e)
+        private async void _timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            void invoke(int presses)
+            async Task invoke(int presses)
             {
                 switch (presses)
                 {
                     case 1:
-                        InvokeAction(0, ActionNames.Press); break;
+                        await InvokeAction(0, ActionNames.Press); break;
                     case 2:
-                        InvokeAction(0, ActionNames.DoublePress); break;
+                        await InvokeAction(0, ActionNames.DoublePress); break;
                     case 3:
-                        InvokeAction(0, ActionNames.TriplePress); break;
+                        await InvokeAction(0, ActionNames.TriplePress); break;
                     case > 3:
-                        InvokeAction(0, ActionNames.TriplePress);
-                        invoke(presses - 3);
+                        await InvokeAction(0, ActionNames.TriplePress);
+                        await invoke(presses - 3);
                         break;
                 }
             }
 
-            invoke(Interlocked.Exchange(ref _presses, 0));
+            await invoke(Interlocked.Exchange(ref _presses, 0));
         }
 
         private bool _isPressed;
@@ -56,7 +56,7 @@ namespace PicoController.Core.Devices.Inputs
         private readonly int _maxDelayBetweenClicks;
         private readonly System.Timers.Timer _timer;
 
-        protected override void ExecuteInternal(InputMessage message)
+        protected override async Task ExecuteInternal(InputMessage message)
         {
             const int counterClockwise = 1, clockwise = 1 << 1, pressed = 1 << 2, released = 1 << 3;
 
@@ -88,13 +88,13 @@ namespace PicoController.Core.Devices.Inputs
                         (true, false)  => ActionNames.RotateSplitC,
                         (false, false) => ActionNames.RotateSplitCC,
                     };
-                    InvokeAction(1, action);
+                    await InvokeAction(1, action);
                 }
                 else
                 {
                     var value = message.ValueHasBits(clockwise) ? 1 : -1;
                     var action = _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate;
-                    InvokeAction(value, action);
+                    await InvokeAction(value, action);
                 }
 
                 //if (message.ValueHasBits(clockwise))
