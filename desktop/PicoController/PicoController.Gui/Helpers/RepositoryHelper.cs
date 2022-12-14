@@ -60,8 +60,8 @@ internal class RepositoryHelper : ReactiveObject, IRepositoryHelper
     {
         Device workingDevice = GetDeviceHelper(deviceId);
 
-        if (!workingDevice.Inputs[inputId].Actions.ContainsKey(actionName))
-            throw new InvalidOperationException($"Unknown action: {actionName}");
+        //if (!workingDevice.Inputs[inputId].Actions.ContainsKey(actionName))
+            //throw new InvalidOperationException($"Unknown action: {actionName}");
 
         this.RaisePropertyChanging(nameof(WorkingConfigCopy));
 

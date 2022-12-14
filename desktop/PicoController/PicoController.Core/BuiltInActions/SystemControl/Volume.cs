@@ -37,7 +37,7 @@ internal class Volume : IPluginAction, IDisposable
     {
         if(Device.HasValue)
         {
-            _device.Value.dev.Dispose();
+            Device.Value.dev.Dispose();
         }
         _device = null;
     }
