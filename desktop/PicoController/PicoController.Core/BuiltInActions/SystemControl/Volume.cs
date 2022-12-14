@@ -117,7 +117,10 @@ internal class Volume : IPluginAction, IDisposable
 
             }
             else
-                proc = (process.ProcessName, process.ProcessName);
+                proc = (
+                    process.ProcessName,
+                    string.IsNullOrWhiteSpace(process.MainWindowTitle) ? process.ProcessName : process.MainWindowTitle
+                    );
 
             var displayName = proc.displayName ?? proc.name;
 
