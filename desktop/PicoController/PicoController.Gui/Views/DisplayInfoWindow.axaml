@@ -11,6 +11,7 @@
         SystemDecorations="BorderOnly"
         Width="300"
         Padding="15"
+        CornerRadius="5"
         TransparencyLevelHint="Transparent">
     <ItemsControl Items="{Binding Controls}">
         <ItemsControl.ItemsPanel>

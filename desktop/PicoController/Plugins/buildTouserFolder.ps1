@@ -5,9 +5,12 @@ param (
 )
 
 if ($Plugins.Count -eq 0) {
-    $Plugins = (Get-ChildItem -Directory -Exclude .vscode -Path $PSScriptRoot).Name;
+    $Plugins = (Get-ChildItem -Directory -Exclude .vscode,bin -Path $PSScriptRoot).Name;
 }
 
 foreach ($plugin in $Plugins) {
-    dotnet publish $PSScriptRoot/$plugin --sc --os win -o $env:userprofile\.picoController\Plugins\$plugin;
+    dotnet publish $PSScriptRoot/$plugin --use-current-runtime --os win -o $env:userprofile\.picoController\Plugins\$plugin;
+    # if ($plugin -eq 'PicoController.VirtualDesktop.Windows') {
+    #     robocopy "$PSScriptRoot\..\..\..\Thirdparty\publish\VirtualDesktop\" "$env:userprofile\.picoController\Plugins\$plugin"
+    # }
 }

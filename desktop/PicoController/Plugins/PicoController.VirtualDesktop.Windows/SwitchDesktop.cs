@@ -1,5 +1,4 @@
-﻿using OSVersionExtension;
-using PicoController.Core;
+﻿using PicoController.Core;
 using WindowsDesktop;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416", Justification = "this lib is Windows only")]
@@ -13,8 +12,7 @@ public class SwitchDesktop : IPluginAction
         argument = argument ?? throw new ArgumentNullException(nameof(argument));
         await Task.Yield();
 
-        var windowsVersion = OSVersion.GetOSVersion().Version;
-        if(windowsVersion.Major < 10 || (windowsVersion.Major == 10 && windowsVersion.Build < 14393))
+        if (Environment.OSVersion.Version.Build < 14393)
             throw new InvalidOperationException("Use at least Windows 10 1607");
 
         if (int.TryParse(argument, out int index))

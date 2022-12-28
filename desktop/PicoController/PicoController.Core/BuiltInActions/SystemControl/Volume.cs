@@ -20,7 +20,7 @@ internal class Volume : IPluginAction, IDisposable
 
     private readonly SequentialScheduler _scheduler;
     private readonly TaskFactory _taskFactory;
-    private readonly MMDeviceEnumerator _deviceEnumerator;
+    private MMDeviceEnumerator _deviceEnumerator;
     private readonly NotificationClient _notificationClient;
 
     public Volume()
@@ -47,13 +47,23 @@ internal class Volume : IPluginAction, IDisposable
     {
         get
         {
-            if (_device is null)
+            try
             {
-                var dev = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-                _device = (dev, dev.FriendlyName);
-            }
+                if (_device is null)
+                {
+                    var dev = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                    _device = (dev, dev.FriendlyName);
+                }
 
-            return _device;
+                return _device;
+            }
+            catch
+            {
+                _deviceEnumerator?.Dispose();
+                _deviceEnumerator = new MMDeviceEnumerator();
+                
+                return Device;
+            }
         }
     }
 

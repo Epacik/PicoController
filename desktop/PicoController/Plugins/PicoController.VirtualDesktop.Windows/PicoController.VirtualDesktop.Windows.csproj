@@ -1,31 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <!--<OutDir>$(ProjectDir)..\bin\PicoController.VirtualDesktop.Windows</OutDir>-->
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="OSVersionExt" Version="2.0.0" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="VirtualDesktop">
-      <HintPath>..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop\bin\Release\net6.0-windows10.0.19041.0\VirtualDesktop.dll</HintPath>
+      <HintPath>..\..\..\..\Thirdparty\publish\VirtualDesktop\VirtualDesktop.dll</HintPath>
     </Reference>
     <Reference Include="VirtualDesktop.WPF">
-      <HintPath>..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop.WPF\bin\Release\net6.0-windows10.0.19041.0\VirtualDesktop.WPF.dll</HintPath>
+      <HintPath>..\..\..\..\Thirdparty\publish\VirtualDesktop\VirtualDesktop.WPF.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="dotnet build -c release &quot;$(ProjectDir)..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop.sln&quot;" />
+    <Exec Command="dotnet publish &quot;$(ProjectDir)..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop.WPF\VirtualDesktop.WPF.csproj&quot; --runtime win10-x64 -f net6.0-windows10.0.19041.0 --sc -o &quot;$(ProjectDir)..\..\..\..\Thirdparty\publish\VirtualDesktop\&quot;" />
   </Target>
+
+  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="robocopy &quot;$(ProjectDir)..\..\..\..\Thirdparty\publish\VirtualDesktop\\&quot; &quot;$(ProjectDir)$(OutDir)&quot;&#xD;&#xA;exit 0" />
+  </Target>-->
 
 </Project>

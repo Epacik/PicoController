@@ -28,6 +28,22 @@ namespace PicoController.Gui
             MainWindow?.RestoreWindowState();
         }
 
+        public void StartStopDevices_Click(object? sender, EventArgs e)
+        {
+            //var isRunning = MainWindow?.DevicesRunning ?? false;
+            //var startStop = this
+            //if (isRunning)
+            //{
+        
+            //    StartStopMenuItem.Header == "Start Devices";
+            //} 
+        }
+
+        public void RestartDevices_Click(object? sender, EventArgs e)
+        {
+            MainWindow?.RestoreWindowState();
+        }
+
         public void ExitApp_Click(object? sender, EventArgs e)
         {
             DesktopApplicationLifetime?.Shutdown();

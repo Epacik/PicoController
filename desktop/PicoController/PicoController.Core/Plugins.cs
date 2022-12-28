@@ -19,9 +19,10 @@ namespace PicoController.Core
         private static Dictionary<string, PluginLoader> _loaders = new();
         private static List<Assembly> _assemblies = new();
         public static bool AreLoaded { get; private set; }
-        public static void LoadPlugins()
+        public static void LoadPlugins(string? directory = null)
         {
-            var directory = Path.Combine(Config.ConfigRepository.ConfigDirectory(), "Plugins");
+            directory ??= Path.Combine(Config.ConfigRepository.ConfigDirectory(), "Plugins");
+
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 

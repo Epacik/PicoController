@@ -60,4 +60,8 @@
     <DefineConstants>OS_WINDOWS</DefineConstants>
   </PropertyGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="pwsh -File &quot;$(ProjectDir)..\Plugins\buildAllHere.ps1&quot;" />
+  </Target>
+
 </Project>

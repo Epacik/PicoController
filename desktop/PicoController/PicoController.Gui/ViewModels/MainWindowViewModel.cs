@@ -13,8 +13,14 @@ namespace PicoController.Gui.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private readonly string? _customPluginDir = null;
     public MainWindowViewModel()
     {
+        const string pluginDirArgName = "-PluginDir=";
+        _customPluginDir = App.DesktopApplicationLifetime!.Args
+            !.FirstOrDefault(x => x.StartsWith(pluginDirArgName))
+            ?.Replace(pluginDirArgName, "");
+
         _repository = Locator.Current.GetRequiredService<IConfigRepository>();
         _repositoryHelper = Locator.Current.GetRequiredService<IRepositoryHelper>();
         _repositoryHelper.PropertyChanged += RepositoryHelper_PropertyChanged;
@@ -22,7 +28,7 @@ public class MainWindowViewModel : ViewModelBase
         ConfigNotFound = !_repository.Exists();
         if (!Core.Plugins.AreLoaded)
         {
-            Core.Plugins.LoadPlugins();
+            Core.Plugins.LoadPlugins(_customPluginDir);
         }
 
         ToggleRunning();
@@ -189,7 +195,7 @@ public class MainWindowViewModel : ViewModelBase
     public void ReloadPlugins()
     {
         Core.Plugins.UnloadPlugins();
-        Core.Plugins.LoadPlugins();
+        Core.Plugins.LoadPlugins(_customPluginDir);
 
         Handlers.Reload();
     }

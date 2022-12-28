@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PicoController.Gui": {
+      "commandName": "Project",
+      "commandLineArgs": "-PluginDir=\"$(ProjectDir)..\\Plugins\\bin\""
+    }
+  }
+}
