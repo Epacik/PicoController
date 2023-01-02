@@ -51,8 +51,8 @@ internal class WindowsInputSimulator : INativeInputSimulator
 
     private static int SizeOf<T>() => Marshal.SizeOf(typeof(T));
 
-    [DllImport("user32.dll")]
-    static extern uint SendInput(uint length, INPUT[] inputs, int typeSize);
+    [DllImport("user32.dll", EntryPoint = "SendInput", ExactSpelling = true)]
+    private static extern uint SendInput(uint length, INPUT[] inputs, int typeSize);
 
     /// <summary>
     /// Retrieves the cursor's position, in screen coordinates.

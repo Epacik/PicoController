@@ -17,7 +17,7 @@ internal class DisplayInfo : IDisplayInfo
     private static readonly DisplayInfoWindowViewModel _viewModel = new DisplayInfoWindowViewModel();
     private static readonly DisplayInfoWindow _window = new DisplayInfoWindow(_viewModel);
     
-    public void Display(IEnumerable<OneOf<Text, PicoController.Plugin.DisplayInfos.ProgressBar>> infos)
+    public void Display(IEnumerable<DisplayInformations> infos)
     {
         Task.Run(async () => await Dispatcher.UIThread.InvokeAsync(() => _viewModel.Update(infos)));
     }

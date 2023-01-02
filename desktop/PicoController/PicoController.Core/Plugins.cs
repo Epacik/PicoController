@@ -16,8 +16,8 @@ namespace PicoController.Core
 {
     public static class Plugins
     {
-        private static Dictionary<string, PluginLoader> _loaders = new();
-        private static List<Assembly> _assemblies = new();
+        private static readonly Dictionary<string, PluginLoader> _loaders = new();
+        private static readonly List<Assembly> _assemblies = new();
         public static bool AreLoaded { get; private set; }
         public static void LoadPlugins(string? directory = null)
         {

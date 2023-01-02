@@ -4,6 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <!--<OutDir>$(ProjectDir)..\bin\PicoController.TidalVolume</OutDir>-->
   </PropertyGroup>
 

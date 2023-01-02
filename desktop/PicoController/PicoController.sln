@@ -17,7 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{C0E1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.TidalVolume", "Plugins\PicoControler.TidalVolume\PicoController.TidalVolume.csproj", "{E433B4F1-F4DD-49C0-964B-FA0D62218960}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoController.VirtualDesktop.Windows", "Plugins\PicoController.VirtualDesktop.Windows\PicoController.VirtualDesktop.Windows.csproj", "{35F8E544-1502-482A-ACB9-84E568964DE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.VirtualDesktop.Windows", "Plugins\PicoController.VirtualDesktop.Windows\PicoController.VirtualDesktop.Windows.csproj", "{35F8E544-1502-482A-ACB9-84E568964DE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{003988C5-4A1F-45C7-888C-87D0CB0276A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{35F8E544-1502-482A-ACB9-84E568964DE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35F8E544-1502-482A-ACB9-84E568964DE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35F8E544-1502-482A-ACB9-84E568964DE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

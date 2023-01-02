@@ -31,7 +31,7 @@ public class DisplayInfoWindowViewModel : ViewModelBase
         Show = false;
     }
 
-    internal void Update(IEnumerable<OneOf<Text, PicoController.Plugin.DisplayInfos.ProgressBar>> infos)
+    internal void Update(IEnumerable<DisplayInformations> infos)
     {
         Controls.Clear();
 

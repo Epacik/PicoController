@@ -9,5 +9,5 @@ namespace PicoController.Plugin;
 
 public interface IDisplayInfo
 {
-    void Display(IEnumerable<OneOf<DisplayInfos.Text, DisplayInfos.ProgressBar>> infos);
+    void Display(IEnumerable<DisplayInfos.DisplayInformations> infos);
 }

@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
     <!--<OutDir>$(ProjectDir)..\bin\PicoController.VirtualDesktop.Windows</OutDir>-->
   </PropertyGroup>
 

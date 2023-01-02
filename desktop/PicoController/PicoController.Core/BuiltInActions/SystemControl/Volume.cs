@@ -181,9 +181,9 @@ internal class Volume : IPluginAction, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static OneOf<Text, ProgressBar>[] GetDisplayInfo(string friendlyName, float value)
+    private static DisplayInformations[] GetDisplayInfo(string friendlyName, float value)
     {
-        OneOf<Text, ProgressBar>[] infos =
+        DisplayInformations[] infos =
         {
             new Text("Volume", 18, 600),
             new Text(friendlyName),
