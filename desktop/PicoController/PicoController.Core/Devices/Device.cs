@@ -16,25 +16,16 @@ namespace PicoController.Core.Devices
     {
 
         public readonly Communication.InterfaceBase Interface;
-        public readonly List<Inputs.InputBase> Inputs;
+        public readonly List<Inputs.Input> Inputs;
         private bool _isDisposed;
 
-        public Device(InterfaceBase @interface, List<Inputs.InputBase> inputs)
+        public Device(InterfaceBase @interface, List<Inputs.Input> inputs)
         {
             Interface = @interface;
             Inputs = inputs;
             Interface.NewMessage += Interface_NewMessage;
-
-            foreach(var input in Inputs)
-                input.ActionThrownAnException += Input_ActionThrownAnException;
         }
 
-        private void Input_ActionThrownAnException(object? sender, PluginActionExceptionEventArgs e)
-        {
-            ActionThrownAnException?.Invoke(this, e);
-        }
-
-        public event EventHandler<PluginActionExceptionEventArgs>? ActionThrownAnException;
 
         private async void Interface_NewMessage(object? sender, InterfaceMessageEventArgs e)
         {
@@ -63,7 +54,7 @@ namespace PicoController.Core.Devices
                     _ => throw new InvalidDataException(),
                 };
 
-                var inputs = new List<InputBase>();
+                var inputs = new List<Input>();
 
                 foreach(var inp in dev.Inputs)
                 {
@@ -96,8 +87,6 @@ namespace PicoController.Core.Devices
                 if (disposing)
                 {
                     Interface.NewMessage -= Interface_NewMessage;
-                    foreach (var input in Inputs)
-                        input.ActionThrownAnException -= Input_ActionThrownAnException;
                 }
 
                 ((IDisposable)Interface).Dispose();

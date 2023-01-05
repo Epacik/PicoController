@@ -7,12 +7,16 @@
     <Grid RowDefinitions="30,*">
         <ListBox 
             Grid.Row="1"
-            SelectedItem="{Binding LastItem}"
+            SelectedItem="{Binding LastItem, Mode=OneWay}"
             VerticalAlignment="Stretch"
             x:Name="Output"
-            Items="{Binding Output}"
+            Items="{Binding Logs}"
             AutoScrollToSelectedItem="True">
-            
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Text, Mode=OneWay}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
         </ListBox>
     </Grid>
 </UserControl>

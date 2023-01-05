@@ -1,10 +1,12 @@
-﻿using System.Collections.Immutable;
+﻿using Serilog;
+using Serilog.Core;
+using System.Collections.Immutable;
 using System.Text;
 using Tiger.Clock;
 
 namespace PicoController.Core.Devices.Inputs;
 
-public abstract class InputBase
+public abstract class Input
 {
     private readonly int _deviceId;
     public byte Id { get; }
@@ -14,7 +16,7 @@ public abstract class InputBase
 
     public ImmutableArray<string> AvailableActions { get; }
 
-    protected InputBase(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, bool split = false)
+    protected Input(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, bool split = false)
     {
         _deviceId = deviceId;
         Id = inputId;
@@ -38,8 +40,7 @@ public abstract class InputBase
 
     protected async Task InvokeAction(int inputValue, string actionName)
     {
-        RemoveLater.Output.SendMessage(_deviceId, Id, actionName);
-        Console.WriteLine($" device: {_deviceId}, input: {Id}, action: {actionName}");
+        Log.Logger.Information("Device: {DeviceId}, input: {Id}, action: {ActionName}", _deviceId, Id, actionName);
 
         if (Actions.ContainsKey(actionName) && Actions[actionName] is not null)
         {
@@ -49,10 +50,11 @@ public abstract class InputBase
             }
             catch (Exception ex)
             {
-                ActionThrownAnException?.Invoke(this, new(_deviceId, Id, actionName, ex));
+                Log.Logger.Error("An action thrown an exception\n" +
+                    "Device: {DeviceId}, input: {Id}, action: {ActionName}\n" +
+                    "{Ex}", _deviceId, Id, actionName, ex);
             }
         }
     }
 
-    public event EventHandler<PluginActionExceptionEventArgs>? ActionThrownAnException;
 }

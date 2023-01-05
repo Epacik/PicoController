@@ -3,33 +3,32 @@ using Avalonia.Controls.Templates;
 using PicoController.Gui.ViewModels;
 using System;
 
-namespace PicoController.Gui
+namespace PicoController.Gui;
+
+public class ViewLocator : IDataTemplate
 {
-    public class ViewLocator : IDataTemplate
+    public IControl Build(object? data)
     {
-        public IControl Build(object? data)
+        if (data is null)
         {
-            if (data is null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
-            var name = data.GetType().FullName!.Replace("ViewModel", "View");
-            var type = Type.GetType(name);
-
-            if (type is not null)
-            {
-                return (Control)Activator.CreateInstance(type)!;
-            }
-            else
-            {
-                return new TextBlock { Text = "Not Found: " + name };
-            }
+            throw new ArgumentNullException(nameof(data));
         }
 
-        public bool Match(object? data)
+        var name = data.GetType().FullName!.Replace("ViewModel", "View");
+        var type = Type.GetType(name);
+
+        if (type is not null)
         {
-            return data is ViewModelBase;
+            return (Control)Activator.CreateInstance(type)!;
         }
+        else
+        {
+            return new TextBlock { Text = "Not Found: " + name };
+        }
+    }
+
+    public bool Match(object? data)
+    {
+        return data is ViewModelBase;
     }
 }

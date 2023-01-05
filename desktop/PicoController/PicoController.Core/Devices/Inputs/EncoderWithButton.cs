@@ -11,7 +11,7 @@ using Tiger.Clock;
 
 namespace PicoController.Core.Devices.Inputs
 {
-    internal class EncoderWithButton : InputBase
+    internal class EncoderWithButton : Input
     {
         private EncoderWithButton(
             int deviceId,

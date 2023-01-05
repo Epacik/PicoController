@@ -8,7 +8,7 @@ using Tiger.Clock;
 
 namespace PicoController.Core.Devices.Inputs;
 
-internal class Button : InputBase
+internal class Button : Input
 {
     private readonly int _maxDelayBetweenClicks;
     private readonly System.Timers.Timer _timer;

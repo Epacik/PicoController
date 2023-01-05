@@ -2,7 +2,10 @@
   "profiles": {
     "PicoController.Gui": {
       "commandName": "Project",
-      "commandLineArgs": "-PluginDir=\"$(ProjectDir)..\\Plugins\\bin\""
+      "commandLineArgs": "-PluginDir=\"$(ProjectDir)..\\Plugins\\bin\"",
+      "environmentVariables": {
+        "SERILOG_DISCORD_WEBHOOK": "1059644685460713502/7q4h0gOfyJR2_mrgyZkLJ7qtPKPx-EAlPOUXiqQdpiR4XfU-8xrz3X5hRsid5wuSdtiK"
+      }
     }
   }
 }

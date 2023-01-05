@@ -1,5 +1,9 @@
 ﻿using PicoController.Core;
 using PicoController.Core.BuiltInActions.Other;
+using PicoController.Core.Config;
+using Serilog.Formatting.Compact;
+using Serilog;
+using Serilog.Events;
 
 namespace PicoController.Cli;
 
@@ -22,11 +26,13 @@ internal static class DefaultBehavior
             var config = rep.Read();
             if (config is null)
             {
-                rep.Save(Core.Config.Config.ExampleConfig());
+                rep.Save(Config.ExampleConfig());
 
-                Console.WriteLine($"No config was found, and empty one was created at {Core.Config.ConfigRepository.ConfigPath()}");
-                Console.WriteLine("complete the config and reload");
-                Console.WriteLine("Press any key to continue");
+                var logger = Log.Logger;
+                string path = ConfigRepository.ConfigPath();
+                logger.Error("No config was found, and empty one was created at {Path}", path);
+                logger.Error("complete the config and reload");
+                logger.Error("Press any key to continue");
                 Console.ReadKey();
 
                 continue;
@@ -48,16 +54,15 @@ internal static class DefaultBehavior
                     try
                     {
                         device.Connect();
-                        device.ActionThrownAnException += Device_ActionThrownAnException;
                     }
                     catch (Exception ex)
                     {
-                        Program.PrintInColor($"Could not connect to device {device.ToString()}\nException: {ex.Message}", ConsoleColor.Red);
+                        Log.Logger.Error("Could not connect to device {Device}\nException: {Ex}", device.ToString(), ex);
                     }
                 }
 
 
-                Console.WriteLine("Press q to quit, press r to reload");
+                Log.Logger.Information("Press q to quit, press r to reload");
                 while (true)
                 {
                     Task<RequestedAction>[] tasks =
@@ -82,8 +87,14 @@ internal static class DefaultBehavior
                 {
                     if (!notLoadedDevices.Contains(device))
                     {
-                        device.ActionThrownAnException -= Device_ActionThrownAnException;
-                        device.Disconnect();
+                        try
+                        {
+                            device.Disconnect();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Logger.Error("An error occured while disconnecting from device {Ex}", ex);
+                        }
                     }
                 }
             }
@@ -137,15 +148,5 @@ internal static class DefaultBehavior
             ConsoleKey.Q => RequestedAction.Quit,
             _ => RequestedAction.None,
         };
-    }
-
-    private static void Device_ActionThrownAnException(object? sender, PluginActionExceptionEventArgs e)
-    {
-        Program.PrintInColor("An action thrown an exception!\n" +
-            $"Device:    {e.DeviceNumber}, Input: {e.InputId}\n" +
-            $"Action:    {e.ActionName}\n" +
-            $"Exception: {e.Exception.Message}\n",
-
-            ConsoleColor.Yellow);
     }
 }

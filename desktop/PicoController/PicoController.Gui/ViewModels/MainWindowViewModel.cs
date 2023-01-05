@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using PicoController.Core.BuiltInActions.Other;
 using Microsoft.Win32;
 using PicoController.Gui.ViewModels.Devices;
+using Avalonia.Logging;
+using Serilog;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -141,11 +143,6 @@ public class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(RunEnabled));
     }
 
-    private void Device_ActionThrownAnException(object? sender, Core.PluginActionExceptionEventArgs e)
-    {
-        Output.ActionThrownAnException(e);
-    }
-
     private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
         if (!OperatingSystem.IsWindows())
@@ -224,11 +221,10 @@ public class MainWindowViewModel : ViewModelBase
             try
             {
                 device.Connect();
-                device.ActionThrownAnException += Device_ActionThrownAnException;
             }
             catch (Exception ex)
             {
-                Output.OtherException(ex);
+                Log.Logger.Error("An exception occured while trying to connect to a device {Ex}", ex);
             }
         }
         _runningDevices = runningDevices;
@@ -242,8 +238,14 @@ public class MainWindowViewModel : ViewModelBase
         {
             foreach (var device in _runningDevices)
             {
-                device.ActionThrownAnException -= Device_ActionThrownAnException;
-                device.Disconnect();
+                try
+                {
+                    device.Disconnect();
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.Error("An exception occured while trying to disconnect from a device {Ex}", ex);
+                }
             }
         }
         finally

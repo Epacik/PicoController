@@ -1,7 +1,10 @@
 ﻿using Avalonia.Collections;
 using PicoController.Core;
+using PicoController.Core.Extensions;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,62 +15,28 @@ public class DevicesOutputViewModel : ViewModelBase
 {
     public DevicesOutputViewModel()
     {
-        Core.RemoveLater.Output.MessageSent += Output_MessageSent;
+        Logs = Locator.Current.GetRequiredService<LimitedAvaloniaList<LogEventOutput>>("LogList");
+        this.RaisePropertyChanged(nameof(Logs));
+        Logs.CollectionChanged += Logs_CollectionChanged;
     }
 
-    private void Output_MessageSent(object? sender, Core.RemoveLater.OutputMessageEventArgs e)
+    private void Logs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        AddToOutput($"Device: {e.DeviceId}, Input: {e.InputId}, Action: {e.ActionName}");
+        this.RaisePropertyChanged(nameof(LastItem));
     }
 
-    internal void ActionThrownAnException(PluginActionExceptionEventArgs e)
+    public LogEventOutput? LastItem => Logs.LastOrDefault();
+    public LimitedAvaloniaList<LogEventOutput> Logs { get; }
+}
+
+public class LogEventOutput
+{
+    public LogEventOutput(LogEvent logEvent)
     {
-        AddToOutput("An action thrown an exception!\n" +
-        $"Device:    {e.DeviceNumber}, Input: {e.InputId}\n" +
-        $"Action:    {e.ActionName}\n" +
-        $"Exception: {e.Exception.Message}\n");
+        LogEvent = logEvent;
     }
 
-    internal void OtherException(Exception ex)
-    {
-        AddToOutput($"Exception was thrown: \n{ex}");
-    }
-
-    object locker = new();
-
-    private void AddToOutput(string text)
-    {
-        lock(locker)
-        {
-            Output.Add(new(text));
-            LastItem = Output.LastOrDefault();
-            this.RaisePropertyChanged(nameof(Output));
-        }
-    }
-
-    private AvaloniaList<OutputItem> _output = new();
-    public AvaloniaList<OutputItem> Output
-    {
-        get => _output;
-        set => this.RaiseAndSetIfChanged(ref _output, value);
-    }
-
-    private OutputItem? _lastItem;
-    public OutputItem? LastItem
-    {
-        get => _lastItem;
-        set => this.RaiseAndSetIfChanged(ref _lastItem, value);
-    }
-
-    public class OutputItem
-    {
-        public OutputItem(string text)
-        {
-            Text = text;
-        }
-
-        public string Text { get; }
-
-        public override string ToString() => Text;
-    }
+    public LogEvent LogEvent { get; }
+    private string? _text;
+    public string Text => _text ??= LogEvent.RenderMessage();
 }

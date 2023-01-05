@@ -9,7 +9,7 @@ using Tiger.Clock;
 
 namespace PicoController.Core.Devices.Inputs
 {
-    internal class Encoder : InputBase
+    internal class Encoder : Input
     {
         
         private Encoder(

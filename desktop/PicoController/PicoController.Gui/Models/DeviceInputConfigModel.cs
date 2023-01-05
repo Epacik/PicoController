@@ -107,6 +107,6 @@ public class DeviceInputConfigModel : ReactiveObject
         this.RaisePropertyChanged(nameof(Actions));
     }
 
-    internal IEnumerable<string> GetPossibleActions() => Input.GetPossibleActions(Type, Split);
-    internal IEnumerable<string> GetAllPossibleActions() => Input.GetAllPossibleActions(Type);
+    internal IEnumerable<string> GetPossibleActions() => Core.Config.Input.GetPossibleActions(Type, Split);
+    internal IEnumerable<string> GetAllPossibleActions() => Core.Config.Input.GetAllPossibleActions(Type);
 }

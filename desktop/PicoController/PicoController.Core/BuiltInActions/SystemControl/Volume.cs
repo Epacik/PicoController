@@ -2,6 +2,8 @@
 
 namespace PicoController.Core.BuiltInActions.SystemControl;
 
+using IronPython.Compiler.Ast;
+
 #if OS_WINDOWS
 #pragma warning disable CA1416 // Walidacja zgodności z platformą
 
@@ -11,6 +13,7 @@ using OneOf;
 using PicoController.Plugin;
 using PicoController.Plugin.DisplayInfos;
 using SecretNest.TaskSchedulers;
+using Serilog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -57,8 +60,9 @@ internal class Volume : IPluginAction, IDisposable
 
                 return _device;
             }
-            catch
+            catch (Exception ex) 
             {
+                Log.Logger.Error("An error occured while obaining a sound device {Ex}", ex);
                 _deviceEnumerator?.Dispose();
                 _deviceEnumerator = new MMDeviceEnumerator();
                 
