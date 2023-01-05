@@ -42,7 +42,7 @@ public abstract class Input
     {
         Log.Logger.Information("Device: {DeviceId}, input: {Id}, action: {ActionName}", _deviceId, Id, actionName);
 
-        if (Actions.ContainsKey(actionName) && Actions[actionName] is not null)
+        if (Actions.TryGetValue(actionName, out Func<int, Task>? value) && value is not null)
         {
             try
             {
