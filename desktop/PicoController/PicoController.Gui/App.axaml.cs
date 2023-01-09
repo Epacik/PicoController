@@ -4,8 +4,10 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using PicoController.Core;
 using PicoController.Core.Config;
+using PicoController.Core.Extensions;
 using PicoController.Gui.Helpers;
 using PicoController.Gui.Plugin;
+using PicoController.Gui.Themes;
 using PicoController.Gui.ViewModels;
 using PicoController.Gui.ViewModels.Devices;
 using PicoController.Gui.Views;
@@ -24,17 +26,6 @@ public class App : Application
 {
     public override void Initialize()
     {
-        var limitedList = new LimitedAvaloniaList<LogEventOutput>(500);
-        var logger = CreateLogger(limitedList);
-        Log.Logger = logger;
-
-        Locator.CurrentMutable.RegisterLazySingleton<Serilog.ILogger>(() => logger);
-        Locator.CurrentMutable.RegisterLazySingleton<LimitedAvaloniaList<LogEventOutput>>(() => limitedList, "LogList");
-        Locator.CurrentMutable.RegisterLazySingleton<IRepositoryHelper>(() => new RepositoryHelper());
-        Locator.CurrentMutable.RegisterLazySingleton<Themes.ThemeManager>(Themes.ThemeManager.CreateManager);
-        Locator.CurrentMutable.RegisterLazySingleton<IDisplayInfo>(() => new DisplayInfo());
-        Locator.CurrentMutable.RegisterLazySingleton<IConfigRepository>(() => new ConfigRepository());
-
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -71,45 +62,14 @@ public class App : Application
     {
         if (DesktopApplicationLifetime is not null)
         {
-            DesktopApplicationLifetime.MainWindow = new MainWindow
+            DesktopApplicationLifetime.MainWindow = new MainWindow(Resolver.GetRequiredService<ThemeManager>())
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = Resolver.GetRequiredService<IMainWindowViewModel>(),
             };
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static Serilog.ILogger CreateLogger(LimitedAvaloniaList<LogEventOutput> limitedList)
-    {
-        var cfgPath = ConfigRepository.ConfigDirectory();
-        var jsonFormatter = new CompactJsonFormatter();
-        var config = new LoggerConfiguration()
-            .WriteTo.Async(
-                x => x.File(
-                    Path.Combine(cfgPath, "Logs", "Text", "log-.log"),
-                    LogEventLevel.Information,
-                    rollingInterval: RollingInterval.Hour))
-            .WriteTo.Async(
-                x => x.File(
-                    jsonFormatter,
-                    Path.Combine(cfgPath, "Logs", "JSON", "log-.json"),
-                    LogEventLevel.Information,
-                    rollingInterval: RollingInterval.Hour))
-            .WriteTo.Async(
-                x => x.EventLog("PicoController GUI", restrictedToMinimumLevel: LogEventLevel.Warning))
-            .WriteTo.Async(
-                x => x.Observers(
-                    ev => ev.Do(e => limitedList.Add(new(e)))
-                    .Subscribe()));
-
-        if (Environment.GetEnvironmentVariable("SERILOG_DISCORD_WEBHOOK") is string x)
-        {
-            var (idStr, token) = x.Split('/');
-            if (ulong.TryParse(idStr, out ulong id))
-                config.WriteTo.Async(x => x.Discord(id, token, restrictedToMinimumLevel: LogEventLevel.Error));
-        }
-
-        return config.CreateLogger();
-    }
+    static IReadonlyDependencyResolver Resolver => Locator.Current;
 }

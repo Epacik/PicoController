@@ -13,9 +13,9 @@ namespace PicoController.Gui.ViewModels.Devices;
 
 public class DevicesOutputViewModel : ViewModelBase
 {
-    public DevicesOutputViewModel()
+    public DevicesOutputViewModel(LimitedAvaloniaList<LogEventOutput> logsList)
     {
-        Logs = Locator.Current.GetRequiredService<LimitedAvaloniaList<LogEventOutput>>("LogList");
+        Logs = logsList;
         this.RaisePropertyChanged(nameof(Logs));
         Logs.CollectionChanged += Logs_CollectionChanged;
     }

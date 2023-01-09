@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Avalonia.VisualTree;
 using FluentAvalonia.UI.Controls;
 using Mapster;
+using PicoController.Core;
 using PicoController.Core.Config;
 using PicoController.Core.Extensions;
 using PicoController.Gui.Helpers;
@@ -16,13 +17,15 @@ namespace PicoController.Gui.ViewModels.Devices;
 
 public class DeviceViewModel : ViewModelBase
 {
-    public DeviceViewModel() : this(Config.ExampleConfig(1).Devices[0].Adapt<DeviceConfigModel>()) { }
+    public DeviceViewModel(IRepositoryHelper repositoryHelper, IPluginManager pluginManager) 
+        : this(Config.ExampleConfig(1).Devices[0].Adapt<DeviceConfigModel>(), repositoryHelper, pluginManager) { }
 
-    public DeviceViewModel(DeviceConfigModel device)
+    public DeviceViewModel(DeviceConfigModel device, IRepositoryHelper repositoryHelper, IPluginManager pluginManager)
     {
         Device = device;
         Inputs = device.Inputs!;
-        _repositoryHelper = Locator.Current.GetRequiredService<IRepositoryHelper>();
+        _repositoryHelper = repositoryHelper;
+        _pluginManager = pluginManager;
         _repositoryHelper.PropertyChanged += RepositoryHelper_PropertyChanged;
         SelectedInputChangedCommand = ReactiveCommand.Create<SelectionChangedEventArgs>(SelectedInputChanged);
         SwitchChangedCommand = ReactiveCommand.Create<DeviceInputConfigModel>(SwitchChanged);
@@ -44,6 +47,7 @@ public class DeviceViewModel : ViewModelBase
 
     public DeviceConfigModel Device { get; }
     private readonly IRepositoryHelper _repositoryHelper;
+    private readonly IPluginManager _pluginManager;
 
     //public Input[] Inputs => Device.Inputs;
 
@@ -103,7 +107,7 @@ public class DeviceViewModel : ViewModelBase
         var handler = (ReactiveKeyValuePair<string, DeviceInputActionConfigModel>)args.AddedItems[0]!;
        
         var input = (args.Source as ListBox)?.FindAncestorOfType<ListBoxItem>(false)?.Content as DeviceInputConfigModel;
-        var content = new HandlerEditorViewModel(handler);
+        var content = new HandlerEditorViewModel(handler, _pluginManager);
 
         var dialog = new ContentDialog
         {

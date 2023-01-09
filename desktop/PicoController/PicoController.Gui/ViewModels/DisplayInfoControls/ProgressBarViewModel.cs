@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace PicoController.Gui.ViewModels.DisplayInfoControls;
 
-public class ProgressBarViewModel : ViewModelBase
+public class ProgressBarViewModel : DisplayInfoViewModel
 {
     public ProgressBarViewModel(PicoController.Plugin.DisplayInfos.ProgressBar progress)
+        :base(progress)
     {
         (Min, Max, Value, Indeterminate) = progress;
     }

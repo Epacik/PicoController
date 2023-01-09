@@ -4,25 +4,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignHeight="150"
         x:Class="PicoController.Gui.Views.DisplayInfoWindow"
-        Title="DisplayInfoWindow"
+        Title="Display Info"
         Topmost="True"
         ShowInTaskbar="False"
-        SizeToContent="Height"
-        SystemDecorations="BorderOnly"
+        WindowState="Maximized"
+        SystemDecorations="None"
+        Background="{x:Null}"
+        TransparencyLevelHint="Transparent">
+    <Border
         Width="300"
         Padding="15"
+        Margin="20,10,20,25"
         CornerRadius="5"
-        TransparencyLevelHint="Transparent">
-    <ItemsControl Items="{Binding Controls}">
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <StackPanel />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <ContentControl Content="{Binding .}"/>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+        Background="{DynamicResource SolidBackgroundFillColorBase}"
+        VerticalAlignment="Bottom"
+        HorizontalAlignment="Center"
+        BoxShadow="0 5 25 2 #66000000"
+        x:Name="WindowBorder">
+        <ItemsControl
+            Items="{Binding Controls}" >
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Border>
 </Window>

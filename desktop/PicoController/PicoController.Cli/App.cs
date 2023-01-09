@@ -4,32 +4,39 @@ using PicoController.Core.Config;
 using Serilog.Formatting.Compact;
 using Serilog;
 using Serilog.Events;
+using System.CommandLine.Invocation;
+using PicoController.Core.Devices;
 
 namespace PicoController.Cli;
 
-internal static class DefaultBehavior
+internal static class App
 {
-    internal static void Run()
+    internal static async Task Run(
+        DirectoryInfo? pluginDir,
+        IPluginManager pluginManager,
+        IDeviceManager deviceManager,
+        IConfigRepository configRepository,
+        ILocationProvider locationProvider,
+        Serilog.ILogger logger)
     {
         var run = true;
 
         PicoControllerActions.ActionRequested += PicoControllerActions_ActionRequested;
-#if OS_WINDOWS
-#pragma warning disable CA1416 // Platform compatibility validation
-        Microsoft.Win32.SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
-#pragma warning restore CA1416 // Platform compatibility validation
-#endif
+        if (OperatingSystem.IsWindows())
+        {
+            Microsoft.Win32.SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+        }
 
+        var pluginsPath = pluginDir?.FullName;
         while (run)
         {
-            var rep = new Core.Config.ConfigRepository();
+            var rep = configRepository;
             var config = rep.Read();
             if (config is null)
             {
-                rep.Save(Config.ExampleConfig());
-
-                var logger = Log.Logger;
-                string path = ConfigRepository.ConfigPath();
+                await rep.SaveAsync(Config.ExampleConfig());
+;
+                string path = locationProvider.ConfigPath;
                 logger.Error("No config was found, and empty one was created at {Path}", path);
                 logger.Error("complete the config and reload");
                 logger.Error("Press any key to continue");
@@ -38,13 +45,15 @@ internal static class DefaultBehavior
                 continue;
             }
 
-            Plugins.UnloadPlugins();
-            Plugins.LoadPlugins();
+            pluginManager.UnloadPlugins();
+            pluginManager.LoadPlugins(pluginsPath);
 
             _requestedAction = RequestedAction.None;
             _resumeFromSleep = false;
 
-            var devices = Core.Devices.Device.FromConfig(config);
+            var devices = await deviceManager.LoadDevicesAsync();
+            if (devices is null)
+                throw new InvalidOperationException("could not load devices");
             var notLoadedDevices = new List<Core.Devices.Device>();
             try
             {
@@ -72,9 +81,9 @@ internal static class DefaultBehavior
                         GetAction(),
                     };
 
-                    var finished = Task.WaitAny(tasks);
+                    var finished = await Task.WhenAny(tasks);
 
-                    var result = tasks[finished].GetAwaiter().GetResult();
+                    var result = await finished;
 
                     if (result == RequestedAction.Quit)
                         run = false;

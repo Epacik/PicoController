@@ -22,11 +22,11 @@ public class Serial : InterfaceBase
 
     public override void Connect()
     {
-        _port.DataReceived += _port_DataReceived;
+        _port.DataReceived += Port_DataReceived;
         _port.Open();
     }
 
-    private void _port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
         
         var data = _port.ReadExisting()?.Trim() ?? "";
@@ -49,7 +49,7 @@ public class Serial : InterfaceBase
         {
             if (disposing)
             {
-                _port.DataReceived -= _port_DataReceived;
+                _port.DataReceived -= Port_DataReceived;
                 _port.Dispose();
             }
 

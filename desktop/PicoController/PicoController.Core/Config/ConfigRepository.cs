@@ -1,15 +1,28 @@
-﻿using System;
+﻿using Serilog;
+using Serilog.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using PicoController.Core.Extensions;
 
 namespace PicoController.Core.Config;
 
 public class ConfigRepository : IConfigRepository
 {
+    private readonly ILocationProvider _location;
+    private readonly IFileSystem _filesystem;
+    private readonly ILogger? _logger;
+
+    public ConfigRepository(ILocationProvider location, IFileSystem filesystem, Serilog.ILogger? logger)
+    {
+        _location = location;
+        _filesystem = filesystem;
+        _logger = logger;
+    }
     public event EventHandler<ConfigChangedEventArgs>? Changed;
     void OnChanged(Config config)
     {
@@ -18,22 +31,28 @@ public class ConfigRepository : IConfigRepository
 
     private object lockObject = new object();
     private (Config config, DateTime readTime)? _configCache;
-
+    
     public Config? Read()
     {
+        if (_logger.ExistsAndIsEnabled(LogEventLevel.Debug))
+            _logger?.Debug("Checking configuration cache");
+
         lock (lockObject)
         {
             if (_configCache is (Config, DateTime) cc && cc.readTime >= DateTime.Now.AddSeconds(-5))
             {
+                if (_logger.ExistsAndIsEnabled(LogEventLevel.Debug))
+                    _logger?.Debug("Cache exists and isn't stale, returning");
+
                 return cc.config;
             }
         }
 
         if (!Exists())
             return null;
-        var configPath = ConfigPath();
+        var configPath = _location.ConfigPath;
 
-        var json = File.ReadAllText(configPath) ?? "";
+        var json = _filesystem.FileReadAllText(configPath) ?? "";
         var options = new JsonSerializerOptions()
         {
             ReadCommentHandling = JsonCommentHandling.Skip,
@@ -64,9 +83,9 @@ public class ConfigRepository : IConfigRepository
 
         if (!Exists())
                 return null;
-        var configPath = ConfigPath();
+        var configPath = _location.ConfigPath;
 
-        var json = await File.ReadAllTextAsync(configPath) ?? "";
+        var json = await _filesystem.FileReadAllTextAsync(configPath) ?? "";
         var options = new JsonSerializerOptions()
         {
             ReadCommentHandling = JsonCommentHandling.Skip,
@@ -88,7 +107,7 @@ public class ConfigRepository : IConfigRepository
 
     public async Task SaveAsync(Config config, CancellationToken? token = null)
     {
-        var configPath = ConfigPath();
+        var configPath = _location.ConfigPath;
         var options = new JsonSerializerOptions()
         {
             ReadCommentHandling = JsonCommentHandling.Skip,
@@ -101,9 +120,9 @@ public class ConfigRepository : IConfigRepository
         };
 
         var json = JsonSerializer.Serialize(config, options);
-        Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
+        _filesystem.CreateDirectory(Path.GetDirectoryName(configPath)!);
 
-        await File.WriteAllTextAsync(configPath, json);
+        await _filesystem.WriteAllTextAsync(configPath, json);
 
         lock (lockObject)
         {
@@ -114,7 +133,7 @@ public class ConfigRepository : IConfigRepository
 
     public void Save(Config config)
     {
-        var configPath = ConfigPath();
+        var configPath = _location.ConfigPath;
         var options = new JsonSerializerOptions()
         {
             ReadCommentHandling = JsonCommentHandling.Skip,
@@ -126,8 +145,8 @@ public class ConfigRepository : IConfigRepository
             }
         };
         var json = JsonSerializer.Serialize(config, options);
-        Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
-        File.WriteAllText(configPath, json);
+        _filesystem.CreateDirectory(Path.GetDirectoryName(configPath)!);
+        _filesystem.FileWriteAllText(configPath, json);
 
         lock (lockObject)
         {
@@ -136,16 +155,5 @@ public class ConfigRepository : IConfigRepository
         OnChanged(config);
     }
 
-    public static string ConfigDirectory()
-    {
-        var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        return Path.Combine(userFolder, ".picoController");
-    }
-    public static string ConfigPath()
-    {
-        var configPath = Path.Combine(ConfigDirectory(), "config.json");
-        return configPath;
-    }
-
-    public bool Exists() => File.Exists(ConfigPath());
+    public bool Exists() => _filesystem.FileExists(_location.ConfigPath);
 }

@@ -14,8 +14,8 @@ namespace PicoController.Gui.Plugin;
 
 internal class DisplayInfo : IDisplayInfo
 {
-    private static readonly DisplayInfoWindowViewModel _viewModel = new DisplayInfoWindowViewModel();
-    private static readonly DisplayInfoWindow _window = new DisplayInfoWindow(_viewModel);
+    private static readonly DisplayInfoWindowViewModel _viewModel = new();
+    private static readonly DisplayInfoWindow _window = new(_viewModel);
     
     public void Display(IEnumerable<DisplayInformations> infos)
     {

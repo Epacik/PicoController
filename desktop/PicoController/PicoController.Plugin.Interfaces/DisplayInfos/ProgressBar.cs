@@ -36,4 +36,27 @@ public class ProgressBar
         value = Value;
         indeterminate = Indeterminate;
     }
+
+    public static bool operator ==(ProgressBar one, ProgressBar other)
+        => one.Indeterminate == other.Indeterminate
+        && one.Min           == other.Min
+        && one.Max           == other.Max
+        && one.Value         == other.Value;
+
+    public static bool operator !=(ProgressBar one, ProgressBar other)
+        => one.Indeterminate != other.Indeterminate
+        || one.Min != other.Min
+        || one.Max != other.Max
+        || one.Value != other.Value;
+
+    public override bool Equals(object? obj)
+        => obj is ProgressBar bar
+        && Min.Equals(bar.Min)
+        && Max.Equals(bar.Max)
+        && Value.Equals(bar.Value)
+        && Indeterminate.Equals(bar.Indeterminate);
+
+
+    public override int GetHashCode() 
+        => HashCode.Combine(Indeterminate, Min, Max, Value);
 }

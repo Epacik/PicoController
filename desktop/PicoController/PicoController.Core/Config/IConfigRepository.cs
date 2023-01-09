@@ -13,6 +13,7 @@ namespace PicoController.Core.Config
         Config? Read();
         ValueTask<Config?> ReadAsync(CancellationToken? token = null);
         bool Exists();
+
         event EventHandler<ConfigChangedEventArgs>? Changed;
     }
 }

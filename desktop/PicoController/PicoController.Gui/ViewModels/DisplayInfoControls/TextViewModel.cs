@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace PicoController.Gui.ViewModels.DisplayInfoControls;
 
-public class TextViewModel : ViewModelBase
+public class TextViewModel : DisplayInfoViewModel
 {
     public TextViewModel(Text text)
+        :base(text)
     {
         (Text, FontSize, FontWeight) = text;
     }

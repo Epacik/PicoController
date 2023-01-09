@@ -19,21 +19,21 @@ internal static class Handlers
         //var helpContext = new HelpContext(helpBuilder)
     }
 
-    internal static void ShowActions(object handler)
+    internal static void ShowActions(object h, IPluginManager pluginManager)
     {
-        if(!Plugins.AreLoaded)
-            Plugins.LoadPlugins();
-        var handlers = Plugins.AllAvailableActions();
-        Plugins.UnloadPlugins();
+        if(!pluginManager.AreLoaded)
+            pluginManager.LoadPlugins();
+        var handlers = pluginManager.AllAvailableActions();
+        pluginManager.UnloadPlugins();
         Console.WriteLine("All available handlers:");
         Console.WriteLine(string.Join("\n", handlers));
     }
 
-    internal static void Handler(string handler)
+    internal static void Handler(string handler, IPluginManager pluginManager)
     {
-        if (!Plugins.AreLoaded)
-            Plugins.LoadPlugins();
-        var info = Plugins.GetHandlerInfo(handler);
+        if (!pluginManager.AreLoaded)
+            pluginManager.LoadPlugins();
+        var info = pluginManager.GetHandlerInfo(handler);
         if (info?.ValidArguments is object) {
             Console.WriteLine(
                 "Handler: {0} - {1}\n\nValid values:\n{2}",

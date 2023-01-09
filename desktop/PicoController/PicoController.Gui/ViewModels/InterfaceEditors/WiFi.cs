@@ -1,4 +1,5 @@
 ﻿using Avalonia.Collections;
+using PicoController.Gui.Extensions.InterfaceEditors;
 using PicoController.Gui.Models;
 using System;
 using System.Collections.Generic;
@@ -12,14 +13,12 @@ namespace PicoController.Gui.ViewModels.InterfaceEditors;
 
 internal class WiFi : InterfaceEditorViewModel
 {
-    public WiFi(AvaloniaList<ReactiveKeyValuePair<string, JsonElement>>? data)
+    public WiFi(IEnumerable<ReactiveKeyValuePair<string, JsonElement>>? settings)
     {
-        if (data is null)
+        if (settings is null)
             return;
 
-        var element = data.FirstOrDefault(x => x.Key == "ip")?.Value;
-        if (element?.ValueKind == JsonValueKind.String)
-            IP = element?.GetString();
+        IP = settings.GetString("ip");
     }
 
     public override Dictionary<string, JsonElement> GetInterfaceSettings() =>

@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace PicoController.Core.Config;
 
-public class Input : ICloneable<Input>
+public class Input : IClonable<Input>
 {
     public Input(byte id, InputType type, Dictionary<string, InputAction> actions)
         : this(id, type, actions, false) { }

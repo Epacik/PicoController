@@ -1,4 +1,6 @@
-﻿using PicoController.Core.Config;
+﻿using Avalonia.Collections;
+using PicoController.Core;
+using PicoController.Core.Config;
 using PicoController.Gui.Models;
 using System;
 using System.Collections.Generic;
@@ -11,8 +13,9 @@ namespace PicoController.Gui.ViewModels;
 
 public class HandlerEditorViewModel : ViewModelBase
 {
-    public HandlerEditorViewModel(ReactiveKeyValuePair<string, DeviceInputActionConfigModel> handler)
+    public HandlerEditorViewModel(ReactiveKeyValuePair<string, DeviceInputActionConfigModel> handler, IPluginManager pluginManager)
     {
+        _pluginManager = pluginManager;
         Handler            = handler;
         HandlerName        = handler.Key;
         HandlerId          = handler.Value!.Handler;
@@ -61,5 +64,20 @@ public class HandlerEditorViewModel : ViewModelBase
 
     public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> GetHandler() =>
         new(HandlerName ?? "",new(HandlerId ?? "", HandlerData ?? "", OverrideValue ? InputValueOverride : null));
+
+    private readonly IPluginManager _pluginManager;
+
+    private AvaloniaList<string> _handlers = new();
+    public AvaloniaList<string> Handlers
+    {
+        get => _handlers;
+        set => this.RaiseAndSetIfChanged(ref _handlers, value);
+    }
+
+    public void Reload()
+    {
+        Handlers.Clear();
+        Handlers.AddRange(_pluginManager.AllAvailableActions());
+    }
 
 }

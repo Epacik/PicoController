@@ -19,10 +19,13 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+    }
+    public MainWindow(Themes.ThemeManager themeManager) : this()
+    {
 
         this.PropertyChanged += MainWindow_PropertyChanged;
 
-        _themeManager = Locator.Current.GetService<Themes.ThemeManager>();
+        _themeManager = themeManager;
         if (OperatingSystem.IsWindows())
         {
             var build = Environment.OSVersion.Version.Build;
@@ -40,8 +43,6 @@ public partial class MainWindow : Window
                 > 10000 => "mica", //"acrylic",
                 _ => "",
             });
-
-            
         }
     }
 

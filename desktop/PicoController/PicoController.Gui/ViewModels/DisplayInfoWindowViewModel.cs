@@ -1,10 +1,12 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Threading;
 using OneOf;
+using PicoController.Gui.Extensions.DisplayInfo;
 using PicoController.Gui.ViewModels.DisplayInfoControls;
 using PicoController.Plugin.DisplayInfos;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -33,16 +35,26 @@ public class DisplayInfoWindowViewModel : ViewModelBase
 
     internal void Update(IEnumerable<DisplayInformations> infos)
     {
-        Controls.Clear();
+        var infoArray = infos.ToImmutableArray();
+        if(infoArray.Length < Controls.Count)
+        {
+            Controls.RemoveRange(infoArray.Length - 1, infoArray.Length - Controls.Count);
+        }
 
-        Controls.AddRange(
-            infos.Select(
-                x => x.Match<ViewModelBase>(
-                    text => new TextViewModel(text),
-                    progress => new ProgressBarViewModel(progress)
-                    )
-                )
-            );
+        for (int i = 0; i < Math.Max(Controls.Count, infos.Count()); i++)
+        {
+            if (infoArray.Length > i && Controls.Count > i && !infoArray[i].Value.Equals(Controls[i].Item))
+            {
+                Controls[i] = infoArray[i].ConvertToViewModel();
+            }
+            else if (infoArray.Length > i && Controls.Count < infoArray.Length)
+            {
+                Controls.Add(infoArray[i].ConvertToViewModel());
+            }
+
+        }
+
+        this.RaisePropertyChanged(nameof(Controls));
 
         Show = true;
         _timer.Stop();
@@ -58,8 +70,8 @@ public class DisplayInfoWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _show, value);
     }
 
-    private AvaloniaList<ViewModelBase> _controls = new();
-    public AvaloniaList<ViewModelBase> Controls
+    private AvaloniaList<DisplayInfoViewModel> _controls = new();
+    public AvaloniaList<DisplayInfoViewModel> Controls
     {
         get => _controls;
         set => this.RaiseAndSetIfChanged(ref _controls, value);

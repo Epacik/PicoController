@@ -15,7 +15,7 @@ namespace PicoController.Core.Devices
     public class Device : IDisposable
     {
 
-        public readonly Communication.InterfaceBase Interface;
+        public readonly InterfaceBase Interface;
         public readonly List<Inputs.Input> Inputs;
         private bool _isDisposed;
 
@@ -25,7 +25,6 @@ namespace PicoController.Core.Devices
             Inputs = inputs;
             Interface.NewMessage += Interface_NewMessage;
         }
-
 
         private async void Interface_NewMessage(object? sender, InterfaceMessageEventArgs e)
         {
@@ -38,46 +37,6 @@ namespace PicoController.Core.Devices
 
         public void Connect() => Interface.Connect();
         public void Disconnect() => Interface.Disconnect();
-
-        public static List<Device> FromConfig(Config.Config config)
-        {
-            var devices = config.Devices;
-            var result = new List<Device>();
-            int i = 0;
-            foreach (var dev in devices)
-            {
-                var deviceId = i;
-                InterfaceBase ifc = dev.Interface.Type switch
-                {
-                    Config.InterfaceType.COM => new Serial(dev.Interface.Data),
-                    Config.InterfaceType.WiFi => new WiFi(dev.Interface.Data),
-                    _ => throw new InvalidDataException(),
-                };
-
-                var inputs = new List<Input>();
-
-                foreach(var inp in dev.Inputs)
-                {
-                    var actions = new Dictionary<string, Func<int, Task>?>();
-
-                    foreach(var a in inp.Actions)
-                    {
-                        actions[a.Key] = Plugins.LookupActions(a.Value);
-                    }
-
-                    inputs.Add(inp.Type switch
-                    {
-                        InputType.Button            => new Button(deviceId, inp.Id, actions, config.MaxDelayBetweenClicks),
-                        InputType.Encoder           => Encoder.Create(deviceId, inp.Id, actions, inp.Split == true),
-                        InputType.EncoderWithButton => EncoderWithButton.Create(deviceId, inp.Id,  actions, config.MaxDelayBetweenClicks, inp.Split == true),
-                        _                           => throw new InvalidDataException(),
-                    });
-                }
-                result.Add(new Device(ifc, inputs));
-                i++;
-            }
-            return result;
-        }
 
         #region IDisposable
         protected virtual void Dispose(bool disposing)

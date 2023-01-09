@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Gui.Themes
 {
-    internal abstract class ThemeManager : IDisposable
+    public abstract class ThemeManager : IDisposable
     {
         public static ThemeManager CreateManager()
         {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core.Config
 {
-    public class InputAction : ICloneable<InputAction>
+    public class InputAction : IClonable<InputAction>
     {
         [JsonConstructor]
         public InputAction()

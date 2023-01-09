@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core.Config
 {
-    public class Config : ICloneable<Config>
+    public class Config : IClonable<Config>
     {
         public Config() { }
 

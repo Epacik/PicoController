@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Gui.Helpers;
 
-internal interface IRepositoryHelper : IReactiveNotifyPropertyChanged<IReactiveObject>, IHandleObservableErrors, IReactiveObject, INotifyPropertyChanged, INotifyPropertyChanging, IEnableLogger
+public interface IRepositoryHelper : IReactiveNotifyPropertyChanged<IReactiveObject>, IHandleObservableErrors, IReactiveObject, INotifyPropertyChanged, INotifyPropertyChanging, IEnableLogger
 {
     void RequestReload();
     event EventHandler? ReloadRequested;

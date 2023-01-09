@@ -8,9 +8,9 @@ namespace PicoController.Gui.Helpers;
 
 internal class RepositoryHelper : ReactiveObject, IRepositoryHelper
 {
-    public RepositoryHelper()
+    public RepositoryHelper(IConfigRepository configRepository)
     {
-        Repository = Locator.Current.GetRequiredService<IConfigRepository>();
+        Repository = configRepository;
         Repository.Changed += Repository_Changed;
         SavedConfigCopy = Repository.Read();
         WorkingConfigCopy = SavedConfigCopy?.Clone();

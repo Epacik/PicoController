@@ -5,30 +5,41 @@ using PicoController.Gui.Helpers;
 using PicoController.Core.Extensions;
 using PicoController.Gui.Models;
 using Mapster;
+using PicoController.Core;
+using System.Linq;
 
 namespace PicoController.Gui.ViewModels.Devices;
 
 public class DeviceListViewModel : ViewModelBase
 {
-    public DeviceListViewModel()
+    public DeviceListViewModel(IRepositoryHelper repositoryHelper, IPluginManager pluginManager)
     {
+        _repositoryHelper = repositoryHelper;
+        _pluginManager = pluginManager;
+
         if (Avalonia.Controls.Design.IsDesignMode)
         {
-            Debug.WriteLine("Design mode!");
             PopulateDesignData();
             return;
         }
-        _repositoryHelper = Locator.Current.GetRequiredService<IRepositoryHelper>();
+        
         _repositoryHelper.ReloadRequested += RepositoryHelper_ReloadRequested;
         _repositoryHelper.PropertyChanging += RepositoryHelper_PropertyChanging;
         _repositoryHelper.PropertyChanged += RepositoryHelper_PropertyChanged;
 
         IEnumerable<Device>? dev = _repositoryHelper?.SavedConfigCopy?.Devices;
         dev ??= Array.Empty<Device>();
-        Devices = new(dev.Select(x => x.Adapt<DeviceConfigModel>()));
+        Devices = new(
+            dev.Select(
+                x => new DeviceViewModel(
+                    x.Adapt<DeviceConfigModel>(),
+                    repositoryHelper,
+                    pluginManager)));
     }
 
     private IRepositoryHelper? _repositoryHelper;
+    private readonly IPluginManager _pluginManager;
+
     private void RepositoryHelper_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         //if (e.PropertyName == nameof(_repositoryHelper.WorkingConfigCopy))
@@ -51,7 +62,12 @@ public class DeviceListViewModel : ViewModelBase
     {
         IEnumerable<Device>? dev = _repositoryHelper?.SavedConfigCopy?.Devices;
         dev ??= Array.Empty<Device>();
-        Devices = new(dev.Select(x => x.Adapt<DeviceConfigModel>()));
+        Devices = new(
+            dev.Select(
+                x => new DeviceViewModel(
+                    x.Adapt<DeviceConfigModel>(),
+                    _repositoryHelper!,
+                    _pluginManager)));
     }
 
     private bool expandMenuBar = true;
@@ -60,16 +76,16 @@ public class DeviceListViewModel : ViewModelBase
         get => expandMenuBar;
         set => this.RaiseAndSetIfChanged(ref expandMenuBar, value);
     }
-    private AvaloniaList<DeviceConfigModel>? _devices;
-    public AvaloniaList<DeviceConfigModel>? Devices
+    private AvaloniaList<DeviceViewModel>? _devices;
+    public AvaloniaList<DeviceViewModel>? Devices
     {
         get => _devices;
         set => this.RaiseAndSetIfChanged(ref _devices, value);
     }
 
-    private DeviceConfigModel? _selectedDevice;
+    private DeviceViewModel? _selectedDevice;
 
-    public DeviceConfigModel? SelectedDevice
+    public DeviceViewModel? SelectedDevice
     {
         get => _selectedDevice;
         set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
@@ -78,6 +94,14 @@ public class DeviceListViewModel : ViewModelBase
     private void PopulateDesignData()
     {
         Debug.WriteLine("Showing example data");
-        Devices = new(Config.ExampleConfig(5).Devices.Select(x => x.Adapt<DeviceConfigModel>()));
+        var dev = Config.ExampleConfig(5).Devices;
+        Devices = new(
+            dev.Select(
+                x => new DeviceViewModel(
+                    x.Adapt<DeviceConfigModel>(),
+                    _repositoryHelper!,
+                    _pluginManager)));
     }
+
+    
 }

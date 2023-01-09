@@ -10,27 +10,70 @@ using Microsoft.Win32;
 using PicoController.Gui.ViewModels.Devices;
 using Avalonia.Logging;
 using Serilog;
+using PicoController.Core;
+using PicoController.Core.Devices;
+using Device = PicoController.Core.Devices.Device;
 
 namespace PicoController.Gui.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public interface IMainWindowViewModel
+{
+    bool ConfigNotFound { get; set; }
+    bool CreateNewConfingEnabled { get; set; }
+    DeviceListViewModel Devices { get; set; }
+    bool ExpandMenuBar { get; }
+    bool MenuButtonToggle { get; set; }
+    bool MenuButtonVisible { get; set; }
+    DevicesOutputViewModel Output { get; set; }
+    bool Run { get; set; }
+    bool RunEnabled { get; }
+    bool SaveEnabled { get; }
+    Device? SelectedDevice { get; set; }
+    bool ShowOutput { get; set; }
+
+    Task CreateNewConfig();
+    void ReloadPlugins();
+    void RequestReload();
+    void RestartDevices();
+    Task SaveConfigCommand();
+    void ToggleRunning();
+}
+
+public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
 {
     private readonly string? _customPluginDir = null;
-    public MainWindowViewModel()
+    private readonly IPluginManager _pluginManager;
+    private readonly IDeviceManager _deviceManager;
+    private readonly IRepositoryHelper _repositoryHelper;
+    private readonly Serilog.ILogger? _logger;
+    private IConfigRepository ConfigRepository => _repositoryHelper.Repository;
+
+    public MainWindowViewModel(
+        IPluginManager pluginManager,
+        IDeviceManager deviceManager,
+        IRepositoryHelper repositoryHelper,
+        LimitedAvaloniaList<LogEventOutput> logEventOutputs,
+        Serilog.ILogger? logger)
     {
+        _pluginManager = pluginManager;
+        _deviceManager = deviceManager;
+        _repositoryHelper = repositoryHelper;
+        _logger = logger;
+        _devices = new(_repositoryHelper, pluginManager);
+        _output = new(logEventOutputs);
+
         const string pluginDirArgName = "-PluginDir=";
-        _customPluginDir = App.DesktopApplicationLifetime!.Args
-            !.FirstOrDefault(x => x.StartsWith(pluginDirArgName))
+        _customPluginDir = Array.Find(
+                App.DesktopApplicationLifetime!.Args!,
+                x => x.StartsWith(pluginDirArgName))
             ?.Replace(pluginDirArgName, "");
 
-        _repository = Locator.Current.GetRequiredService<IConfigRepository>();
-        _repositoryHelper = Locator.Current.GetRequiredService<IRepositoryHelper>();
         _repositoryHelper.PropertyChanged += RepositoryHelper_PropertyChanged;
 
-        ConfigNotFound = !_repository.Exists();
-        if (!Core.Plugins.AreLoaded)
+        ConfigNotFound = !ConfigRepository.Exists();
+        if (!pluginManager.AreLoaded)
         {
-            Core.Plugins.LoadPlugins(_customPluginDir);
+            pluginManager.LoadPlugins(_customPluginDir);
         }
 
         ToggleRunning();
@@ -40,18 +83,7 @@ public class MainWindowViewModel : ViewModelBase
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
     }
 
-    private readonly IConfigRepository _repository;
-    private readonly IRepositoryHelper _repositoryHelper;
-
-    private HandlersViewModel _handlers = new();
-    public HandlersViewModel Handlers
-    {
-        get => _handlers;
-        set => this.RaiseAndSetIfChanged(ref _handlers, value);
-    }
-
-
-    private DeviceListViewModel _devices = new();
+    private DeviceListViewModel _devices;
     public DeviceListViewModel Devices
     {
         get => _devices;
@@ -127,7 +159,7 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
     }
 
-    private DevicesOutputViewModel _output = new();
+    private DevicesOutputViewModel _output;
     public DevicesOutputViewModel Output
     {
         get => _output;
@@ -147,7 +179,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (!OperatingSystem.IsWindows())
             return;
-        
+
         if (e.Mode == PowerModes.Resume)
         {
             RestartDevices();
@@ -172,7 +204,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         CreateNewConfingEnabled = false;
         var example = Config.ExampleConfig();
-        await _repository.SaveAsync(example);
+        await ConfigRepository.SaveAsync(example);
         if (App.DesktopApplicationLifetime?.MainWindow is Window win)
             await MessageBoxManager.GetMessageBoxStandardWindow(
                 "Config created",
@@ -191,10 +223,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public void ReloadPlugins()
     {
-        Core.Plugins.UnloadPlugins();
-        Core.Plugins.LoadPlugins(_customPluginDir);
-
-        Handlers.Reload();
+        _pluginManager.UnloadPlugins();
+        _pluginManager.LoadPlugins(_customPluginDir);
     }
 
     public void ToggleRunning()
@@ -205,7 +235,7 @@ public class MainWindowViewModel : ViewModelBase
             StopDevices();
     }
 
-    private void StartDevices()
+    private async void StartDevices()
     {
         if (_runningDevices is not null)
             return;
@@ -214,9 +244,9 @@ public class MainWindowViewModel : ViewModelBase
         if (config is null)
             return;
 
-        var runningDevices = Core.Devices.Device.FromConfig(config);
-        
-        foreach(var device in runningDevices)
+        var runningDevices = (await _deviceManager.LoadDevicesAsync(config)) ?? Array.Empty<Device>();
+
+        foreach (var device in runningDevices)
         {
             try
             {
@@ -227,13 +257,13 @@ public class MainWindowViewModel : ViewModelBase
                 Log.Logger.Error("An exception occured while trying to connect to a device {Ex}", ex);
             }
         }
-        _runningDevices = runningDevices;
+        _runningDevices = runningDevices.ToList();
     }
     private void StopDevices()
     {
         if (_runningDevices is null)
             return;
-        
+
         try
         {
             foreach (var device in _runningDevices)

@@ -9,5 +9,4 @@ namespace PicoController.Plugin.DisplayInfos;
 
 [GenerateOneOf]
 public partial class DisplayInformations : OneOfBase<Text, ProgressBar>
-{
-}
+{}

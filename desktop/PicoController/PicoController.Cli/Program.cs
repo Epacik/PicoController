@@ -6,94 +6,59 @@ using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using Serilog.Events;
 using Splat;
+using Serilog.Sinks.SystemConsole.Themes;
+using PicoController.Cli;
+using PicoController.Core;
+using PicoController.Core.DependencyInjection;
+using PicoController.Core.Extensions;
+using PicoController.Core.Devices;
 
-namespace PicoController.Cli;
+Bootstrapper.Register(Splat.Locator.CurrentMutable, Locator.Current);
 
-internal static class Program
+
+var rootCommand = new RootCommand("Program communicating with a PicoController");
+var pluginPathOption = new Option<DirectoryInfo?>("PluginDir");
+rootCommand.AddOption(pluginPathOption);
+
+rootCommand.SetHandler(
+    dir => App.Run(
+        dir,
+        GetRequiredService<IPluginManager>(),
+        GetRequiredService<IDeviceManager>(),
+        GetRequiredService<IConfigRepository>(),
+        GetRequiredService<ILocationProvider>(),
+        GetRequiredService<Serilog.ILogger>()),
+    pluginPathOption);
+
+
+var handlersCommand = new Command("handlers", "Show all available handlers");
+handlersCommand.SetHandler(
+    h => Handlers.ShowActions(h, GetRequiredService<IPluginManager>()));
+
+var handlerCommand = new Command("handler", "Show informations about specific handler");
+
+var handlerArgument = new Argument<string>("handler")
 {
-    private static ConsoleColor _defaultForeground;
-    private static ConsoleColor _defaultBackground;
+    Arity = ArgumentArity.ExactlyOne,
+};
 
-    static async Task<int> Main(string[] args)
-    {
-        var logger = CreateLogger();
-        Log.Logger = logger;
-        Splat.Locator.CurrentMutable.RegisterLazySingleton<Serilog.ILogger>(() => logger);
-
-        _defaultForeground = Console.ForegroundColor;
-        _defaultBackground = Console.BackgroundColor;
-        var rootCommand = new RootCommand("Program communicating with a PicoController");
-        rootCommand.SetHandler(handler => DefaultBehavior.Run());
-
-        var handlersCommand = new Command("handlers", "Show all available handlers");
-        handlersCommand.SetHandler(handler => Handlers.ShowActions(handler));
-
-        var handlerCommand = new Command("handler", "Show informations about specific handler");
-        
-        var handlerArgument = new Argument<string>("handler")
-        {
-            Arity = ArgumentArity.ExactlyOne,
-        };
-
-        handlerCommand.Add(handlerArgument);
-        handlerCommand.SetHandler(
-            (handler) => Handlers.Handler(handler),
-            new Handlers.HandlerBinder(handlerArgument));
-        
-
-        rootCommand.AddCommand(handlersCommand);
-        rootCommand.AddCommand(handlerCommand);
-
-        var builder = new CommandLineBuilder(rootCommand)
-            .UseDefaults()
-            .UseHelp();
-
-        var parser = builder.Build();
-        
-        return await parser.InvokeAsync(args);
-    }
+handlerCommand.Add(handlerArgument);
+handlerCommand.SetHandler(
+    h => Handlers.Handler(h, GetRequiredService<IPluginManager>()),
+    new Handlers.HandlerBinder(handlerArgument));
 
 
-    public static void PrintInColor(string message, ConsoleColor? foreground = null, ConsoleColor? background = null)
-    {
-        if (foreground is not null)
-            Console.ForegroundColor = (ConsoleColor)foreground;
+rootCommand.AddCommand(handlersCommand);
+rootCommand.AddCommand(handlerCommand);
 
-        if (background is not null)
-            Console.BackgroundColor = (ConsoleColor)background;
+var builder = new CommandLineBuilder(rootCommand)
+    .UseDefaults()
+    .UseHelp();
 
-        Console.WriteLine(message);
-        Console.ForegroundColor = _defaultForeground;
-        Console.BackgroundColor = _defaultBackground;
-    }
+var parser = builder.Build();
 
-    private static Serilog.ILogger CreateLogger()
-    {
-        var cfgPath = ConfigRepository.ConfigDirectory();
-        var jsonFormatter = new CompactJsonFormatter();
-        var config = new LoggerConfiguration()
-            .WriteTo.Async(
-                x => x.File(
-                    Path.Combine(cfgPath, "Logs", "Text", "log-.log"),
-                    LogEventLevel.Information,
-                    rollingInterval: RollingInterval.Hour))
-            .WriteTo.Async(
-                x => x.File(
-                    jsonFormatter,
-                    Path.Combine(cfgPath, "Logs", "JSON", "log-.json"),
-                    LogEventLevel.Information,
-                    rollingInterval: RollingInterval.Hour))
-            .WriteTo.Async(
-                x => x.EventLog("PicoController GUI", restrictedToMinimumLevel: LogEventLevel.Warning))
-            .WriteTo.Console();
+return await parser.InvokeAsync(args);
 
-        //if (Environment.GetEnvironmentVariable("SERILOG_DISCORD_WEBHOOK") is string x)
-        //{
-        //    var (idStr, token) = x.Split('/');
-        //    if (ulong.TryParse(idStr, out ulong id))
-        //        config.WriteTo.Async(x => x.Discord(id, token, restrictedToMinimumLevel: LogEventLevel.Error));
-        //}
 
-        return config.CreateLogger();
-    }
-}
+T? GetService<T>() => Locator.Current.GetService<T>();
+T GetRequiredService<T>() => Locator.Current.GetRequiredService<T>();

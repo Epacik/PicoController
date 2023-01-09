@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core.Misc
 {
-    internal interface ICloneable<T>
+    internal interface IClonable<T>
     {
         T Clone();
     }

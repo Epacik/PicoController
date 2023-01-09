@@ -1,5 +1,6 @@
 ﻿using McMaster.NETCore.Plugins;
 using PicoController.Core;
+using PicoController.Core.Config;
 using PicoController.Plugin;
 using PicoController.Plugin.Attributes;
 using Serilog;
@@ -16,34 +17,62 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core;
 
-public static class Plugins
+public interface IPluginManager
 {
-    private static readonly Dictionary<string, PluginLoader> _loaders = new();
-    private static readonly List<Assembly> _assemblies = new();
-    public static bool AreLoaded { get; private set; }
+    bool AreLoaded { get; }
+    IEnumerable<string> AllAvailableActions();
+    HandlerInfo? GetHandlerInfo(string handler);
+    void LoadPlugins(string? directory = null);
+    Func<int, Task>? LookupActions(InputAction value);
+    void UnloadPlugins();
+}
 
+public class PluginManager : IPluginManager
+{
+    private readonly Dictionary<string, PluginLoader> _loaders = new();
+    private readonly List<Assembly> _assemblies = new();
 
-    public static void LoadPlugins(string? directory = null)
+    private readonly Dictionary<string, IPluginAction> LoadedActions = new();
+    private readonly ILocationProvider _locationProvider;
+    private readonly IFileSystem _fileSystem;
+    private readonly IReadonlyDependencyResolver _resolver;
+    private Serilog.ILogger? _logger;
+
+    public PluginManager(
+        ILocationProvider locationProvider,
+        IFileSystem fileSystem,
+        IReadonlyDependencyResolver resolver,
+        Serilog.ILogger? logger)
     {
-        directory ??= Path.Combine(Config.ConfigRepository.ConfigDirectory(), "Plugins");
+        _locationProvider = locationProvider;
+        _fileSystem = fileSystem;
+        _resolver = resolver;
+        _logger = logger;
+    }
+
+    public bool AreLoaded { get; private set; }
+
+    public void LoadPlugins(string? directory = null)
+    {
+        directory ??= _locationProvider.PluginsDirectory;
 
         if (Log.Logger?.IsEnabled(LogEventLevel.Information) == true)
             Log.Logger?.Information("Loading plugins from {Directory}", directory);
 
-        if (!Directory.Exists(directory))
+        if (!_fileSystem.DirectoryExists(directory))
         {
             if (Log.Logger?.IsEnabled(LogEventLevel.Information) == true)
                 Log.Logger?.Information("{Directory}", directory);
 
-            Directory.CreateDirectory(directory);
+            _fileSystem.CreateDirectory(directory);
         }
 
-        var pluginDirs = Directory.GetDirectories(directory);
+        var pluginDirs = _fileSystem.GetDirectories(directory) ?? Array.Empty<string>();
         foreach (var dir in pluginDirs)
         {
             var dirName = Path.GetFileName(dir);
             var dllPath = Path.Combine(dir, dirName + ".dll");
-            if (File.Exists(dllPath))
+            if (_fileSystem.FileExists(dllPath))
             {
                 var loader = PluginLoader.CreateFromAssemblyFile(
                     dllPath,
@@ -55,7 +84,7 @@ public static class Plugins
         AreLoaded = true;
     }
 
-    public static void UnloadPlugins()
+    public void UnloadPlugins()
     {
         _assemblies.Clear();
         foreach (var loader in _loaders)
@@ -67,7 +96,7 @@ public static class Plugins
         AreLoaded = true;
     }
 
-    private static void ClearLookups()
+    private void ClearLookups()
     {
         foreach (var action in LoadedActions)
         {
@@ -81,7 +110,7 @@ public static class Plugins
         LoadedActions.Clear();
     }
 
-    internal static Func<int, Task>? LookupActions(Config.InputAction value)
+    public Func<int, Task>? LookupActions(Config.InputAction value)
     {
         if (string.IsNullOrWhiteSpace(value.Handler))
             return null;
@@ -104,7 +133,7 @@ public static class Plugins
         }
     }
 
-    private static Func<int, Task>? LookupPluginAction(Config.InputAction value, string handler)
+    private Func<int, Task>? LookupPluginAction(Config.InputAction value, string handler)
     {
         var splittedHandler = handler.Split('/');
         var (assemblyName, typename) = (splittedHandler[0], splittedHandler[1]);
@@ -121,7 +150,7 @@ public static class Plugins
         }
     }
 
-    private static Func<int, Task>? LookupBuildtInAction(Config.InputAction value, string handler)
+    private Func<int, Task>? LookupBuildtInAction(Config.InputAction value, string handler)
     {
         var typename = handler.TrimStart('/');
         var assembly = Assembly.GetExecutingAssembly();
@@ -129,11 +158,11 @@ public static class Plugins
         return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
     }
 
-    private static Func<int, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler)
+    private Func<int, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler)
     {
         if (allActionsInAssembly is null)
             return null;
-        
+
         var actionType = allActionsInAssembly.FirstOrDefault(t => t.Name == typename);
         if (actionType is null)
             return null;
@@ -148,7 +177,7 @@ public static class Plugins
         return IPluginActionToFuncOfTask(value, action);
     }
 
-    private static void InjectDependencies(IPluginAction action, Type actionType)
+    private void InjectDependencies(IPluginAction action, Type actionType)
     {
         var flags = BindingFlags.Public | BindingFlags.Instance;
         var props = actionType.GetProperties(flags);
@@ -162,25 +191,25 @@ public static class Plugins
             foreach (PropertyInfo prop in props.Where(x => x.PropertyType == type))
             {
                 var set = prop.GetSetMethod(true);
-                var value = Locator.Current.GetService(type);
+                var value = _resolver.GetService(type);
                 if (set is not null && value is not null)
                     set.Invoke(action, new[] { value });
             }
         }
     }
 
-    private static bool IsPluginAction(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);
-    private static bool IsVisiblePluginAction(TypeInfo t) => 
+    private bool IsPluginAction(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);
+    private bool IsVisiblePluginAction(TypeInfo t) =>
         IsPluginAction(t) && t.GetCustomAttribute<HideHandlerAttribute>(false) is null;
 
-    private static Func<int, Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
+    private Func<int, Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
     {
         return async inputValue => await action.ExecuteAsync(value.InputValueOverride ?? inputValue, value.Data);
     }
 
-    private static readonly Dictionary<string, IPluginAction> LoadedActions = new();
+    
 
-    public static IEnumerable<string> AllAvailableActions()
+    public IEnumerable<string> AllAvailableActions()
     {
         var result = new List<string>();
 
@@ -188,7 +217,7 @@ public static class Plugins
             Assembly.GetExecutingAssembly().DefinedTypes
                 .Where(IsVisiblePluginAction).Select(x => "/" + x.Name));
 
-        foreach(var loader in _loaders)
+        foreach (var loader in _loaders)
         {
             result.AddRange(
                 loader.Value
@@ -199,7 +228,7 @@ public static class Plugins
 
         return result;
     }
-    public static HandlerInfo? GetHandlerInfo(string handler)
+    public HandlerInfo? GetHandlerInfo(string handler)
     {
         TypeInfo? ha = handler.StartsWith('/')
             ? GetBuiltInHandlerInfo(handler)
@@ -213,7 +242,7 @@ public static class Plugins
         if (typeof(IValidValues).IsAssignableFrom(ha))
         {
             var instance = (IValidValues?)Activator.CreateInstance(ha);
-            if(instance is not null)
+            if (instance is not null)
             {
                 validValues = instance.ValidValues;
             }
@@ -222,17 +251,17 @@ public static class Plugins
         return new(description, validValues);
     }
 
-    private static TypeInfo? GetBuiltInHandlerInfo(string handler) =>
+    private TypeInfo? GetBuiltInHandlerInfo(string handler) =>
         Assembly.GetExecutingAssembly()
             .DefinedTypes
             .FirstOrDefault(
-                x => IsPluginAction(x) 
+                x => IsPluginAction(x)
                   && string.Equals(
                         x.Name,
-                        handler.Trim('/'), 
+                        handler.Trim('/'),
                         StringComparison.CurrentCultureIgnoreCase));
 
-    private static TypeInfo? GetPluginHandlerInfo(string handler)
+    private TypeInfo? GetPluginHandlerInfo(string handler)
     {
         var (plugin, action) = handler.Split('/');
 

@@ -12,7 +12,7 @@
         </Style>
     </UserControl.Styles>
     <Grid >
-        <ListBox Items="{Binding Handlers}" 
+        <ListBox Items="{Binding .}" 
                  x:Name="Handlers"
                  Padding="0"
                  Classes="Handlers">

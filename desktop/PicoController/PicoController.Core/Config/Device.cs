@@ -9,7 +9,7 @@ using PicoController.Core.Misc;
 
 namespace PicoController.Core.Config
 {
-    public class Device : ICloneable<Device>
+    public class Device : IClonable<Device>
     {
         [JsonConstructor]
         public Device()
