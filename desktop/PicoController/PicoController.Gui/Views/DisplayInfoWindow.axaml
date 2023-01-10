@@ -7,14 +7,14 @@
         Title="Display Info"
         Topmost="True"
         ShowInTaskbar="False"
-        WindowState="Maximized"
         SystemDecorations="None"
-        Background="{x:Null}"
+        Background="#00000000"
+        WindowState="FullScreen"
         TransparencyLevelHint="Transparent">
     <Border
         Width="300"
         Padding="15"
-        Margin="20,10,20,25"
+        Margin="20,10,20,55"
         CornerRadius="5"
         Background="{DynamicResource SolidBackgroundFillColorBase}"
         VerticalAlignment="Bottom"

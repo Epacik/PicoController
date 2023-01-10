@@ -14,6 +14,7 @@ namespace PicoController.Gui.Views
         public DisplayInfoWindow()
         {
             InitializeComponent();
+            Topmost = true;
             MakeNotClickable();
         }
 
@@ -84,7 +85,20 @@ namespace PicoController.Gui.Views
 #endif
         private void UpdateWindowTransparency()
         {
-            if (OperatingSystem.IsWindows() 
+            //var primaryScreen = Screens.Primary;
+            //if (primaryScreen is null)
+            //    return;
+
+            //var scale = primaryScreen.Scaling;
+            //var workingArea = primaryScreen.WorkingArea;
+            //Bounds = new Rect(
+            //    workingArea.TopLeft.ToPoint(scale),
+            //    workingArea.BottomRight.ToPoint(scale));
+            //Position = workingArea.TopLeft;
+
+            WindowState = WindowState.FullScreen;
+
+            if (OperatingSystem.IsWindows()
                 && this.PlatformImpl is Avalonia.Win32.WindowImpl window)
             {
 #if OS_WINDOWS
@@ -102,6 +116,7 @@ namespace PicoController.Gui.Views
 
                 SetWindowRgn(hwnd, rrect, true);
 #endif
+
             }
         }
         private void MakeNotClickable()
