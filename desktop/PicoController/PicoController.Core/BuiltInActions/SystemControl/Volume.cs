@@ -25,8 +25,9 @@ internal class Volume : IPluginAction, IDisposable
     private readonly TaskFactory _taskFactory;
     private MMDeviceEnumerator _deviceEnumerator;
     private readonly NotificationClient _notificationClient;
+    private readonly ILogger? _logger;
 
-    public Volume()
+    public Volume(ILogger? logger, IDisplayInfo? displayInfo)
     {
         _notificationClient = new NotificationClient();
         _notificationClient.DeviceNotification += NotificationClient_DeviceNotification;
@@ -34,6 +35,8 @@ internal class Volume : IPluginAction, IDisposable
         _taskFactory = new TaskFactory(_scheduler);
         _deviceEnumerator = new MMDeviceEnumerator();
         _deviceEnumerator.RegisterEndpointNotificationCallback(_notificationClient);
+        _logger = logger;
+        DisplayInfo = displayInfo;
     }
 
     private void NotificationClient_DeviceNotification(object? sender, EventArgs e)
@@ -62,7 +65,7 @@ internal class Volume : IPluginAction, IDisposable
             }
             catch (Exception ex) 
             {
-                Log.Logger.Error("An error occured while obaining a sound device {Ex}", ex);
+                _logger?.Error("An error occured while obaining a sound device {Ex}", ex);
                 _deviceEnumerator?.Dispose();
                 _deviceEnumerator = new MMDeviceEnumerator();
                 

@@ -9,6 +9,8 @@ namespace PicoController.Core.Devices.Inputs;
 public abstract class Input
 {
     private readonly int _deviceId;
+    protected readonly ILogger _logger;
+
     public byte Id { get; }
     public InputType Type { get; }
     public Dictionary<string, Func<int, Task>?> Actions { get; } = new();
@@ -16,12 +18,13 @@ public abstract class Input
 
     public ImmutableArray<string> AvailableActions { get; }
 
-    protected Input(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, bool split = false)
+    protected Input(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, ILogger logger, bool split = false)
     {
         _deviceId = deviceId;
         Id = inputId;
         Type = type;
         Actions = actions;
+        _logger = logger;
         Split = split;
         AvailableActions = availableActions.ToImmutableArray();
     }
@@ -40,7 +43,7 @@ public abstract class Input
 
     protected async Task InvokeAction(int inputValue, string actionName)
     {
-        Log.Logger.Information("Device: {DeviceId}, input: {Id}, action: {ActionName}", _deviceId, Id, actionName);
+        _logger.Information("Device: {DeviceId}, input: {Id}, action: {ActionName}", _deviceId, Id, actionName);
 
         if (Actions.TryGetValue(actionName, out Func<int, Task>? value) && value is not null)
         {
@@ -50,7 +53,7 @@ public abstract class Input
             }
             catch (Exception ex)
             {
-                Log.Logger.Error("An action thrown an exception\n" +
+                _logger.Error("An action thrown an exception\n" +
                     "Device: {DeviceId}, input: {Id}, action: {ActionName}\n" +
                     "{Ex}", _deviceId, Id, actionName, ex);
             }

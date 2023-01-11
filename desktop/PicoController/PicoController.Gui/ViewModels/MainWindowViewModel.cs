@@ -254,7 +254,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
             }
             catch (Exception ex)
             {
-                Log.Logger.Error("An exception occured while trying to connect to a device {Ex}", ex);
+                _logger.Error("An exception occured while trying to connect to a device {Ex}", ex);
             }
         }
         _runningDevices = runningDevices.ToList();
@@ -274,7 +274,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Error("An exception occured while trying to disconnect from a device {Ex}", ex);
+                    _logger.Error("An exception occured while trying to disconnect from a device {Ex}", ex);
                 }
             }
         }

@@ -18,11 +18,11 @@ public class DeviceManager : IDeviceManager
 {
     private readonly IPluginManager _pluginLoader;
     private readonly IConfigRepository _repository;
-    private readonly ILogger? _logger;
+    private readonly ILogger _logger;
     private bool _disposedValue;
     private List<Device>? _devices;
     public IEnumerable<Device>? Devices => _devices;
-    public DeviceManager(IPluginManager pluginLoader, IConfigRepository repository, Serilog.ILogger? logger)
+    public DeviceManager(IPluginManager pluginLoader, IConfigRepository repository, Serilog.ILogger logger)
     {
         _pluginLoader = pluginLoader;
         _repository = repository;
@@ -75,11 +75,11 @@ public class DeviceManager : IDeviceManager
                      inputs.Add(input.Type switch
                      {
                          Inputs.InputType.Button
-                             => new Button(deviceId, input.Id, actions, config.MaxDelayBetweenClicks),
+                             => new Button(deviceId, input.Id, actions, config.MaxDelayBetweenClicks, _logger),
                          Inputs.InputType.Encoder
-                             => Inputs.Encoder.Create(deviceId, input.Id, actions, input.Split),
+                             => Inputs.Encoder.Create(deviceId, input.Id, actions, input.Split, _logger),
                          Inputs.InputType.EncoderWithButton
-                             => EncoderWithButton.Create(deviceId, input.Id, actions, config.MaxDelayBetweenClicks, input.Split),
+                             => EncoderWithButton.Create(deviceId, input.Id, actions, config.MaxDelayBetweenClicks, input.Split, _logger),
                          _ => throw new InvalidDataException($"Invalid input type {input.Type}"),
                      });
                  }

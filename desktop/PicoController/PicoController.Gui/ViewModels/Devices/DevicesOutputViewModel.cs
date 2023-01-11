@@ -22,11 +22,23 @@ public class DevicesOutputViewModel : ViewModelBase
 
     private void Logs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        this.RaisePropertyChanged(nameof(LastItem));
+        if(e.NewItems is not null || e.NewStartingIndex == -1)
+        {
+            //LastIndex = Logs.Count - 1;
+            this.RaisePropertyChanged(nameof(LastItem));
+        }
     }
 
-    public LogEventOutput? LastItem => Logs.LastOrDefault();
+    public LogEventOutput? LastItem { get; set; }
     public LimitedAvaloniaList<LogEventOutput> Logs { get; }
+
+    private int _lastIndex;
+    public int LastIndex
+    {
+        get => _lastIndex;
+        set => this.RaiseAndSetIfChanged(ref _lastIndex, value);
+    }
+
 }
 
 public class LogEventOutput
@@ -39,4 +51,5 @@ public class LogEventOutput
     public LogEvent LogEvent { get; }
     private string? _text;
     public string Text => _text ??= LogEvent.RenderMessage();
+    public override string ToString() => Text;
 }

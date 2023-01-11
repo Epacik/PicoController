@@ -1,5 +1,6 @@
 ﻿using PicoController.Core.Config;
 using PicoController.Core.Extensions;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,8 +20,9 @@ namespace PicoController.Core.Devices.Inputs
             IEnumerable<string> availableActions,
             Dictionary<string, Func<int, Task>?> actions,
             int maxDelayBetweenClicks,
-            bool split) 
-            : base(deviceId, inputId, InputType.EncoderWithButton, availableActions, actions, split)
+            bool split,
+            ILogger logger) 
+            : base(deviceId, inputId, InputType.EncoderWithButton, availableActions, actions, logger, split)
         {
             _maxDelayBetweenClicks = maxDelayBetweenClicks;
             _timer = new System.Timers.Timer(_maxDelayBetweenClicks);
@@ -113,7 +115,8 @@ namespace PicoController.Core.Devices.Inputs
             byte inputId,
             Dictionary<string, Func<int, Task>?> actions,
             int maxDelayBetweenClicks,
-            bool split)
+            bool split,
+            ILogger logger)
         {
             if (split)
             {
@@ -129,7 +132,8 @@ namespace PicoController.Core.Devices.Inputs
                     },
                     actions,
                     maxDelayBetweenClicks,
-                    split);
+                    split,
+                    logger);
             }
             else
             {
@@ -147,7 +151,8 @@ namespace PicoController.Core.Devices.Inputs
                     },
                     actions,
                     maxDelayBetweenClicks,
-                    split);
+                    split, 
+                    logger);
             }
         }
     }

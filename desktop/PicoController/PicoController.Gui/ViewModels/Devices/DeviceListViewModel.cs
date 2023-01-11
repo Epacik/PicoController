@@ -7,11 +7,14 @@ using PicoController.Gui.Models;
 using Mapster;
 using PicoController.Core;
 using System.Linq;
+using PicoController.Gui.Design;
 
 namespace PicoController.Gui.ViewModels.Devices;
 
 public class DeviceListViewModel : ViewModelBase
 {
+    public DeviceListViewModel() : this(new DesignRepositoryHelper(), new DesignPluginManager())
+    { }
     public DeviceListViewModel(IRepositoryHelper repositoryHelper, IPluginManager pluginManager)
     {
         _repositoryHelper = repositoryHelper;

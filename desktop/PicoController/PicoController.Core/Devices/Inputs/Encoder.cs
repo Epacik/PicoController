@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,8 +18,9 @@ namespace PicoController.Core.Devices.Inputs
             byte inputId,
             IEnumerable<string> availableActions,
             Dictionary<string, Func<int, Task>?> actions,
-            bool split)
-            : base(deviceId, inputId, InputType.Encoder, availableActions, actions, split)
+            bool split,
+            ILogger logger)
+            : base(deviceId, inputId, InputType.Encoder, availableActions, actions, logger, split)
         {
         }
 
@@ -43,7 +45,7 @@ namespace PicoController.Core.Devices.Inputs
             }
         }
 
-        public static Encoder Create(int deviceId, byte inputId,  Dictionary<string, Func<int, Task>?> actions, bool split)
+        public static Encoder Create(int deviceId, byte inputId,  Dictionary<string, Func<int, Task>?> actions, bool split, ILogger logger)
         {
             if (split)
             {
@@ -52,7 +54,8 @@ namespace PicoController.Core.Devices.Inputs
                     inputId,
                     new string[] { ActionNames.Rotate },
                     actions,
-                    split);
+                    split,
+                    logger);
             }
             else
             {
@@ -61,7 +64,8 @@ namespace PicoController.Core.Devices.Inputs
                     inputId,
                     new string[] { ActionNames.RotateSplitC, ActionNames.RotateSplitCC },
                     actions,
-                    split);
+                    split,
+                    logger);
             } 
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,13 +18,15 @@ internal class Button : Input
         int deviceId,
         byte inputId,
         Dictionary<string, Func<int, Task>?> actions,
-        int maxDelayBetweenClicks) 
+        int maxDelayBetweenClicks, 
+        ILogger logger) 
         : base(
             deviceId,
             inputId,
             InputType.Button,
             new string[] { ActionNames.Press, ActionNames.DoublePress, ActionNames.TriplePress },
-            actions)
+            actions,
+            logger)
     {
         _maxDelayBetweenClicks = maxDelayBetweenClicks;
         _timer = new System.Timers.Timer(_maxDelayBetweenClicks);

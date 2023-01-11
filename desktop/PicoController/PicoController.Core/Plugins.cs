@@ -56,13 +56,13 @@ public class PluginManager : IPluginManager
     {
         directory ??= _locationProvider.PluginsDirectory;
 
-        if (Log.Logger?.IsEnabled(LogEventLevel.Information) == true)
-            Log.Logger?.Information("Loading plugins from {Directory}", directory);
+        if (_logger?.IsEnabled(LogEventLevel.Information) == true)
+            _logger?.Information("Loading plugins from {Directory}", directory);
 
         if (!_fileSystem.DirectoryExists(directory))
         {
-            if (Log.Logger?.IsEnabled(LogEventLevel.Information) == true)
-                Log.Logger?.Information("{Directory}", directory);
+            if (_logger?.IsEnabled(LogEventLevel.Information) == true)
+                _logger?.Information("{Directory}", directory);
 
             _fileSystem.CreateDirectory(directory);
         }
@@ -167,12 +167,39 @@ public class PluginManager : IPluginManager
         if (actionType is null)
             return null;
 
-        var action = Activator.CreateInstance(actionType.AsType()) as IPluginAction;
-        if (action is null)
+        IPluginAction? action = null;
+
+        var constructors = actionType.DeclaredConstructors;
+        var numberOfConstructors = constructors.Count(x => x.IsPublic);
+        if (numberOfConstructors > 1)
+            throw new InvalidOperationException($"Action '{actionType.FullName}' has more than one public constructor");
+        else if (numberOfConstructors == 0)
+            throw new InvalidOperationException($"Action '{actionType.FullName}' has no public constructors");
+
+        if (actionType.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+        {
+
+            action = Activator.CreateInstance(actionType.AsType()) as IPluginAction;
+            if (action is null)
             return null;
 
-        InjectDependencies(action, actionType);
+            InjectDependencies(action, actionType);
+        }
+        else
+        {
+            List<object?> arguments = new();
+            var ctor = constructors.First();
+            foreach ( var parameter in ctor.GetParameters() )
+            {
+                arguments.Add(_resolver.GetService(parameter.ParameterType));
+            }
+            action = ctor.Invoke(arguments.ToArray()) as IPluginAction;
+            //action = Activator.CreateInstance(actionType.AsType(), arguments) as IPluginAction;
+        }
 
+
+        if (action is null)
+            return null;
         LoadedActions[handler] = action;
         return IPluginActionToFuncOfTask(value, action);
     }

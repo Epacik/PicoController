@@ -5,18 +5,18 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PicoController.Gui.Views.Devices.DevicesOutputView">
     <Grid RowDefinitions="30,*">
+            <!--SelectedItem="{Binding LastItem}"-->
         <ListBox 
-            Grid.Row="1"
-            SelectedItem="{Binding LastItem, Mode=OneWay}"
-            VerticalAlignment="Stretch"
             x:Name="Output"
-            Items="{Binding Logs}"
-            AutoScrollToSelectedItem="True">
-            <ListBox.ItemTemplate>
+            Grid.Row="1"
+            SelectedIndex="{Binding LastIndex}"
+            VerticalAlignment="Stretch"
+            Items="{Binding Logs}">
+            <!--<ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Text, Mode=OneWay}"/>
                 </DataTemplate>
-            </ListBox.ItemTemplate>
+            </ListBox.ItemTemplate>-->
         </ListBox>
     </Grid>
 </UserControl>

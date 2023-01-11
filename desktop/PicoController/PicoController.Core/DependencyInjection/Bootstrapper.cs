@@ -28,7 +28,7 @@ public static class Bootstrapper
         services.RegisterLazySingleton<IDeviceManager>(() => new DeviceManager(
             resolver.GetRequiredService<IPluginManager>(),
             resolver.GetRequiredService<IConfigRepository>(),
-            resolver.GetService<Serilog.ILogger>()
+            resolver.GetRequiredService<Serilog.ILogger>()
         ));
     }
 }
