@@ -16,6 +16,14 @@ public class ProgressBar
         Value = 0f;
     }
 
+    public ProgressBar(float value)
+    {
+        Indeterminate = false;
+        Value = value;
+        Min = 0;
+        Max = 100;
+    }
+
     public ProgressBar(float min, float max, float value)
     {
         Indeterminate = false;
