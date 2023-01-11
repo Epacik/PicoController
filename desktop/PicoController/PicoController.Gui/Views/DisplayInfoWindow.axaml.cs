@@ -4,6 +4,7 @@ using Avalonia.Platform;
 using OneOf.Types;
 using PicoController.Gui.ViewModels;
 using SuccincT.Functional;
+using System.Collections.Specialized;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -16,6 +17,12 @@ namespace PicoController.Gui.Views
             InitializeComponent();
             Topmost = true;
             MakeNotClickable();
+            Controls.SizeChanged += Controls_SizeChanged;
+        }
+
+        private void Controls_SizeChanged(object? sender, SizeChangedEventArgs e)
+        {
+            UpdateWindowTransparency(e.NewSize);
         }
 
         public DisplayInfoWindow(DisplayInfoWindowViewModel viewModel) : this()
@@ -40,8 +47,6 @@ namespace PicoController.Gui.Views
                     break;
             }
         }
-
-        
 
         protected override void OnOpened(EventArgs e)
         {
@@ -83,7 +88,7 @@ namespace PicoController.Gui.Views
 
         private static partial IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int cx, int cy);
 #endif
-        private void UpdateWindowTransparency()
+        private void UpdateWindowTransparency(Size? newSize = null)
         {
             //var primaryScreen = Screens.Primary;
             //if (primaryScreen is null)
@@ -103,8 +108,13 @@ namespace PicoController.Gui.Views
             {
 #if OS_WINDOWS
                 var hwnd = window.Handle.Handle;
-                var topLeft = WindowBorder.Bounds.TopLeft;
-                var bottomRight = WindowBorder.Bounds.BottomRight;
+                var bounds = WindowBorder.Bounds;
+                var padding = WindowBorder.Padding.Top + WindowBorder.Padding.Bottom;
+
+                var (topLeft, bottomRight) =
+                    newSize is Size s
+                    ? (new Point(bounds.Left, bounds.Bottom - s.Height - padding), bounds.BottomRight)
+                    : (bounds.TopLeft, bounds.BottomRight);
                 var margin = WindowBorder.Margin;
                 var rrect = CreateRoundRectRgn(
                     (int)(topLeft.X - margin.Left),

@@ -38,7 +38,7 @@ public class DisplayInfoWindowViewModel : ViewModelBase
         var infoArray = infos.ToImmutableArray();
         if(infoArray.Length < Controls.Count)
         {
-            Controls.RemoveRange(infoArray.Length - 1, infoArray.Length - Controls.Count);
+            Controls.RemoveRange(infoArray.Length - 1, Controls.Count - infoArray.Length);
         }
 
         for (int i = 0; i < Math.Max(Controls.Count, infos.Count()); i++)
