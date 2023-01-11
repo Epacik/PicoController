@@ -100,9 +100,8 @@ public class PluginManager : IPluginManager
     {
         foreach (var action in LoadedActions)
         {
-            if (typeof(IDisposable).IsAssignableFrom(action.Value.GetType()))
+            if (action.Value is IDisposable disposable)
             {
-                var disposable = action.Value as IDisposable;
                 disposable?.Dispose();
             }
         }
