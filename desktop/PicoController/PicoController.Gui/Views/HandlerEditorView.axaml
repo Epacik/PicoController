@@ -42,11 +42,7 @@
 
         <TextBlock FontSize="16" FontWeight="SemiBold" Grid.Row="9">Avaliable handlers</TextBlock>
         <ScrollViewer Grid.Row="10">
-            <views:HandlersView DataContext="{Binding Handlers}">
-                <!--<views:HandlersView.DataContext>
-                    <viewModels:HandlersViewModel/>
-                </views:HandlersView.DataContext>-->
-            </views:HandlersView>
+            <views:HandlersView DataContext="{Binding Handlers}"/>
         </ScrollViewer>
     </Grid>
 </UserControl>

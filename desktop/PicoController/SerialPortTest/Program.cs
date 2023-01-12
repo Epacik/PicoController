@@ -1,45 +1,34 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
 using CoreAudio;
+using LanguageExt.Common;
 using System.IO.Ports;
 
+Result<int>[] results =
+{
+    Add("a", "b"),
+    Add("1", "2"),
+};
+
+foreach (var result in results)
+{
+    Console.WriteLine(
+        result.Match(
+            i => i.ToString(), // return normal response
+            e => e.Message));  // return error 500
+}
+
 Console.WriteLine("Hello, World!");
-//var port = new SerialPort()
-//{
-//    PortName               = "COM9",
-//    BaudRate               = 115200,
-//    Parity                 = Parity.None,
-//    StopBits               = StopBits.One,
-//    Handshake              = Handshake.None,
-//    DataBits               = 8,
-//    ReceivedBytesThreshold = 1,
-//    DtrEnable              = true,
-//};
-
-//MMDeviceEnumerator audioEnumerator = new MMDeviceEnumerator();
-
-//port.PinChanged += (s, e) => { Console.WriteLine(e); };
-//port.ErrorReceived  += (s, e) => { Console.WriteLine(e.ToString()); };
-//port.DataReceived += (s, e) =>
-//{
-//    var data = port.ReadLine()?.Trim() ?? "";
-    
-//    var device = audioEnumerator.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
-//    if (device?.AudioEndpointVolume is null)
-//        return;
-
-//    switch (data)
-//    {
-//        case "Toggle Mute":
-//            device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
-//            break;
-//        case "Volume Up":
-//            device.AudioEndpointVolume.VolumeStepUp();
-//            break;
-//        case "Volume Down":
-//            device.AudioEndpointVolume.VolumeStepDown();
-//            break;
-//    }
-//};
-//port.Open();
-
 Console.ReadKey();
+
+
+Result<int> Add(string x, string y)
+{
+    if (int.TryParse(x, out int xInt) && int.TryParse(y, out int yInt))
+    {
+        return xInt + yInt;
+    }
+    else
+    {
+        return new Result<int>(new InvalidDataException("Arguments are not parsable"));
+    }
+}
