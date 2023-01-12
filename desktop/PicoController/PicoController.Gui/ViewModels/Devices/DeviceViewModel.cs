@@ -17,7 +17,7 @@ namespace PicoController.Gui.ViewModels.Devices;
 
 public class DeviceViewModel : ViewModelBase
 {
-    public DeviceViewModel(IRepositoryHelper repositoryHelper, IPluginManager pluginManager) 
+    public DeviceViewModel(IRepositoryHelper repositoryHelper, IPluginManager pluginManager)
         : this(Config.ExampleConfig(1).Devices[0].Adapt<DeviceConfigModel>(), repositoryHelper, pluginManager) { }
 
     public DeviceViewModel(DeviceConfigModel device, IRepositoryHelper repositoryHelper, IPluginManager pluginManager)

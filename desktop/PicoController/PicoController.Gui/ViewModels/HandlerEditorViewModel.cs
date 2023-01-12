@@ -15,14 +15,17 @@ public class HandlerEditorViewModel : ViewModelBase
 {
     public HandlerEditorViewModel(ReactiveKeyValuePair<string, DeviceInputActionConfigModel> handler, IPluginManager pluginManager)
     {
-        _pluginManager = pluginManager;
+        _pluginManager     = pluginManager;
         Handler            = handler;
         HandlerName        = handler.Key;
         HandlerId          = handler.Value!.Handler;
         HandlerData        = handler.Value!.Data;
         OverrideValue      = handler.Value!.InputValueOverride is not null;
         InputValueOverride = handler.Value!.InputValueOverride ?? 0;
+        Reload();
     }
+
+    private readonly IPluginManager _pluginManager;
 
     public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> Handler { get; }
 
@@ -61,11 +64,8 @@ public class HandlerEditorViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _inputValueOverride, value);
     }
 
-
     public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> GetHandler() =>
-        new(HandlerName ?? "",new(HandlerId ?? "", HandlerData ?? "", OverrideValue ? InputValueOverride : null));
-
-    private readonly IPluginManager _pluginManager;
+        new(HandlerName ?? "", new(HandlerId ?? "", HandlerData ?? "", OverrideValue ? InputValueOverride : null));
 
     private AvaloniaList<string> _handlers = new();
     public AvaloniaList<string> Handlers

@@ -21,8 +21,7 @@
     <Grid ColumnDefinitions="*">
         <Grid RowDefinitions="auto,20,*"
               Margin="5">
-            <Expander IsExpanded="true"
-                      IsEnabled="{Binding !DataContext.Run, 
+            <Expander IsEnabled="{Binding !DataContext.Run, 
                         RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
                 <Expander.Header>
                     <Grid
