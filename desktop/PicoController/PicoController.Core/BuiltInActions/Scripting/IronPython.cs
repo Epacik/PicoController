@@ -23,7 +23,7 @@ public abstract class IronPythonBase : IPluginAction
     private readonly bool _useFile;
     private readonly ILogger _logger;
     private readonly IDisplayInfo _displayInfo;
-    private ScriptEngine _engine;
+    private readonly ScriptEngine _engine;
 
     protected IronPythonBase(bool useFile, ILogger logger, IDisplayInfo displayInfo)
     {
@@ -42,7 +42,6 @@ public abstract class IronPythonBase : IPluginAction
 
         var scope = _engine.CreateScope();
         
-
         scope.SetVariable("__input_value__", inputValue);
         scope.SetVariable("__logger__", _logger);
         scope.SetVariable("__display_info__", _displayInfo);

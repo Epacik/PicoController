@@ -123,6 +123,7 @@ public class DeviceManager : IDeviceManager
                     device.Dispose();
                 }
             }
+            _devices = null;
 
             return true;
         });
