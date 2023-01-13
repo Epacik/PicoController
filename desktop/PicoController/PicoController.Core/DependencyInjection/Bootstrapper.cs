@@ -7,10 +7,10 @@ namespace PicoController.Core.DependencyInjection;
 
 public static class Bootstrapper
 {
-    public static void Register(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver)
+    public static void Register(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver, string? customMainDir)
     {
         services.RegisterLazySingleton<IFileSystem>(() => new FileSystem());
-        services.RegisterLazySingleton<ILocationProvider>(() => new LocationProvider());
+        services.RegisterLazySingleton<ILocationProvider>(() => new LocationProvider(customMainDir));
 
         services.RegisterLazySingleton<IConfigRepository>(() => new ConfigRepository(
             resolver.GetRequiredService<ILocationProvider>(),

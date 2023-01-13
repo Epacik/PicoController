@@ -18,11 +18,11 @@ namespace PicoController.Gui.DependencyInjection;
 
 public static class Bootstrapper
 {
-    public static void Register(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver)
+    public static void Register(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver, string? customMainDir)
     {
         RegisterBasics(services, resolver);
         RegisterLogging(services, resolver);
-        Core.DependencyInjection.Bootstrapper.Register(services, resolver);
+        Core.DependencyInjection.Bootstrapper.Register(services, resolver, customMainDir);
         RegisterViewModels(services, resolver);
 
         services.RegisterLazySingleton(Themes.ThemeManager.CreateManager);

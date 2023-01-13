@@ -15,7 +15,11 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        Bootstrapper.Register(Locator.CurrentMutable, Locator.Current);
+        const string pluginDirArgName = "-ConfigDir=";
+        var customMainDir = Array.Find(args, x => x.StartsWith(pluginDirArgName))
+            ?.Replace(pluginDirArgName, "");
+
+        Bootstrapper.Register(Locator.CurrentMutable, Locator.Current, customMainDir);
         BuildAvaloniaApp()
         .StartWithClassicDesktopLifetime(args);
     }
