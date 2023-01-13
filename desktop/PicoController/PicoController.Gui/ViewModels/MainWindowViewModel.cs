@@ -199,7 +199,6 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         }
     }
 
-
     public async Task CreateNewConfig()
     {
         CreateNewConfingEnabled = false;
@@ -227,15 +226,15 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         _pluginManager.LoadPlugins(_customPluginDir);
     }
 
-    public void ToggleRunning()
+    public async void ToggleRunning()
     {
         if (Run)
-            StartDevices();
+            await StartDevices();
         else
-            StopDevices();
+            await StopDevices();
     }
 
-    private async void StartDevices()
+    private async Task StartDevices()
     {
         if (_runningDevices is not null)
             return;
@@ -254,43 +253,29 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
             }
             catch (Exception ex)
             {
-                _logger.Error("An exception occured while trying to connect to a device {Ex}", ex);
+                _logger?.Error("An exception occured while trying to connect to a device {Ex}", ex);
             }
         }
         _runningDevices = runningDevices.ToList();
     }
-    private void StopDevices()
+    private async Task StopDevices()
     {
         if (_runningDevices is null)
             return;
 
         try
         {
-            foreach (var device in _runningDevices)
-            {
-                try
-                {
-                    device.Disconnect();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error("An exception occured while trying to disconnect from a device {Ex}", ex);
-                }
-            }
+            await _deviceManager.UnloadDevicesAsync();
         }
         finally
         {
-            foreach (var device in _runningDevices)
-            {
-                device.Dispose();
-            }
             _runningDevices = null;
         }
     }
 
-    public void RestartDevices()
+    public async void RestartDevices()
     {
-        StopDevices();
-        StartDevices();
+        await StopDevices();
+        await StartDevices();
     }
 }

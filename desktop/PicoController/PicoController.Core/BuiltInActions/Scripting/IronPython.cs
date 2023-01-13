@@ -40,12 +40,11 @@ public abstract class IronPythonBase : IPluginAction
             if (argument is null)
                 throw new ArgumentNullException("data");
 
-            var scope = _engine.CreateScope();
-
-
-            scope.SetVariable("__input_value__", inputValue);
-            scope.SetVariable("__logger__", _logger);
-            scope.SetVariable("__display_info__", _displayInfo);
+        var scope = _engine.CreateScope();
+        
+        scope.SetVariable("__input_value__", inputValue);
+        scope.SetVariable("__logger__", _logger);
+        scope.SetVariable("__display_info__", _displayInfo);
 
             if (_useFile)
                 _engine.ExecuteFile(argument, scope);
