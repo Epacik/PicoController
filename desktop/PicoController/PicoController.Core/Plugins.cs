@@ -1,6 +1,7 @@
 ﻿using McMaster.NETCore.Plugins;
 using PicoController.Core;
 using PicoController.Core.Config;
+using PicoController.Core.Extensions;
 using PicoController.Plugin;
 using PicoController.Plugin.Attributes;
 using Serilog;
@@ -230,10 +231,43 @@ public class PluginManager : IPluginManager
 
     private Func<int, Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
     {
-        return async inputValue => await action.ExecuteAsync(value.InputValueOverride ?? inputValue, value.Data);
-    }
+        return async inputValue =>
+        {
+            if (_logger.ExistsAndIsEnabled(LogEventLevel.Information))
+            {
+                if(value.InputValueOverride is not null)
+                {
+                    _logger?.Information(
+                        """
+                        Executing action.Handler: {Handler}
+                        Data: {Data}
+                        Input value Override: {InputValueOverride}
 
-    
+                        IPluginAction Type: {Type}
+                        """,
+                        value.Handler,
+                        value.Data,
+                        value.InputValueOverride,
+                        action.GetType().FullName);
+                }
+                else
+                {
+                    _logger?.Information(
+                        """
+                        Executing action.Handler: {Handler}
+                        Data: {Data}
+
+                        IPluginAction Type: {Type}
+                        """,
+                        value.Handler,
+                        value.Data,
+                        action.GetType().FullName);
+                }
+            }
+
+            await action.ExecuteAsync(value.InputValueOverride ?? inputValue, value.Data);
+        };
+    }
 
     public IEnumerable<string> AllAvailableActions()
     {

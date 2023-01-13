@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using PicoController.Core.Extensions;
+using Serilog;
 using Serilog.Core;
 using System.Collections.Immutable;
 using System.Text;
@@ -49,7 +50,7 @@ public abstract class Input
         {
             try
             {
-                await Actions[actionName]!.Invoke(inputValue);
+                await value!.Invoke(inputValue);
             }
             catch (Exception ex)
             {
@@ -57,6 +58,10 @@ public abstract class Input
                     "Device: {DeviceId}, input: {Id}, action: {ActionName}\n" +
                     "{Ex}", _deviceId, Id, actionName, ex);
             }
+        }
+        else if (_logger.ExistsAndIsEnabled(Serilog.Events.LogEventLevel.Verbose))
+        {
+            _logger?.Verbose("Action not found: {ActionName}", actionName);
         }
     }
 

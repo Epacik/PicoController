@@ -71,18 +71,22 @@ public static class Bootstrapper
                         jsonFormatter,
                         Path.Combine(jsonLogsDir, "log-.json"),
                         LogEventLevel.Information,
-                        rollingInterval: RollingInterval.Hour))
+                        rollingInterval: RollingInterval.Hour));
 
-                .WriteTo.Async(
-                    x => x.EventLog("PicoController GUI", restrictedToMinimumLevel: LogEventLevel.Warning));
+                //.WriteTo.Async(
+                //    x => x.EventLog(
+                //        "PicoController.GUI",
+                //        "PicoController"));
 
             var limitedList = resolver.GetService<LimitedAvaloniaList<LogEventOutput>>("LogList");
             if(limitedList is not null)
             {
                 config.WriteTo.Async(
                     x => x.Observers(
-                        ev => ev.Do(e => limitedList.Add(new(e)))
-                        .Subscribe()));
+                        ev => ev
+                            .Do(e => limitedList.Add(new(e)))
+                            .Subscribe(),
+                        LogEventLevel.Verbose));
             }
 
             if (Environment.GetEnvironmentVariable("SERILOG_DISCORD_WEBHOOK") is string x)
