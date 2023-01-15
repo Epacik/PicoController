@@ -64,7 +64,7 @@
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="pwsh -File &quot;$(ProjectDir)..\Plugins\buildAllHere.ps1&quot;" />
+    <Exec Command="pwsh -File &quot;$(ProjectDir)..\Plugins\PicoController.Core_prebuild.ps1&quot; -Config $(Configuration)" />
   </Target>
 
 </Project>
