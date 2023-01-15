@@ -53,6 +53,12 @@ public class PluginManager : IPluginManager
 
     public bool AreLoaded { get; private set; }
 
+    private static Type[] SharedTypes =
+    {
+        typeof(IPluginAction),
+        typeof(IDisplayInfo),
+        typeof(Serilog.ILogger),
+    };
     public void LoadPlugins(string? directory = null)
     {
         directory ??= _locationProvider.PluginsDirectory;
@@ -77,8 +83,14 @@ public class PluginManager : IPluginManager
             {
                 var loader = PluginLoader.CreateFromAssemblyFile(
                     dllPath,
-                    sharedTypes: new Type[] { typeof(IPluginAction), typeof(IDisplayInfo) },
-                    config => { config.PreferSharedTypes = true; config.IsUnloadable = true; });
+                    sharedTypes: SharedTypes,
+                    config => { 
+                        config.PreferSharedTypes = true;
+                        config.IsUnloadable = true;
+                        //config.EnableHotReload = true;
+                        config.IsLazyLoaded = true;
+                        config.LoadInMemory = true;
+                    });
                 _loaders.Add(dirName, loader);
             }
         }
