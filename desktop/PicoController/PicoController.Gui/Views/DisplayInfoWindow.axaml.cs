@@ -16,7 +16,6 @@ namespace PicoController.Gui.Views
         {
             InitializeComponent();
             Topmost = true;
-            MakeNotClickable();
             Controls.SizeChanged += Controls_SizeChanged;
         }
 
@@ -51,23 +50,8 @@ namespace PicoController.Gui.Views
         protected override void OnOpened(EventArgs e)
         {
             base.OnOpened(e);
-            //var primaryScreen = Screens.Primary;
-            //if (primaryScreen is null)
-            //    return;
-
-            //var workingArea = primaryScreen.WorkingArea;
-
-            //var rel = (x: workingArea.Width / 2, y: workingArea.Height - 15);
-            //var screenPos = (x: rel.x + workingArea.X, y: rel.y + workingArea.Y);
-            //var winPos = (x: screenPos.x - (Bounds.Width / 2), y: screenPos.y - Bounds.Height);
-
-            //Position = Position.WithX((int)winPos.x).WithY((int)winPos.y);
+            ShowOnAllDesktops();
         }
-
-        //protected override void OnGotFocus(GotFocusEventArgs e)
-        //{
-        //    e.Handled = true;
-        //}
 
 #if OS_WINDOWS
         [LibraryImport("user32.dll")]
@@ -87,26 +71,38 @@ namespace PicoController.Gui.Views
         [LibraryImport("gdi32.dll")]
 
         private static partial IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int cx, int cy);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
+        public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, GWL nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+        public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, GWL nIndex, IntPtr dwNewLong);
+
+        const long WS_EX_TOPMOST = 0x00000008L;
+        const long WS_EX_TOOLWINDOW = 0x00000080;
+
+        public enum GWL : int
+        {
+            GWL_WNDPROC = (-4),
+            GWL_HINSTANCE = (-6),
+            GWL_HWNDPARENT = (-8),
+            GWL_STYLE = (-16),
+            GWL_EXSTYLE = (-20),
+            GWL_USERDATA = (-21),
+            GWL_ID = (-12)
+        }
 #endif
         private void UpdateWindowTransparency(Size? newSize = null)
         {
-            //var primaryScreen = Screens.Primary;
-            //if (primaryScreen is null)
-            //    return;
-
-            //var scale = primaryScreen.Scaling;
-            //var workingArea = primaryScreen.WorkingArea;
-            //Bounds = new Rect(
-            //    workingArea.TopLeft.ToPoint(scale),
-            //    workingArea.BottomRight.ToPoint(scale));
-            //Position = workingArea.TopLeft;
-
             WindowState = WindowState.FullScreen;
 
             if (OperatingSystem.IsWindows()
                 && this.PlatformImpl is Avalonia.Win32.WindowImpl window)
             {
 #if OS_WINDOWS
+
+                var primaryScreen = Screens.Primary;
+                var taskbarHeight = (primaryScreen?.Bounds.Bottom - primaryScreen?.WorkingArea.Bottom) ?? 0;
                 var hwnd = window.Handle.Handle;
                 var bounds = WindowBorder.Bounds;
                 var padding = WindowBorder.Padding.Top + WindowBorder.Padding.Bottom;
@@ -120,7 +116,7 @@ namespace PicoController.Gui.Views
                     (int)(topLeft.X - margin.Left),
                     (int)(topLeft.Y - margin.Top),
                     (int)(bottomRight.X + margin.Right),
-                    (int)(bottomRight.Y + margin.Bottom),
+                    (int)(bottomRight.Y + margin.Bottom - taskbarHeight),
                     5,
                     5);
 
@@ -129,47 +125,18 @@ namespace PicoController.Gui.Views
 
             }
         }
-        private void MakeNotClickable()
+
+
+        private void ShowOnAllDesktops()
         {
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows()
+                && PlatformImpl is Avalonia.Win32.WindowImpl window)
             {
-                if (this.PlatformImpl is Avalonia.Win32.WindowImpl window)
-                {
 #if OS_WINDOWS
-                    var hwnd = window.Handle.Handle;
+                var style = GetWindowLongPtr(window.Handle.Handle, GWL.GWL_EXSTYLE);
+                style = new IntPtr(style.ToInt64() | WS_EX_TOOLWINDOW);
+                SetWindowLongPtr(window.Handle.Handle, GWL.GWL_EXSTYLE, style);
 #endif
-                    //const int GWL_EXSTYLE = -20;
-                    //const uint
-                    //    //WS_EX_NOACTIVATE = 0x08000000,
-                    //    WS_EX_LAYERED = 0x00080000,
-                    //    //WS_EX_TRANSPARENT = 0x00000020,
-                    //    WS_EX_TOPMOST = 0x00000008;
-                    //                    var getWindowLong = window.GetType()
-                    //                        .GetMethod("GetExtendedStyle", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                    //                    var setWindowLong = window.GetType()
-                    //                        .GetMethod("SetExtendedStyle", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                    //                    if (getWindowLong is null || setWindowLong is null)
-                    //                    {
-                    //                        return;
-                    //                    }
-
-
-                    //                    var style = (uint)getWindowLong.Invoke(window, null)!;
-
-                    //                    setWindowLong.Invoke(window, new object[]
-                    //                    {
-                    //                        style | WS_EX_LAYERED | WS_EX_TOPMOST,
-                    //                        true
-                    //                    });
-
-                    //                    window.SetTopmost(true);
-
-                    //#if OS_WINDOWS
-                    //                    var val = SetLayeredWindowAttributes(hwnd, 0x00000000, 0, (uint)LayeredWindowFlags.LWA_ALPHA);
-                    //#endif
-                }
             }
         }
     }
