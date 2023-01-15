@@ -36,11 +36,10 @@ public partial class MainWindow : Window
                 _ => WindowTransparencyLevel.None,
             };
 
-
             Classes.Add(build switch
             {
                 > 20000 => "mica",
-                > 10000 => "mica", //"acrylic",
+                > 10000 => "acrylic", //"acrylic",
                 _ => "",
             });
         }
