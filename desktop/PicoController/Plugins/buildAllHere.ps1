@@ -4,10 +4,10 @@ param (
     [string[]]$Plugins = [string[]]@()
 )
 
-$base = $PSScriptRoot
+$base = "$PSScriptRoot\bin\"
 if ($null -eq $Plugins) {
     &"$PSScriptRoot/build.ps1" -Out $base
 }
 else {
-    &"$PSScriptRoot/build.ps1" -Out $base -Plugins $Plugins
+    &"$PSScriptRoot/build.ps1" -Out "$base" -Plugins $Plugins
 }

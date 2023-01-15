@@ -52,11 +52,11 @@ public class SwitchDesktop : IPluginAction
             };
 
             if (_logger.IsEnabled(Serilog.Events.LogEventLevel.Information))
-                _logger.Information("Switching desktop to {NewIndex}", newIndex);
+                _logger.Information("Switching desktop to {NewIndex}", newIndex + 1);
 
             VirtualDesktopAccessorInterop.GoToDesktopNumber(newIndex);
 
-            _displayInfo.Display(new Text($"Desktop {newIndex}", 25, 600));
+            _displayInfo.Display(new Text($"Desktop {newIndex + 1}", 25, 600));
         }
     });
 }

@@ -5,8 +5,6 @@ param (
     [Parameter( Mandatory = $false, Position = 1)]
     [ValidateScript( { $_ -in (Get-ChildItem -Path $PSScriptRoot -ErrorAction Stop -Directory -Exclude .vscode,bin).Name }, ErrorMessage = 'Please specify the name of a subdirectory in the current directory.')]
     [string[]]$Plugins = [string[]]@()
-
-    
 )
 
 $pluginDirs = $null;
