@@ -21,4 +21,9 @@ internal class DisplayInfo : IDisplayInfo
     {
         Task.Run(async () => await Dispatcher.UIThread.InvokeAsync(() => _viewModel.Update(infos)));
     }
+
+    public void Display(params DisplayInformations[] infos)
+    {
+        Display(infos.AsEnumerable());
+    }
 }

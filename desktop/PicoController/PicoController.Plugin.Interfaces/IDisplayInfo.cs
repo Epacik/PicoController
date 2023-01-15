@@ -9,5 +9,6 @@ namespace PicoController.Plugin;
 
 public interface IDisplayInfo
 {
+    void Display(params DisplayInformations[] infos);
     void Display(IEnumerable<DisplayInformations> infos);
 }
