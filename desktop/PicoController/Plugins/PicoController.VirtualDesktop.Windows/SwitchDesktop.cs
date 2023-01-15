@@ -1,5 +1,7 @@
 ﻿using PicoController.Core;
-using WindowsDesktop;
+using PicoController.Plugin;
+using PicoController.Plugin.DisplayInfos;
+using Serilog;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416", Justification = "this lib is Windows only")]
 
@@ -7,33 +9,54 @@ namespace PicoController.VirtualDesktop.Windows;
 
 public class SwitchDesktop : IPluginAction
 {
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    private readonly ILogger _logger;
+    private readonly IDisplayInfo _displayInfo;
+
+    public SwitchDesktop(ILogger logger, IDisplayInfo displayInfo)
     {
+        _logger = logger;
+        _displayInfo = displayInfo;
+    }
+    public async Task ExecuteAsync(int inputValue, string? argument) 
+        => await Task.Run(() =>
+    {
+        
         argument = argument ?? throw new ArgumentNullException(nameof(argument));
-        await Task.Yield();
 
         if (Environment.OSVersion.Version.Build < 14393)
             throw new InvalidOperationException("Use at least Windows 10 1607");
 
         if (int.TryParse(argument, out int index))
         {
-            WindowsDesktop.VirtualDesktop.GetDesktops()[index].Switch();
+            VirtualDesktopAccessorInterop.GoToDesktopNumber(index);
         }
         else
         {
-            var current = WindowsDesktop.VirtualDesktop.Current;
-            var desktop = argument.ToLowerInvariant() switch
+            var count = VirtualDesktopAccessorInterop.GetDesktopCount();
+            var current = VirtualDesktopAccessorInterop.GetCurrentDesktopNumber();
+            var newIndex = argument.ToLowerInvariant() switch
             {
-                "left"  => current.GetLeft()  ?? WindowsDesktop.VirtualDesktop.GetDesktops().Last(),
-                "right" => current.GetRight() ?? WindowsDesktop.VirtualDesktop.GetDesktops().First(),
-                "switch" => inputValue switch
-                {
-                     > 0 => current.GetLeft() ?? WindowsDesktop.VirtualDesktop.GetDesktops().Last(),
-                     <= 0 => current.GetRight() ?? WindowsDesktop.VirtualDesktop.GetDesktops().First(),
-                },
-                _       => throw new NotImplementedException(),
+                "switch" when inputValue < 0 && current > 0 => current - 1,
+                "left"   when current > 0 => current - 1,
+
+                "switch" when inputValue< 0 && current == 0 => count - 1,
+                "left"   when current == 0 => count - 1,
+
+                "switch" when inputValue > 0 && current < (count - 1) => current + 1,
+                "right"  when current < (count -1) => current + 1,
+
+                "switch" when inputValue > 0 && current == (count - 1) => 0,
+                "right"  when current == (count - 1) => 0,
+
+                _ => throw new InvalidOperationException("invalid argument")
             };
-            desktop.Switch();
+
+            if (_logger.IsEnabled(Serilog.Events.LogEventLevel.Information))
+                _logger.Information("Switching desktop to {NewIndex}", newIndex);
+
+            VirtualDesktopAccessorInterop.GoToDesktopNumber(newIndex);
+
+            _displayInfo.Display(new Text($"Desktop {newIndex}", 25, 600));
         }
-    }
+    });
 }

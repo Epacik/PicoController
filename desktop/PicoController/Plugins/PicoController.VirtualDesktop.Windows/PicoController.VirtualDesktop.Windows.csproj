@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <Platforms>AnyCPU;x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--<OutDir>$(ProjectDir)..\bin\PicoController.VirtualDesktop.Windows</OutDir>-->
   </PropertyGroup>
 
@@ -28,12 +29,5 @@
     </Reference>
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="dotnet publish &quot;$(ProjectDir)..\..\..\..\Thirdparty\VirtualDesktop\src\VirtualDesktop.WPF\VirtualDesktop.WPF.csproj&quot; --runtime win10-x64 -f net6.0-windows10.0.19041.0 --sc -o &quot;$(ProjectDir)..\..\..\..\Thirdparty\publish\VirtualDesktop\&quot;" />
-  </Target>
-
-  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="robocopy &quot;$(ProjectDir)..\..\..\..\Thirdparty\publish\VirtualDesktop\\&quot; &quot;$(ProjectDir)$(OutDir)&quot;&#xD;&#xA;exit 0" />
-  </Target>-->
 
 </Project>
