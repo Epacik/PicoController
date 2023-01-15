@@ -16,6 +16,7 @@ using SecretNest.TaskSchedulers;
 using Serilog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 internal class Volume : IPluginAction, IDisposable
 {
@@ -41,15 +42,12 @@ internal class Volume : IPluginAction, IDisposable
 
     private void NotificationClient_DeviceNotification(object? sender, EventArgs e)
     {
-        if(Device.HasValue)
-        {
-            Device.Value.dev.Dispose();
-        }
         _device = null;
     }
 
-    private (MMDevice dev, string name)? _device;
-    public (MMDevice dev, string name)? Device
+
+    private DeviceCache? _device;
+    public DeviceCache? Device
     {
         get
         {
@@ -88,18 +86,26 @@ internal class Volume : IPluginAction, IDisposable
 
         var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
-        if (args.Length < 2)
+        try
         {
-            ChangeMasterVolume(argument, step, device.Value);
+            if (args.Length < 2)
+            {
+                ChangeMasterVolume(argument, step, device.Value);
+            }
+            else
+            {
+                ChangeAppVolume(argument, step, device.Value, args);
+            }
         }
-        else
+        catch (InvalidComObjectException ex)
         {
-            ChangeAppVolume(argument, step, device.Value, args);
+            _logger?.Warning("An exception occured while changing volume {Ex}", ex);
+            _device = null;
         }
     }
 
 
-    private void ChangeMasterVolume(string argument, float step, (MMDevice dev, string name) device)
+    private void ChangeMasterVolume(string argument, float step, DeviceCache device)
     {
         var (dev, name) = device;
         if (argument.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
@@ -116,7 +122,7 @@ internal class Volume : IPluginAction, IDisposable
             Throw(argument);
         }
     }
-    private void ChangeAppVolume(string? argument, float step, (MMDevice dev, string name) device, string[] args)
+    private void ChangeAppVolume(string? argument, float step, DeviceCache device, string[] args)
     {
         var (dev, _) = device;
         var (appName, action) = (args[0], args[1]);
@@ -282,11 +288,25 @@ internal class Volume : IPluginAction, IDisposable
 
         public void OnDeviceStateChanged(string deviceId, DeviceState newState)
         {
+            DeviceNotification?.Invoke(this, EventArgs.Empty);
         }
 
         public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
         {
         }
+    }
+}
+
+internal record struct DeviceCache(MMDevice dev, string name)
+{
+    public static implicit operator (MMDevice dev, string name)(DeviceCache value)
+    {
+        return (value.dev, value.name);
+    }
+
+    public static implicit operator DeviceCache((MMDevice dev, string name) value)
+    {
+        return new DeviceCache(value.dev, value.name);
     }
 }
 
