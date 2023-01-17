@@ -12,21 +12,56 @@ public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollection
 	public LimitedAvaloniaList(int limit)
 	{
         Limit = limit;
-        InnerAvaloniaList = new AvaloniaList<T>();
+        InnerAvaloniaList = new AvaloniaList<T>(Limit);
     }
 
     public T this[int index]
     {
-        get => InnerAvaloniaList[index];
-        set => InnerAvaloniaList[index] = value;
+        get
+        {
+            lock (SyncRoot)
+            {
+                return InnerAvaloniaList[index];
+            }
+        }
+
+        set
+        {
+            lock (SyncRoot)
+            {
+                InnerAvaloniaList[index] = value;
+            }
+        }
     }
 
-    T IReadOnlyList<T>.this[int index] => InnerReadOnly[index];
-
-    object? IList.this[int index] 
+    T IReadOnlyList<T>.this[int index]
     {
-        get => InnerIList[index];
-        set => InnerIList[index] = value;
+        get
+        {
+            lock (SyncRoot)
+            {
+                return InnerReadOnly[index];
+            }
+        }
+    }
+
+    object? IList.this[int index]
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return InnerIList[index];
+            }
+        }
+
+        set
+        {
+            lock (SyncRoot)
+            {
+                InnerIList[index] = value;
+            }
+        }
     }
 
     public int Limit { get; }
@@ -35,25 +70,67 @@ public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollection
     private IReadOnlyList<T> InnerReadOnly => InnerAvaloniaList;
     private readonly AvaloniaList<T> InnerAvaloniaList;
 
-    public int Count => InnerAvaloniaList.Count;
+    public int Count
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                if (InnerAvaloniaList.Count <= Limit)
+                {
+                    return InnerAvaloniaList.Count;
+                }
+
+                InnerAvaloniaList.RemoveRange(Limit - 1, InnerAvaloniaList.Count - Limit);
+
+                return InnerAvaloniaList.Count;
+            }
+        }
+    }
 
     public bool IsReadOnly => InnerIList.IsReadOnly;
 
     public bool IsFixedSize => InnerIList.IsFixedSize;
 
-    public bool IsSynchronized => InnerIList.IsSynchronized;
+    public bool IsSynchronized => true;
 
     public object SyncRoot => (InnerAvaloniaList as ICollection)!.SyncRoot;
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged
     {
-        add => InnerAvaloniaList.CollectionChanged += value;
-        remove => InnerAvaloniaList.CollectionChanged -= value;
+        add
+        {
+            lock (SyncRoot)
+            {
+                InnerAvaloniaList.CollectionChanged += value;
+            }
+        }
+
+        remove
+        {
+            lock (SyncRoot)
+            {
+                InnerAvaloniaList.CollectionChanged -= value;
+            }
+        }
     }
     public event PropertyChangedEventHandler? PropertyChanged
     {
-        add => InnerAvaloniaList.PropertyChanged += value;
-        remove => InnerAvaloniaList.PropertyChanged -= value;
+        add
+        {
+            lock (SyncRoot)
+            {
+                InnerAvaloniaList.PropertyChanged += value;
+            }
+        }
+
+        remove
+        {
+            lock (SyncRoot)
+            {
+                InnerAvaloniaList.PropertyChanged -= value;
+            }
+        }
     }
 
     private void LimitElements(int itemsToAddCount)
@@ -67,40 +144,100 @@ public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollection
 
     public void Add(T item)
     {
-        LimitElements(1);
-        InnerAvaloniaList.Add(item);
+        lock (SyncRoot)
+        {
+            LimitElements(1);
+            InnerAvaloniaList.Add(item); 
+        }
     }
 
     public int Add(object? value)
     {
-        LimitElements(1);
-        return InnerIList.Add(value);
+        lock (SyncRoot)
+        {
+            LimitElements(1);
+            return InnerIList.Add(value); 
+        }
     }
 
     public void AddRange(IEnumerable<T> items)
     {
-        LimitElements(items.Count());
-        InnerAvaloniaList.AddRange(items);
+        lock (SyncRoot)
+        {
+            LimitElements(items.Count());
+            InnerAvaloniaList.AddRange(items);
+        }
     }
 
-    public void Clear() => InnerAvaloniaList.Clear();
+    public void Clear()
+    {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.Clear();
+        }
+    }
 
-    public bool Contains(T item) => InnerAvaloniaList.Contains(item);
+    public bool Contains(T item)
+    {
+        lock (SyncRoot)
+        {
+            return InnerAvaloniaList.Contains(item);
+        }
+    }
 
-    public bool Contains(object? value) => InnerIList.Contains(value);
+    public bool Contains(object? value)
+    {
+        lock (SyncRoot)
+        {
+            return InnerIList.Contains(value);
+        }
+    }
 
-    public void CopyTo(T[] array, int arrayIndex) => InnerAvaloniaList.CopyTo(array, arrayIndex);
+    public void CopyTo(T[] array, int arrayIndex)
+    {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.CopyTo(array, arrayIndex);
+        }
+    }
 
-    public void CopyTo(Array array, int index) => InnerIList.CopyTo(array, index);
+    public void CopyTo(Array array, int index)
+    {
+        lock (SyncRoot)
+        {
+            InnerIList.CopyTo(array, index);
+        }
+    }
 
-    Delegate[]? INotifyCollectionChangedDebug.GetCollectionChangedSubscribers() =>
-        ((INotifyCollectionChangedDebug)InnerAvaloniaList).GetCollectionChangedSubscribers();
+    Delegate[]? INotifyCollectionChangedDebug.GetCollectionChangedSubscribers()
+    {
+        lock (SyncRoot)
+        {
+            return ((INotifyCollectionChangedDebug)InnerAvaloniaList).GetCollectionChangedSubscribers();
+        }
+    }
 
-    public IEnumerator<T> GetEnumerator() => InnerAvaloniaList.GetEnumerator();
+    public IEnumerator<T> GetEnumerator()
+    {
+        lock (SyncRoot)
+        {
+            return InnerAvaloniaList.GetEnumerator();
+        }
+    }
 
-    public int IndexOf(T item) => InnerAvaloniaList.IndexOf(item);
+    public int IndexOf(T item) {
+        lock (SyncRoot)
+        {
+            return InnerAvaloniaList.IndexOf(item);
+        }
+    }
 
-    public int IndexOf(object? value) => InnerIList.IndexOf(value);
+    public int IndexOf(object? value) {
+        lock (SyncRoot)
+        {
+            return InnerIList.IndexOf(value);
+        }
+    }
 
     public void Insert(int index, T item)
     {
@@ -125,26 +262,66 @@ public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollection
     }
 
     public void Move(int oldIndex, int newIndex)
-        => InnerAvaloniaList.Move(oldIndex, newIndex);
+    {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.Move(oldIndex, newIndex);
+        }
+    }
 
     public void MoveRange(int oldIndex, int count, int newIndex) 
-        => InnerAvaloniaList.MoveRange(oldIndex, count, newIndex);
+        {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.MoveRange(oldIndex, count, newIndex);
+        }
+    }
 
     public bool Remove(T item) 
-        => InnerAvaloniaList.Remove(item);
+    {
+        lock (SyncRoot)
+        {
+            return InnerAvaloniaList.Remove(item);
+        }
+    }
 
     public void Remove(object? value)
-        => InnerIList.Remove(value);
+    {
+        lock (SyncRoot)
+        {
+            InnerIList.Remove(value);
+        }
+    }
 
     public void RemoveAll(IEnumerable<T> items)
-        => InnerAvaloniaList.RemoveAll(items);
+        {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.RemoveAll(items);
+        }
+    }
 
     public void RemoveAt(int index)
-        => InnerAvaloniaList.RemoveAt(index);
+        {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.RemoveAt(index);
+        }
+    }
 
     public void RemoveRange(int index, int count)
-        => InnerAvaloniaList.RemoveRange(index, count);
+        {
+        lock (SyncRoot)
+        {
+            InnerAvaloniaList.RemoveRange(index, count);
+        }
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
-        => InnerAvaloniaList.GetEnumerator();
+        {
+        lock (SyncRoot)
+        {
+            return InnerAvaloniaList.GetEnumerator();
+        }
+    }
 }
