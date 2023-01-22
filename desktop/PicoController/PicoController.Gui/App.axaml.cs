@@ -97,9 +97,22 @@ public class App : Application
         MainWindowViewModel?.RestartDevices();
     }
 
-    public void ExitApp_Click(object? sender, EventArgs e)
+    public async void ExitApp_Click(object? sender, EventArgs e)
     {
-        DesktopApplicationLifetime?.Shutdown();
+        var box = MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(
+            new()
+            {
+                ContentTitle          = "Are you sure?",
+                ContentMessage        = "Do you want to close PicoController?",
+                ButtonDefinitions     = MessageBox.Avalonia.Enums.ButtonEnum.YesNo,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            });
+
+        var result = await box.ShowDialog(MainWindow!);
+        if(result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+        {
+            DesktopApplicationLifetime?.Shutdown();
+        }
     }
 
     public override void OnFrameworkInitializationCompleted()
