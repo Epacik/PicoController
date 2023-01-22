@@ -34,6 +34,13 @@ public class SwitchDesktop : IPluginAction
         {
             var count = VirtualDesktopAccessorInterop.GetDesktopCount();
             var current = VirtualDesktopAccessorInterop.GetCurrentDesktopNumber();
+
+            if (count < 0)
+                throw new InvalidOperationException("There was a problem querying desktop count, got negative value");
+
+            if (current < 0)
+                throw new InvalidOperationException("There was a problem querying current desktop index, got negative value");
+
             var newIndex = argument.ToLowerInvariant() switch
             {
                 "switch" when inputValue < 0 && current > 0 => current - 1,
