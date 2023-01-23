@@ -48,6 +48,7 @@ public class App : Application
     {
         AvaloniaXamlLoader.Load(this);
     }
+
     public IMainWindowViewModel? MainWindowViewModel { get; set; }
     public static IClassicDesktopStyleApplicationLifetime? DesktopApplicationLifetime => Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
     private static MainWindow? MainWindow => DesktopApplicationLifetime?.MainWindow as MainWindow;
@@ -95,6 +96,22 @@ public class App : Application
             return;
 
         MainWindowViewModel?.RestartDevices();
+    }
+
+    public void ReloadPlugins_Click(object? sender, EventArgs e)
+    {
+        if (MainWindowViewModel?.Run == true)
+            return;
+
+        MainWindowViewModel?.ReloadPlugins();
+    }
+
+    public void ReloadConfig_Click(object? sender, EventArgs e)
+    {
+        if (MainWindowViewModel?.Run == true)
+            return;
+
+        MainWindowViewModel?.RequestReload();
     }
 
     public async void ExitApp_Click(object? sender, EventArgs e)
@@ -180,6 +197,12 @@ public class App : Application
         if (_trayIcon.Menu!.Items[2] is NativeMenuItem reloadPlugins)
         {
             reloadPlugins.IsEnabled = MainWindowViewModel?.Run != true;
+        }
+
+        // Reload config
+        if (_trayIcon.Menu!.Items[3] is NativeMenuItem reloadConfig)
+        {
+            reloadConfig.IsEnabled = MainWindowViewModel?.Run != true;
         }
     }
 

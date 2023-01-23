@@ -28,7 +28,8 @@
                                 <NativeMenuItem Header="Restart devices" Click="RestartDevices_Click"/>
                             </NativeMenu>
                         </NativeMenuItem>
-                        <NativeMenuItem Header="Reload plugins" Click="RestartDevices_Click"/>
+                        <NativeMenuItem Header="Reload plugins" Click="ReloadPlugins_Click"/>
+                        <NativeMenuItem Header="Reload config" Click="ReloadConfig_Click"/>
                         <NativeMenuItem Header="Exit" Click="ExitApp_Click"/>
                     </NativeMenu>
                 </TrayIcon.Menu>
