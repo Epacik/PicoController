@@ -58,10 +58,28 @@ public partial class MainWindow : Window
         }
     }
 
-    internal void RestoreWindowState()
+    internal void ToggleWindowVisibility()
     {
-        Show();
+        if (IsVisible)
+        {
+            HideWindow();
+        }
+        else
+        {
+            ShowWindow();
+        }
+    }
+
+    internal void ShowWindow()
+    {
         ShowInTaskbar = true;
+        Show();
+    }
+
+    private void HideWindow()
+    {
+        ShowInTaskbar = false;
+        Hide();
     }
 
     protected override void OnOpened(EventArgs e)
@@ -72,11 +90,10 @@ public partial class MainWindow : Window
     protected override void OnClosing(CancelEventArgs e)
     {
         e.Cancel = true;
-        ShowInTaskbar = false;
-        Hide();
+        HideWindow();
         base.OnClosing(e);
     }
-
+    
     public static readonly BooleanToGridLengthConverterParameter OutputHeight = new()
     {
         ForTrue = new GridLength(150),

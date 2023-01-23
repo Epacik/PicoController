@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CppSharp" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="VirtualDesktop">
       <HintPath>..\..\..\..\Thirdparty\publish\VirtualDesktop\VirtualDesktop.dll</HintPath>
     </Reference>
