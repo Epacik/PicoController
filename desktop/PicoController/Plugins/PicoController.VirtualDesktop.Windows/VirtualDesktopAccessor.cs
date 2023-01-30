@@ -9,15 +9,17 @@ namespace PicoController.VirtualDesktop.Windows;
 
 internal static partial class VirtualDesktopAccessorInterop
 {
-    [LibraryImport("VirtualDesktopAccessor.dll")]
+    private const string _libName = "VirtualDesktopAccessor.dll";
+
+    [LibraryImport(_libName)]
     public static partial Int32 GetDesktopCount();
 
-    [LibraryImport("VirtualDesktopAccessor.dll")]
+    [LibraryImport(_libName)]
     public static partial Int32 GetCurrentDesktopNumber();
 
-    [LibraryImport("VirtualDesktopAccessor.dll")]
+    [LibraryImport(_libName)]
     public static partial void GoToDesktopNumber(Int32 desktopNumber);
 
-    [DllImport("VirtualDesktopAccessor.dll", CharSet = CharSet.Unicode)]
-    public static extern int GetDesktopName(int desktopNumber, StringBuilder str, int length);
+    [DllImport(_libName)]
+    public static extern int GetDesktopName(int desktopNumber, IntPtr str, int length);
 }

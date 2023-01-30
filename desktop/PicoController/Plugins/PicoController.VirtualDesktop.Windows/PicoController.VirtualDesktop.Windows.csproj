@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="thirdparty\win11\" />
+    <Folder Include="thirdparty\win10\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
 using PicoController.Plugin;
 using PicoController.Plugin.DisplayInfos;
 using Serilog;
+using System.Runtime.InteropServices;
 using System.Text;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416", Justification = "this lib is Windows only")]
@@ -45,16 +46,16 @@ public class SwitchDesktop : IPluginAction
             var newIndex = argument.ToLowerInvariant() switch
             {
                 "switch" when inputValue < 0 && current > 0 => current - 1,
-                "left"   when current > 0 => current - 1,
+                "left" when current > 0 => current - 1,
 
-                "switch" when inputValue< 0 && current == 0 => count - 1,
-                "left"   when current == 0 => count - 1,
+                "switch" when inputValue < 0 && current == 0 => count - 1,
+                "left" when current == 0 => count - 1,
 
                 "switch" when inputValue > 0 && current < (count - 1) => current + 1,
-                "right"  when current < (count -1) => current + 1,
+                "right" when current < (count - 1) => current + 1,
 
                 "switch" when inputValue > 0 && current == (count - 1) => 0,
-                "right"  when current == (count - 1) => 0,
+                "right" when current == (count - 1) => 0,
 
                 _ => throw new InvalidOperationException("invalid argument")
             };
@@ -64,21 +65,52 @@ public class SwitchDesktop : IPluginAction
 
             VirtualDesktopAccessorInterop.GoToDesktopNumber(newIndex);
 
-            string name = "";
-            try
-            {
-                StringBuilder data = new StringBuilder(32);
 
-                var bufLen = VirtualDesktopAccessorInterop.GetDesktopName(newIndex, data, data.Capacity);
-                name = data.ToString();
-            }
-            catch (Exception ex)
-            {
-            }
+            var header = new Text($"Desktop {newIndex + 1}", 25, 600);
+            var name = GetDesktopName(newIndex);
 
-            _displayInfo.Display(
-                new Text($"Desktop {newIndex + 1}", 25, 600),
-                new Text(name));
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                _displayInfo.Display(header);
+            }
+            else
+            {
+                _displayInfo.Display(header, new Text(name));
+            }
         }
     });
+
+    private string GetDesktopName(int newIndex)
+    {
+        var ptr = Marshal.AllocHGlobal(32);
+        try
+        {
+            var bufLen = VirtualDesktopAccessorInterop.GetDesktopName(newIndex, ptr, 32);
+
+            return PtrToString(ptr, 32);
+        }
+        catch (Exception)
+        {
+            return "";
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+    }
+
+    private string PtrToString(nint ptr, int bufLen)
+    {
+        List<byte> buffer = new List<byte>(bufLen);
+        var offset = 0;
+        byte ch = 0;
+        do
+        {
+            ch = Marshal.ReadByte(ptr, offset++);
+            buffer.Add(ch);
+        }
+        while (ch != 0 && offset < bufLen);
+
+        return Encoding.UTF8.GetString(buffer.ToArray());
+    }
 }
