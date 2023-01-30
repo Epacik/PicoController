@@ -2,6 +2,7 @@
 using PicoController.Plugin;
 using PicoController.Plugin.DisplayInfos;
 using Serilog;
+using System.Text;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416", Justification = "this lib is Windows only")]
 
@@ -63,7 +64,21 @@ public class SwitchDesktop : IPluginAction
 
             VirtualDesktopAccessorInterop.GoToDesktopNumber(newIndex);
 
-            _displayInfo.Display(new Text($"Desktop {newIndex + 1}", 25, 600));
+            string name = "";
+            try
+            {
+                StringBuilder data = new StringBuilder(32);
+
+                var bufLen = VirtualDesktopAccessorInterop.GetDesktopName(newIndex, data, data.Capacity);
+                name = data.ToString();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            _displayInfo.Display(
+                new Text($"Desktop {newIndex + 1}", 25, 600),
+                new Text(name));
         }
     });
 }

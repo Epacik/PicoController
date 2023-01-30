@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C718C1BF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bench", "bench", "{7B03830A-5C57-4C1D-9B03-9371426AF383}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoController.VirtualDesktop.Windows.Playground", "PicoController.VirtualDesktop.Windows.Playground\PicoController.VirtualDesktop.Windows.Playground.csproj", "{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,14 @@ Global
 		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Release|x64.ActiveCfg = Release|Any CPU
 		{003988C5-4A1F-45C7-888C-87D0CB0276A3}.Release|x64.Build.0 = Release|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Debug|x64.Build.0 = Debug|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Release|x64.ActiveCfg = Release|Any CPU
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,6 +123,7 @@ Global
 		{E433B4F1-F4DD-49C0-964B-FA0D62218960} = {C0E17463-ABE1-4698-94CD-E6D69A3F7AAC}
 		{35F8E544-1502-482A-ACB9-84E568964DE0} = {C0E17463-ABE1-4698-94CD-E6D69A3F7AAC}
 		{003988C5-4A1F-45C7-888C-87D0CB0276A3} = {7B03830A-5C57-4C1D-9B03-9371426AF383}
+		{6FC08376-6B41-4E3E-AE1D-BD0D2D640897} = {C0E17463-ABE1-4698-94CD-E6D69A3F7AAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3C17AB0F-CD93-4594-9440-A9FEA7B5977F}
