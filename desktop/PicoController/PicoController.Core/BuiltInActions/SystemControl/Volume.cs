@@ -126,6 +126,7 @@ internal class Volume : IPluginAction, IDisposable
     {
         var (dev, _) = device;
         var (appName, action) = (args[0], args[1]);
+        bool exact = args.Contains("!") || args.Contains("EXACT");
 
         var sessions = dev.AudioSessionManager.Sessions;
         for (int i = 0; i < sessions.Count; i++)
@@ -154,7 +155,9 @@ internal class Volume : IPluginAction, IDisposable
             if (string.IsNullOrWhiteSpace(displayName))
                 continue;
 
-            if (proc.name.Contains(appName, StringComparison.InvariantCultureIgnoreCase))
+            if ((exact && proc.name == appName) 
+                || 
+                (!exact && proc.name.Contains(appName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))
                     session.SimpleAudioVolume.Mute = !session.SimpleAudioVolume.Mute;
