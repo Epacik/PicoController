@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppSharp" Version="1.0.1" />
+    <PackageReference Include="CppSharp" Version="1.0.45.22293" />
   </ItemGroup>
 
   <ItemGroup>
