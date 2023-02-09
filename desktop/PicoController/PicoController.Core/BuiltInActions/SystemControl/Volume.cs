@@ -155,8 +155,8 @@ internal class Volume : IPluginAction, IDisposable
             if (string.IsNullOrWhiteSpace(displayName))
                 continue;
 
-            if ((exact && proc.name == appName) 
-                || 
+            if ((exact && proc.name == appName)
+                ||
                 (!exact && proc.name.Contains(appName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 if (action.Equals("ToggleMute", StringComparison.InvariantCultureIgnoreCase))

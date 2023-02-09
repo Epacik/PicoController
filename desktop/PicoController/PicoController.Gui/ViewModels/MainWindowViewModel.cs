@@ -13,6 +13,7 @@ using Serilog;
 using PicoController.Core;
 using PicoController.Core.Devices;
 using Device = PicoController.Core.Devices.Device;
+using Usb.Events;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -46,6 +47,8 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
     private readonly IDeviceManager _deviceManager;
     private readonly IRepositoryHelper _repositoryHelper;
     private readonly Serilog.ILogger? _logger;
+    private readonly UsbEventWatcher _usbEventWatcher;
+
     private IConfigRepository ConfigRepository => _repositoryHelper.Repository;
 
     public MainWindowViewModel(
@@ -81,6 +84,10 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
 
         if (OperatingSystem.IsWindows())
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+
+        _usbEventWatcher = new UsbEventWatcher();
+        _usbEventWatcher.UsbDeviceAdded += UsbEventWatcher_UsbDeviceAdded;
+        //_usbEventWatcher.UsbDeviceRemoved += UsbEventWatcher_UsbDeviceRemoved;
     }
 
     private DeviceListViewModel _devices;
@@ -197,6 +204,15 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
                 RestartDevices();
                 break;
         }
+    }
+
+    private void UsbEventWatcher_UsbDeviceAdded(object? sender, UsbDevice e)
+    {
+        if (_devices is null)
+            return;
+
+        _usbEventWatcher.Start();
+        RestartDevices();
     }
 
     public async Task CreateNewConfig()

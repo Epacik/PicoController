@@ -61,13 +61,9 @@ public partial class MainWindow : Window
     internal void ToggleWindowVisibility()
     {
         if (IsVisible)
-        {
             HideWindow();
-        }
         else
-        {
             ShowWindow();
-        }
     }
 
     internal void ShowWindow()

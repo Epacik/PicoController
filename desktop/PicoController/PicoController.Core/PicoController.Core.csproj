@@ -42,6 +42,7 @@
     <PackageReference Include="SuccincT" Version="4.0.0" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="Tiger.Clock" Version="2.0.0" />
+    <PackageReference Include="Usb.Events" Version="10.0.1.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">

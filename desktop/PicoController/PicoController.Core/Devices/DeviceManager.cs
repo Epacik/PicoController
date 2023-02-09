@@ -4,6 +4,7 @@ using PicoController.Core.Devices.Inputs;
 using PicoController.Core.Extensions;
 using Serilog;
 using Serilog.Events;
+using Usb.Events;
 
 namespace PicoController.Core.Devices;
 
@@ -155,6 +156,7 @@ public class DeviceManager : IDeviceManager
                     }
                 }
             }
+
             _disposedValue = true;
         }
     }
@@ -169,6 +171,4 @@ public class DeviceManager : IDeviceManager
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
-    
 }

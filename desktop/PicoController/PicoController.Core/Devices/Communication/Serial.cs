@@ -30,7 +30,7 @@ public class Serial : InterfaceBase
     {
         
         var data = _port.ReadExisting()?.Trim() ?? "";
-        var lines = data.Split(new[] { "\r\n" }, StringSplitOptions.None);
+        var lines = data.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
         foreach(var line in lines)
         {
             var message = Inputs.InputMessage.Parse(line);
