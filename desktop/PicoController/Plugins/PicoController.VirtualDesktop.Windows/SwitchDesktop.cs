@@ -2,6 +2,7 @@
 using PicoController.Plugin;
 using PicoController.Plugin.DisplayInfos;
 using Serilog;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -19,6 +20,8 @@ public class SwitchDesktop : IPluginAction
         _logger = logger;
         _displayInfo = displayInfo;
     }
+
+    [HandleProcessCorruptedStateExceptions]
     public async Task ExecuteAsync(int inputValue, string? argument) 
         => await Task.Run(() =>
     {

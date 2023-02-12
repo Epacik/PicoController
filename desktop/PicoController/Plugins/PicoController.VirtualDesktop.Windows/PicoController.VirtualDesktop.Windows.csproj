@@ -10,6 +10,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--<OutDir>$(ProjectDir)..\bin\PicoController.VirtualDesktop.Windows</OutDir>-->
   </PropertyGroup>
+    
 
   <ItemGroup>
     <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
