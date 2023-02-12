@@ -1,4 +1,5 @@
-﻿using System.IO.Ports;
+﻿using Serilog;
+using System.IO.Ports;
 using System.Text.Json;
 
 namespace PicoController.Core.Devices.Communication;
@@ -6,8 +7,9 @@ public class Serial : InterfaceBase
 {
     private bool _isDisposed;
     private readonly SerialPort _port;
+    private readonly ILogger _logger;
 
-    public Serial(Dictionary<string, JsonElement> connectionData) : base(connectionData)
+    public Serial(Dictionary<string, JsonElement> connectionData, Serilog.ILogger _logger) : base(connectionData)
     {
         _port = new SerialPort
         {
@@ -18,6 +20,7 @@ public class Serial : InterfaceBase
             Parity    = (Parity)connectionData["parity"].GetInt32(),
             DtrEnable = true,
         };
+        this._logger = _logger;
     }
 
     public override void Connect()
@@ -30,6 +33,9 @@ public class Serial : InterfaceBase
     {
         
         var data = _port.ReadExisting()?.Trim() ?? "";
+
+        if(_logger.IsEnabled(Serilog.Events.LogEventLevel.Verbose))
+            _logger.Verbose("Message received over serial port, {Data}", data);
         var lines = data.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
         foreach(var line in lines)
         {
@@ -40,6 +46,7 @@ public class Serial : InterfaceBase
 
     public override void Disconnect()
     {
+        _port.DataReceived -= Port_DataReceived;
         _port.Close();
     }
 
@@ -49,7 +56,6 @@ public class Serial : InterfaceBase
         {
             if (disposing)
             {
-                _port.DataReceived -= Port_DataReceived;
                 _port.Dispose();
             }
 

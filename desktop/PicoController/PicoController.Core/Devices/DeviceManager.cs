@@ -63,8 +63,8 @@ public class DeviceManager : IDeviceManager
                  var connectionData = device.Interface.Data;
                  InterfaceBase ifc = device.Interface.Type switch
                  {
-                     InterfaceType.COM => new Serial(connectionData),
-                     InterfaceType.WiFi => new WiFi(connectionData),
+                     InterfaceType.COM => new Serial(connectionData, _logger),
+                     InterfaceType.WiFi => new WiFi(connectionData, _logger),
                      _ => throw new InvalidDataException($"{device.Interface.Type} is not a valid interface"),
                  };
 
