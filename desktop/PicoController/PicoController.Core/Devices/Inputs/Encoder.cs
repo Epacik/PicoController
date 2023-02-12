@@ -27,7 +27,7 @@ namespace PicoController.Core.Devices.Inputs
         protected override async Task ExecuteInternal(InputMessage message)
         {
             const int counterClockwise = 1, clockwise = 1 << 1;
-            if (Split)
+            if (!Split)
             {
                 var value = message.Value switch { counterClockwise => -1, clockwise => 1, _ => 0 };
                 await InvokeAction(value, ActionNames.Rotate);
