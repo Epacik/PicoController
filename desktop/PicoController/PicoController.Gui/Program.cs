@@ -20,6 +20,11 @@ internal static class Program
             ?.Replace(pluginDirArgName, "");
 
         Bootstrapper.Register(Locator.CurrentMutable, Locator.Current, customMainDir);
+        var logger = Locator.Current.GetService<Serilog.ILogger>();
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            logger?.Fatal("An unhandled error occured {ExceptionObject}", e.ExceptionObject);
+        };
         BuildAvaloniaApp()
         .StartWithClassicDesktopLifetime(args);
     }
