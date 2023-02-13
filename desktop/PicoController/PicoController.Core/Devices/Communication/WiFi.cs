@@ -62,6 +62,8 @@ internal class WiFi : InterfaceBase
                 var length = stream.Read(buffer, 0, buffer.Length);
                 var data = utf8.GetString(buffer, 0, length);
 
+                client.Close();
+
                 if (_logger.IsEnabled(Serilog.Events.LogEventLevel.Verbose))
                     _logger.Verbose("Message received over network, {Data}", data);
 
