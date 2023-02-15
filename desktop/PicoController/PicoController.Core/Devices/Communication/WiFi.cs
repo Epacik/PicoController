@@ -78,11 +78,15 @@ internal class WiFi : InterfaceBase
             }
             catch (OperationCanceledException)
             {
+                listener.Stop();
                 return;
             }
             catch(Exception ex)
             {
                 _logger.Warning("An error occured while receiving data over network {Ex}", ex);
+                listener.Stop();
+                listener = new TcpListener(_address, _port);
+                listener.Start();
             }
         }
     }
