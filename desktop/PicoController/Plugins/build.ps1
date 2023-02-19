@@ -23,6 +23,7 @@ else {
 }
 
 foreach ($plugin in $pluginDirs) {
+    Write-Output "Dir: $plugin";
     if (Test-Path -Path "$PSScriptRoot/$plugin/build.ps1")
     {
         &"$PSScriptRoot/$plugin/build.ps1" -Out "$Out$plugin"

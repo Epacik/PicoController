@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
+    <ProjectReference Include="..\VirtualDesktops\VirtualDesktop.Windows\VirtualDesktop.Windows.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CliWrap" Version="3.6.0" />
     <PackageReference Include="CppSharp" Version="1.0.45.22293" />
   </ItemGroup>
 

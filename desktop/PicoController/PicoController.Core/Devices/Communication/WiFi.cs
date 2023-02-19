@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using static IronPython.Modules._ast;
 using static IronPython.Runtime.Profiler;
 
 namespace PicoController.Core.Devices.Communication;
@@ -10,6 +11,7 @@ internal class WiFi : InterfaceBase
 {
     private CancellationTokenSource? _calcallationTokenSource;
     private Thread? _listeningThread;
+    private int id;
     private readonly int _port;
     private readonly IPAddress _address;
     private readonly ILogger _logger;
@@ -33,7 +35,8 @@ internal class WiFi : InterfaceBase
         _calcallationTokenSource = new CancellationTokenSource();
         _listeningThread = new Thread(Listen)
         {
-            IsBackground = true,
+            Priority = ThreadPriority.BelowNormal,
+            Name = $"PicoController Network Interface Thread {id++}",
         };
         _listeningThread.Start();
     }
@@ -46,10 +49,11 @@ internal class WiFi : InterfaceBase
         _calcallationTokenSource?.Cancel();
     }
 
-    private async void Listen(object? obj)
+    private async void Listen()
     {
         var token = _calcallationTokenSource!.Token;
         var listener = new TcpListener(_address, _port);
+        Thread.Sleep(500);
         listener.Start();
         var utf8 = Encoding.UTF8;
         while (true)

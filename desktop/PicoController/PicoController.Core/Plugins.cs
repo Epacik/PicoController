@@ -28,9 +28,19 @@ public interface IPluginManager
     void UnloadPlugins();
 }
 
+internal class PluginInfo : IPluginInfo
+{
+    public PluginInfo(string location)
+    {
+        Location = location;
+    }
+
+    public string Location { get; }
+}
+
 public class PluginManager : IPluginManager
 {
-    private readonly Dictionary<string, PluginLoader> _loaders = new();
+    private readonly Dictionary<string, (PluginLoader, string)> _loaders = new();
     private readonly List<Assembly> _assemblies = new();
 
     private readonly Dictionary<string, IPluginAction> LoadedActions = new();
@@ -91,7 +101,7 @@ public class PluginManager : IPluginManager
                         config.IsLazyLoaded = true;
                         config.LoadInMemory = true;
                     });
-                _loaders.Add(dirName, loader);
+                _loaders.Add(dirName, (loader, dir));
             }
         }
         AreLoaded = true;
@@ -100,9 +110,9 @@ public class PluginManager : IPluginManager
     public void UnloadPlugins()
     {
         _assemblies.Clear();
-        foreach (var loader in _loaders)
+        foreach (var (key, (loader, location)) in _loaders)
         {
-            loader.Value.Dispose();
+            loader.Dispose();
         }
         _loaders.Clear();
         ClearLookups();
@@ -111,9 +121,9 @@ public class PluginManager : IPluginManager
 
     private void ClearLookups()
     {
-        foreach (var action in LoadedActions)
+        foreach (var (key, action) in LoadedActions)
         {
-            if (action.Value is IDisposable disposable)
+            if (action is IDisposable disposable)
             {
                 disposable?.Dispose();
             }
@@ -153,12 +163,12 @@ public class PluginManager : IPluginManager
         if (!_loaders.ContainsKey(assemblyName))
             return null;
 
-        var loader = _loaders[assemblyName];
+        var (loader, location) = _loaders[assemblyName];
         using (loader.EnterContextualReflection())
         {
             var assembly = loader.LoadDefaultAssembly();
             var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPluginAction);
-            return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
+            return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler, location);
         }
     }
 
@@ -167,10 +177,10 @@ public class PluginManager : IPluginManager
         var typename = handler.TrimStart('/');
         var assembly = Assembly.GetExecutingAssembly();
         var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPluginAction);
-        return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler);
+        return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler, assembly?.Location);
     }
 
-    private Func<int, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler)
+    private Func<int, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler, string? location)
     {
         if (allActionsInAssembly is null)
             return null;
@@ -195,7 +205,7 @@ public class PluginManager : IPluginManager
             if (action is null)
             return null;
 
-            InjectDependencies(action, actionType);
+            InjectDependencies(action, actionType, location);
         }
         else
         {
@@ -203,7 +213,14 @@ public class PluginManager : IPluginManager
             var ctor = constructors.First();
             foreach ( var parameter in ctor.GetParameters() )
             {
-                arguments.Add(_resolver.GetService(parameter.ParameterType));
+                if (parameter.ParameterType == typeof(IPluginInfo))
+                {
+                    arguments.Add(new PluginInfo(location!));
+                }
+                else
+                {
+                    arguments.Add(_resolver.GetService(parameter.ParameterType));
+                }
             }
             action = ctor.Invoke(arguments.ToArray()) as IPluginAction;
             //action = Activator.CreateInstance(actionType.AsType(), arguments) as IPluginAction;
@@ -216,21 +233,21 @@ public class PluginManager : IPluginManager
         return IPluginActionToFuncOfTask(value, action);
     }
 
-    private void InjectDependencies(IPluginAction action, Type actionType)
+    private void InjectDependencies(IPluginAction action, Type actionType, string? location)
     {
         var flags = BindingFlags.Public | BindingFlags.Instance;
         var props = actionType.GetProperties(flags);
         if (props is null)
             return;
 
-        Type[] types = { typeof(IDisplayInfo), };
+        Type[] types = { typeof(IDisplayInfo), typeof(Serilog.ILogger), typeof(IPluginInfo) };
 
         foreach (var type in types)
         {
             foreach (PropertyInfo prop in props.Where(x => x.PropertyType == type))
             {
                 var set = prop.GetSetMethod(true);
-                var value = _resolver.GetService(type);
+                var value = type == typeof(IPluginInfo) ? new PluginInfo(location!) : _resolver.GetService(type);
                 if (set is not null && value is not null)
                     set.Invoke(action, new[] { value });
             }
@@ -289,13 +306,13 @@ public class PluginManager : IPluginManager
             Assembly.GetExecutingAssembly().DefinedTypes
                 .Where(IsVisiblePluginAction).Select(x => "/" + x.Name));
 
-        foreach (var loader in _loaders)
+        foreach (var (key, (loader, location)) in _loaders)
         {
             result.AddRange(
-                loader.Value
+                loader
                     .LoadDefaultAssembly().DefinedTypes
                     .Where(IsVisiblePluginAction)
-                    .Select(x => $"{loader.Key}/{x.Name}"));
+                    .Select(x => $"{key}/{x.Name}"));
         }
 
         return result;
@@ -339,4 +356,9 @@ public class PluginManager : IPluginManager
 
         throw new NotImplementedException();
     }
+}
+
+internal record class PluginActionAndInfo(IPluginAction Action, IPluginInfo Info)
+{
+
 }
