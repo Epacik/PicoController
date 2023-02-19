@@ -16,7 +16,7 @@ add_executable(PicoController
 pico_enable_stdio_usb(PicoController 1)
 pico_enable_stdio_uart(PicoController 1)
 
-target_link_libraries(PicoController 
+target_link_libraries(PicoController
     pico_stdlib 
     pico_multicore
     hardware_exception
