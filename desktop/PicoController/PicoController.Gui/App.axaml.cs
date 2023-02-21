@@ -116,6 +116,11 @@ public class App : Application
 
     public async void ExitApp_Click(object? sender, EventArgs e)
     {
+        if(MainWindow?.IsVisible != true)
+        {
+            MainWindow?.Show();
+        }
+
         var box = MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(
             new()
             {
