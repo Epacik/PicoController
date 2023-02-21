@@ -4,6 +4,7 @@ using Avalonia.ReactiveUI;
 using PicoController.Gui.Converters;
 using PicoController.Gui.DependencyInjection;
 using System;
+using System.Diagnostics;
 
 namespace PicoController.Gui;
 
@@ -21,10 +22,17 @@ internal static class Program
 
         Bootstrapper.Register(Locator.CurrentMutable, Locator.Current, customMainDir);
         var logger = Locator.Current.GetService<Serilog.ILogger>();
+
+        var start = DateTime.Now;
+        
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
+            if ((DateTime.Now - start).TotalSeconds > 10)
+                Process.Start("PicoController.RestartAfterCrash.exe");
+            
             logger?.Fatal("An unhandled error occured {ExceptionObject}", e.ExceptionObject);
         };
+
         BuildAvaloniaApp()
         .StartWithClassicDesktopLifetime(args);
     }

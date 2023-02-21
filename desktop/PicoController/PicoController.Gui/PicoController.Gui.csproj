@@ -53,6 +53,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PicoController.Core\PicoController.Core.csproj" />
     <ProjectReference Include="..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
+    <ProjectReference Include="..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj" />
   </ItemGroup>
 
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
