@@ -159,10 +159,6 @@ public class App : Application
                 mwNpc.PropertyChanged += MainWindow_PropertyChanged;
             }
 
-            if (DesktopApplicationLifetime.Args?.Contains("--hide") == true)
-                mainWindow.Hide();
-
-
             _trayIcon = TrayIcon.GetIcons(this)[0];
             UpdateTrayMenu();
         }

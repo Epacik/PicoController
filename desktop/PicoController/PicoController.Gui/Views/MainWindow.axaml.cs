@@ -32,20 +32,30 @@ public partial class MainWindow : Window
             TransparencyLevelHint = build switch
             {
                 > 20000 => WindowTransparencyLevel.Mica,
-                > 10000 => WindowTransparencyLevel.AcrylicBlur,
+                //> 10000 => WindowTransparencyLevel.AcrylicBlur,
                 _ => WindowTransparencyLevel.None,
             };
 
             Classes.Add(build switch
             {
                 > 20000 => "mica",
-                > 10000 => "acrylic", //"acrylic",
+               // > 10000 => "acrylic", //"acrylic",
                 _ => "",
             });
         }
 
-        if (App.DesktopApplicationLifetime?.Args?.Contains("--hide") == true)
+        Opened += MainWindow_Opened;
+    }
+
+    bool firstOpen = true;
+
+    private void MainWindow_Opened(object? sender, EventArgs e)
+    {
+        if (firstOpen && App.DesktopApplicationLifetime?.Args?.Contains("--hide") == true)
+        {
             Hide();
+        }
+        firstOpen = false;
     }
 
     private void MainWindow_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
