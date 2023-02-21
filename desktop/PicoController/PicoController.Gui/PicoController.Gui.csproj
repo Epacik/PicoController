@@ -63,11 +63,12 @@
 
   <Target Name="BuildRestarter">
     <Message Text="Build PicoController.RestartAfterCrash" />
-    <Exec Command="dotnet publish &quot;$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj&quot; -c $(Configuration) --sc -r win-x64 -f $(TargetFramework) -o &quot;$(OutDir)&quot;"/>
-    
-    <MSBuild Projects="$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj" Properties="Configuration=$(Configuration);Optimize=$(Optimize);Platform=$(Platform);" Targets="Build" RebaseOutputs="true">
-      <Output ItemName="BuildRestarterOutputs" TaskParameter="TargetOutputs" />
-    </MSBuild>
+    <Exec Command="dotnet publish &quot;$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj&quot; -c $(Configuration) --sc -r win-x64 -f $(TargetFramework) -o &quot;$(OutDir)\Restarter\&quot;"/>
+  </Target>
+
+  <Target Name="BuildRestarterPublish" AfterTargets="Publish">
+    <Message Text="Build PicoController.RestartAfterCrash" />
+    <Exec Command="dotnet publish &quot;$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj&quot; -c $(Configuration) --sc -r win-x64 -f $(TargetFramework) -o &quot;$(PublishDir)\Restarter\&quot;"/>
   </Target>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
@@ -77,6 +78,7 @@
       BuildRestarter;
       $(BuildDependsOn);
     </BuildDependsOn>
+    
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

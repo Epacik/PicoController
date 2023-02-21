@@ -5,6 +5,7 @@ using PicoController.Gui.Converters;
 using PicoController.Gui.DependencyInjection;
 using System;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace PicoController.Gui;
 
@@ -27,8 +28,9 @@ internal static class Program
         
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
+            var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly()!.Location)!;
             if ((DateTime.Now - start).TotalSeconds > 10)
-                Process.Start("PicoController.RestartAfterCrash.exe");
+                Process.Start(Path.Combine(location, "Restarter", "PicoController.RestartAfterCrash.exe"));
             
             logger?.Fatal("An unhandled error occured {ExceptionObject}", e.ExceptionObject);
         };
