@@ -43,6 +43,9 @@ public partial class MainWindow : Window
                 _ => "",
             });
         }
+
+        if (App.DesktopApplicationLifetime?.Args?.Contains("--hide") == true)
+            Hide();
     }
 
     private void MainWindow_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
