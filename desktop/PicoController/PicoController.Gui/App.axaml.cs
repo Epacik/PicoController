@@ -25,7 +25,7 @@ namespace PicoController.Gui;
 
 public class App : Application
 {
-    private TrayIcon _trayIcon;
+    private TrayIcon? _trayIcon;
 
     public App()
     {
@@ -74,6 +74,12 @@ public class App : Application
     public void ShowWindow_Click(object? sender, EventArgs e)
     {
         MainWindow?.ToggleWindowVisibility();
+    }
+
+    public static void FocusMainWindow()
+    {
+        MainWindow?.ShowWindow();
+        MainWindow?.Focus();
     }
 
     public void ToggleDevices_Click(object? sender, EventArgs e)
@@ -192,20 +198,20 @@ public class App : Application
 
         // Restart Devices
         if (
-            _trayIcon.Menu!.Items[1] is NativeMenuItem devices &&
-            devices.Menu!.Items[1] is NativeMenuItem restartDevices)
+            _trayIcon?.Menu?.Items[1] is NativeMenuItem devices &&
+            devices?.Menu?.Items[1] is NativeMenuItem restartDevices)
         {
             restartDevices.IsEnabled = MainWindowViewModel?.Run == true;
         }
 
         // Reload plugins
-        if (_trayIcon.Menu!.Items[2] is NativeMenuItem reloadPlugins)
+        if (_trayIcon?.Menu?.Items[2] is NativeMenuItem reloadPlugins)
         {
             reloadPlugins.IsEnabled = MainWindowViewModel?.Run != true;
         }
 
         // Reload config
-        if (_trayIcon.Menu!.Items[3] is NativeMenuItem reloadConfig)
+        if (_trayIcon?.Menu?.Items[3] is NativeMenuItem reloadConfig)
         {
             reloadConfig.IsEnabled = MainWindowViewModel?.Run != true;
         }

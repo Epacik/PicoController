@@ -25,7 +25,6 @@ public class SwitchDesktop : IPluginAction
         _pluginInfo = pluginInfo;
     }
 
-    [HandleProcessCorruptedStateExceptions]
     public async Task ExecuteAsync(int inputValue, string? argument)
         //=> await Task.Run(() =>
     {
@@ -54,9 +53,9 @@ public class SwitchDesktop : IPluginAction
 
         var output = System.Text.Json.JsonSerializer.Deserialize<Output>(
             outputBuilder.ToString().Split("|").Last());
-        var header = new Text($"Desktop {output.Index}", 25, 600);
+        var header = new Text($"Desktop {output?.Index}", 25, 600);
 
-        if (string.IsNullOrWhiteSpace(output.Name))
+        if (string.IsNullOrWhiteSpace(output?.Name))
         {
             _displayInfo.Display(header);
         }
