@@ -33,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VirtualDesktops", "VirtualD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDesktop.Windows", "Plugins\VirtualDesktops\VirtualDesktop.Windows\VirtualDesktop.Windows.csproj", "{E69F4A0B-E3BF-4E97-9803-1FD5AA128004}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoController.RestartAfterCrash", "PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj", "{946D58AF-42AA-498E-B9A3-DBB5E405BBAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.RestartAfterCrash", "PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj", "{946D58AF-42AA-498E-B9A3-DBB5E405BBAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

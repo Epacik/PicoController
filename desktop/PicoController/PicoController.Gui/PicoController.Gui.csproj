@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
@@ -53,10 +55,30 @@
   <ItemGroup>
     <ProjectReference Include="..\PicoController.Core\PicoController.Core.csproj" />
     <ProjectReference Include="..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
-    <ProjectReference Include="..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj" />
   </ItemGroup>
 
-    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-        <DefineConstants>OS_WINDOWS</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <DefineConstants>OS_WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <Target Name="BuildRestarter">
+    <Message Text="Build PicoController.RestartAfterCrash" />
+    <Exec Command="dotnet publish &quot;$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj&quot; -c $(Configuration) --sc -r win-x64 -f $(TargetFramework) -o &quot;$(OutDir)&quot;"/>
+    
+    <MSBuild Projects="$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj" Properties="Configuration=$(Configuration);Optimize=$(Optimize);Platform=$(Platform);" Targets="Build" RebaseOutputs="true">
+      <Output ItemName="BuildRestarterOutputs" TaskParameter="TargetOutputs" />
+    </MSBuild>
+  </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <BuildDependsOn>
+      BuildRestarter;
+      $(BuildDependsOn);
+    </BuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  </Target>
 </Project>
