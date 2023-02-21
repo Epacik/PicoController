@@ -13,7 +13,7 @@ using PicoController.Core.DependencyInjection;
 using PicoController.Core.Extensions;
 using PicoController.Core.Devices;
 
-Bootstrapper.Register(Splat.Locator.CurrentMutable, Locator.Current);
+Bootstrapper.Register(Splat.Locator.CurrentMutable, Locator.Current, null);
 
 
 var rootCommand = new RootCommand("Program communicating with a PicoController");

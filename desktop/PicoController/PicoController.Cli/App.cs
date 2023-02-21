@@ -62,7 +62,7 @@ internal static class App
                 {
                     try
                     {
-                        device.Connect();
+                        device.Interface.Connect();
                     }
                     catch (Exception ex)
                     {
@@ -98,7 +98,7 @@ internal static class App
                     {
                         try
                         {
-                            device.Disconnect();
+                            device.Interface.Disconnect();
                         }
                         catch (Exception ex)
                         {
