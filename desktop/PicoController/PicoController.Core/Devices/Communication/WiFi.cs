@@ -7,7 +7,7 @@ using static IronPython.Runtime.Profiler;
 
 namespace PicoController.Core.Devices.Communication;
 
-internal class WiFi : InterfaceBase
+internal class WiFi : DeviceInterface
 {
     private CancellationTokenSource? _calcallationTokenSource;
     private Thread? _listeningThread;
@@ -47,6 +47,11 @@ internal class WiFi : InterfaceBase
             return;
 
         _calcallationTokenSource?.Cancel();
+    }
+
+    public override void Reconnect()
+    {
+        // there's no need to do anything here
     }
 
     private async void Listen()

@@ -3,36 +3,34 @@ using System.IO.Ports;
 using System.Text.Json;
 
 namespace PicoController.Core.Devices.Communication;
-public class Serial : InterfaceBase
+public class Serial : DeviceInterface
 {
     private bool _isDisposed;
-    private readonly SerialPort _port;
+    private SerialPort? _port;
     private readonly ILogger _logger;
+    private readonly string _portName;
+    private readonly int _baudRate;
+    private readonly int _dataBits;
+    private readonly StopBits _stopBits;
+    private readonly Parity _parity;
+    private readonly bool _dtrEnable;
 
     public Serial(Dictionary<string, JsonElement> connectionData, Serilog.ILogger _logger) : base(connectionData)
     {
-        _port = new SerialPort
-        {
-            PortName  = connectionData["port"].GetString() ?? "",
-            BaudRate  = connectionData["rate"].GetInt32(),
-            DataBits  = connectionData["dataBits"].GetInt32(),
-            StopBits  = (StopBits)connectionData["stopBits"].GetInt32(),
-            Parity    = (Parity)connectionData["parity"].GetInt32(),
-            DtrEnable = true,
-        };
+        _portName  = connectionData["port"].GetString() ?? "COM1";
+        _baudRate  = connectionData["rate"].GetInt32();
+        _dataBits  = connectionData["dataBits"].GetInt32();
+        _stopBits  = (StopBits)connectionData["stopBits"].GetInt32();
+        _parity    = (Parity)connectionData["parity"].GetInt32();
+        _dtrEnable = true;
+        
         this._logger = _logger;
-    }
-
-    public override void Connect()
-    {
-        _port.DataReceived += Port_DataReceived;
-        _port.Open();
     }
 
     private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
         
-        var data = _port.ReadExisting()?.Trim() ?? "";
+        var data = _port!.ReadExisting()?.Trim() ?? "";
 
         if(_logger.IsEnabled(Serilog.Events.LogEventLevel.Verbose))
             _logger.Verbose("Message received over serial port, {Data}", data);
@@ -44,10 +42,36 @@ public class Serial : InterfaceBase
         }
     }
 
+    public override void Connect()
+    {
+        _port = new SerialPort
+        {
+            PortName  = _portName,
+            BaudRate  = _baudRate,
+            DataBits  = _dataBits,
+            StopBits  = _stopBits,
+            Parity    = _parity,
+            DtrEnable = _dtrEnable,
+        };
+        _port.DataReceived += Port_DataReceived;
+        _port.Open();
+    }
+
     public override void Disconnect()
     {
+        if (_port is null)
+            throw new InvalidOperationException("Serial interface wasn't connected");
+
         _port.DataReceived -= Port_DataReceived;
         _port.Close();
+    }
+
+    public override void Reconnect()
+    {
+        if (_port is not null)
+            Disconnect();
+
+        Connect();
     }
 
     protected virtual void Dispose(bool disposing)
@@ -56,7 +80,7 @@ public class Serial : InterfaceBase
         {
             if (disposing)
             {
-                _port.Dispose();
+                _port?.Dispose();
             }
 
             _isDisposed = true;
@@ -73,4 +97,6 @@ public class Serial : InterfaceBase
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+
+    
 }

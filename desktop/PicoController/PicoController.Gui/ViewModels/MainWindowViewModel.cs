@@ -14,6 +14,8 @@ using PicoController.Core;
 using PicoController.Core.Devices;
 using Device = PicoController.Core.Devices.Device;
 using Usb.Events;
+using Microsoft.Scripting.Utils;
+using System.Collections.ObjectModel;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -265,7 +267,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         {
             try
             {
-                device.Connect();
+                device.Interface.Connect();
             }
             catch (Exception ex)
             {
@@ -289,9 +291,13 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         }
     }
 
-    public async void RestartDevices()
+    public void RestartDevices()
     {
-        await StopDevices();
-        await StartDevices();
+        if (_runningDevices is null)
+            return;
+        foreach (var device in _runningDevices)
+        {
+            device.Interface.Reconnect();
+        }
     }
 }

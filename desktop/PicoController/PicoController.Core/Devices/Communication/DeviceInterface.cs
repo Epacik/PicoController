@@ -3,11 +3,11 @@ using System.Text.Json;
 
 namespace PicoController.Core.Devices.Communication;
 
-public abstract class InterfaceBase : IDisposable
+public abstract class DeviceInterface : IDisposable
 {
     private readonly Dictionary<string, JsonElement> _connectionData;
 
-    protected InterfaceBase(Dictionary<string, JsonElement> connectionData)
+    protected DeviceInterface(Dictionary<string, JsonElement> connectionData)
     {
         _connectionData = connectionData;
     }
@@ -15,6 +15,7 @@ public abstract class InterfaceBase : IDisposable
     public abstract void Connect();
     public abstract void Disconnect();
     public abstract void Dispose();
+    public abstract void Reconnect();
 
     public event EventHandler<InterfaceMessageEventArgs>? NewMessage;
 

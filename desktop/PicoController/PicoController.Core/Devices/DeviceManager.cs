@@ -61,7 +61,7 @@ public class DeviceManager : IDeviceManager
                  Config.Device device = devices[deviceId];
 
                  var connectionData = device.Interface.Data;
-                 InterfaceBase ifc = device.Interface.Type switch
+                Communication.DeviceInterface ifc = device.Interface.Type switch
                  {
                      InterfaceType.COM => new Serial(connectionData, _logger),
                      InterfaceType.WiFi => new WiFi(connectionData, _logger),
@@ -117,7 +117,7 @@ public class DeviceManager : IDeviceManager
             {
                 try
                 {
-                    device.Disconnect();
+                    device.Interface.Disconnect();
                 }
                 finally
                 {
@@ -148,7 +148,7 @@ public class DeviceManager : IDeviceManager
                 {
                     try
                     {
-                        device.Disconnect();
+                        device.Interface.Disconnect();
                     }
                     finally
                     {

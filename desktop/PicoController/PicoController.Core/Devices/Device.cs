@@ -15,11 +15,11 @@ namespace PicoController.Core.Devices
     public class Device : IDisposable
     {
 
-        public readonly InterfaceBase Interface;
+        public readonly DeviceInterface Interface;
         public readonly List<Inputs.Input> Inputs;
         private bool _isDisposed;
 
-        public Device(InterfaceBase @interface, List<Inputs.Input> inputs)
+        public Device(DeviceInterface @interface, List<Inputs.Input> inputs)
         {
             Interface = @interface;
             Inputs = inputs;
@@ -35,8 +35,6 @@ namespace PicoController.Core.Devices
             await input.Execute(e.Message);
         }
 
-        public void Connect() => Interface.Connect();
-        public void Disconnect() => Interface.Disconnect();
 
         #region IDisposable
         protected virtual void Dispose(bool disposing)
