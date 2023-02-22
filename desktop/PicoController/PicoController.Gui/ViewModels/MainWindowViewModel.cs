@@ -16,6 +16,7 @@ using Device = PicoController.Core.Devices.Device;
 using Usb.Events;
 using Microsoft.Scripting.Utils;
 using System.Collections.ObjectModel;
+using System.Management;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -87,9 +88,15 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         if (OperatingSystem.IsWindows())
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-        _usbEventWatcher = new UsbEventWatcher();
-        _usbEventWatcher.UsbDeviceAdded += UsbEventWatcher_UsbDeviceAdded;
-        //_usbEventWatcher.UsbDeviceRemoved += UsbEventWatcher_UsbDeviceRemoved;
+        try
+        {
+            _usbEventWatcher = new UsbEventWatcher();
+            _usbEventWatcher.UsbDeviceAdded += UsbEventWatcher_UsbDeviceAdded;
+        }
+        catch (ManagementException ex)
+        {
+            _logger?.Warning("An error occured while initializing usb watcher {Ex}", ex);
+        }
     }
 
     private DeviceListViewModel _devices;
