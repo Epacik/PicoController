@@ -21,11 +21,12 @@
         HorizontalAlignment="Center"
         BoxShadow="0 5 25 2 #66000000"
         x:Name="WindowBorder">
-		<Grid RowDefinitions="15, *">
+		<Grid>
 			<Button 
 				HorizontalAlignment="Right"
+				VerticalAlignment="Top"
 				Height="20"
-				Margin="0,-25,-15,0"
+				Margin="0,-15,-15,0"
 				Padding="5,-5"
 				Click="CloseButton_Click"
 				x:Name="CloseButton">
