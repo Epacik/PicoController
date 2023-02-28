@@ -19,6 +19,11 @@ namespace PicoController.Gui.Views
             Controls.SizeChanged += Controls_SizeChanged;
         }
 
+        private void CloseButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            (DataContext as DisplayInfoWindowViewModel)!.Show = false;
+        }
+
         private void Controls_SizeChanged(object? sender, SizeChangedEventArgs e)
         {
             UpdateWindowTransparency(e.NewSize);
