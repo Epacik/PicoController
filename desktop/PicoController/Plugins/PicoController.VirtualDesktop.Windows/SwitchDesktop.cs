@@ -37,7 +37,8 @@ public class SwitchDesktop : IPluginAction
         var outputBuilder = new StringBuilder();
         var command = Cli.Wrap(Path.Combine(_pluginInfo.Location, "VirtualDesktop.Windows.exe"))
             .WithArguments(new string[] { argument, inputValue.ToString() })
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(outputBuilder, Encoding.UTF8));
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(outputBuilder, Encoding.UTF8))
+            .WithValidation(CommandResultValidation.None);
 
         var returnValue = await command.ExecuteAsync();
 
