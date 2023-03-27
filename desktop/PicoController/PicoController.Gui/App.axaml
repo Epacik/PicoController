@@ -30,6 +30,7 @@
                         </NativeMenuItem>
                         <NativeMenuItem Header="Reload plugins" Click="ReloadPlugins_Click"/>
                         <NativeMenuItem Header="Reload config" Click="ReloadConfig_Click"/>
+                        <NativeMenuItem Header="Restart" Click="Restart_Click"/>
                         <NativeMenuItem Header="Exit" Click="ExitApp_Click"/>
                     </NativeMenu>
                 </TrayIcon.Menu>

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Newtonsoft.Json.Bson;
 using PicoController.Core;
 using PicoController.Core.Config;
 using PicoController.Core.Extensions;
@@ -19,7 +20,9 @@ using Serilog.Sinks.Discord;
 using Splat;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Reflection;
 
 namespace PicoController.Gui;
 
@@ -118,6 +121,14 @@ public class App : Application
             return;
 
         MainWindowViewModel?.RequestReload();
+    }
+
+    public void Restart_Click(object? sender, EventArgs e)
+    {
+        var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly()!.Location)!;
+
+        Process.Start(Path.Combine(location, "PicoController.Gui.exe"));
+        Environment.Exit(0);
     }
 
     public async void ExitApp_Click(object? sender, EventArgs e)
