@@ -52,17 +52,30 @@ public class SwitchDesktop : IPluginAction
                 throw new InvalidOperationException("There was a problem querying desktop count, got negative value");
         }
 
-        var output = System.Text.Json.JsonSerializer.Deserialize<Output>(
-            outputBuilder.ToString().Split("|").Last());
-        var header = new Text($"Desktop {output?.Index}", 25, 600);
+        var content = outputBuilder.ToString();
+        var json = content.Split("|").Last();
 
-        if (string.IsNullOrWhiteSpace(output?.Name))
+        try 
         {
-            _displayInfo.Display(header);
+            var output = System.Text.Json.JsonSerializer.Deserialize<Output>(json);
+            var header = new Text($"Desktop {output?.Index}", 25, 600);
+
+            if (string.IsNullOrWhiteSpace(output?.Name))
+            {
+                _displayInfo.Display(header);
+            }
+            else
+            {
+                _displayInfo.Display(header, new Text(output.Name));
+            }
         }
-        else
+        catch (Exception ex)
         {
-            _displayInfo.Display(header, new Text(output.Name));
+            _logger.Warning(
+                "An error occured while parsing json.\nJson to parse: \"{Json}\"\n\nSTD Out: {Content}\n\n Exception: {Ex}",
+                json,
+                content,
+                ex);
         }
 
 
