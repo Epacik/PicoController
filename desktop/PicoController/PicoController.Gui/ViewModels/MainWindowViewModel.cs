@@ -17,6 +17,7 @@ using Usb.Events;
 using Microsoft.Scripting.Utils;
 using System.Collections.ObjectModel;
 using System.Management;
+using System.IO.Ports;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -51,6 +52,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
     private readonly IRepositoryHelper _repositoryHelper;
     private readonly Serilog.ILogger? _logger;
     private readonly UsbEventWatcher _usbEventWatcher;
+    private readonly Timer _deviceCheckTimer;
 
     private IConfigRepository ConfigRepository => _repositoryHelper.Repository;
 
@@ -88,14 +90,42 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         if (OperatingSystem.IsWindows())
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-        try
+        _deviceCheckTimer = new Timer(DeviceCheckTimerCallback, null, 1000, 1000);
+
+        //try
+        //{
+        //    _usbEventWatcher = new UsbEventWatcher();
+        //    _usbEventWatcher.UsbDeviceAdded += UsbEventWatcher_UsbDeviceAdded;
+        //}
+        //catch (ManagementException ex)
+        //{
+        //    _logger?.Warning("An error occured while initializing usb watcher {Ex}", ex);
+        //}
+    }
+
+    private string[] _previousComPorts = Array.Empty<string>();
+
+    private void DeviceCheckTimerCallback(object? state)
+    {
+        var comPorts = SerialPort.GetPortNames();
+        var comDevices = _runningDevices
+            ?.Where(x => x.Interface is Core.Devices.Communication.Serial)
+            ?.ToArray();
+
+        if (comDevices is not null && comPorts is not null)
         {
-            _usbEventWatcher = new UsbEventWatcher();
-            _usbEventWatcher.UsbDeviceAdded += UsbEventWatcher_UsbDeviceAdded;
-        }
-        catch (ManagementException ex)
-        {
-            _logger?.Warning("An error occured while initializing usb watcher {Ex}", ex);
+            var comDeviceNames = comDevices
+                .Select(x => (x.Interface as Core.Devices.Communication.Serial)?.PortName)
+                .Where(x => x is not null)
+                .ToArray();
+
+            if (comPorts.Length != _previousComPorts.Length ||
+                !comPorts.All(x => _previousComPorts.Contains(x)) ||
+                !_previousComPorts.All(x => comPorts.Contains(x)))
+            {
+                RestartDevices();
+            }
+            _previousComPorts = comPorts;
         }
     }
 
@@ -264,6 +294,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         if (_runningDevices is not null)
             return;
 
+        _logger?.Information("Starting devices");
         var config = _repositoryHelper.SavedConfigCopy;
         if (config is null)
             return;
@@ -288,6 +319,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         if (_runningDevices is null)
             return;
 
+        _logger?.Information("Stopping devices");
         try
         {
             await _deviceManager.UnloadDevicesAsync();
@@ -302,6 +334,8 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
     {
         if (_runningDevices is null)
             return;
+
+        _logger?.Information("Restarting devices");
         foreach (var device in _runningDevices)
         {
             device.Interface.Reconnect();

@@ -63,7 +63,7 @@ public class PluginManager : IPluginManager
 
     public bool AreLoaded { get; private set; }
 
-    private static Type[] SharedTypes =
+    private static readonly Type[] SharedTypes =
     {
         typeof(IPluginAction),
         typeof(IDisplayInfo),

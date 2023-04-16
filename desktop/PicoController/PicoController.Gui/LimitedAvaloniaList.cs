@@ -147,7 +147,7 @@ public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollection
         lock (SyncRoot)
         {
             LimitElements(1);
-            InnerAvaloniaList.Add(item); 
+            InnerAvaloniaList.Add(item);
         }
     }
 

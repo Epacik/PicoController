@@ -8,16 +8,16 @@ public class Serial : DeviceInterface
     private bool _isDisposed;
     private SerialPort? _port;
     private readonly ILogger _logger;
-    private readonly string _portName;
+    public string PortName { get; }
     private readonly int _baudRate;
     private readonly int _dataBits;
     private readonly StopBits _stopBits;
     private readonly Parity _parity;
     private readonly bool _dtrEnable;
 
-    public Serial(Dictionary<string, JsonElement> connectionData, Serilog.ILogger _logger) : base(connectionData)
+    public Serial(Dictionary<string, JsonElement> connectionData, ILogger _logger) : base(connectionData)
     {
-        _portName  = connectionData["port"].GetString() ?? "COM1";
+        PortName  = connectionData["port"].GetString() ?? "COM1";
         _baudRate  = connectionData["rate"].GetInt32();
         _dataBits  = connectionData["dataBits"].GetInt32();
         _stopBits  = (StopBits)connectionData["stopBits"].GetInt32();
@@ -44,9 +44,13 @@ public class Serial : DeviceInterface
 
     public override void Connect()
     {
+        var availablePorts = SerialPort.GetPortNames();
+        if (availablePorts is null || !availablePorts.Contains(PortName))
+            return;
+
         _port = new SerialPort
         {
-            PortName  = _portName,
+            PortName  = PortName,
             BaudRate  = _baudRate,
             DataBits  = _dataBits,
             StopBits  = _stopBits,
@@ -64,6 +68,7 @@ public class Serial : DeviceInterface
 
         _port.DataReceived -= Port_DataReceived;
         _port.Close();
+        _port.Dispose();
     }
 
     public override void Reconnect()
@@ -97,6 +102,4 @@ public class Serial : DeviceInterface
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
-    
 }

@@ -42,7 +42,7 @@ internal static class Program
             .UsePlatformDetect()
             .With(new Win32PlatformOptions
             {
-                UseWindowsUIComposition = true,
+                //UseWindowsUIComposition = true,
             })
             .With(new X11PlatformOptions { })
             .With(new AvaloniaNativePlatformOptions { })
