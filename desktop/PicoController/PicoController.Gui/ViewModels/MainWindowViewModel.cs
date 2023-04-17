@@ -90,7 +90,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         if (OperatingSystem.IsWindows())
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-        _deviceCheckTimer = new Timer(DeviceCheckTimerCallback, null, 1000, 1000);
+        _deviceCheckTimer = new Timer(DeviceCheckTimerCallback, null, 100, 100);
 
         //try
         //{
