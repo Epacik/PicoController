@@ -1,3 +1,5 @@
+
+
 add_executable(PicoController
         main.cpp main.h
 
@@ -11,7 +13,8 @@ add_executable(PicoController
         Communication.cpp Communication.h
         UserInteractions.cpp UserInteractions.h
         pins.h
-        IO/Output/LED.cpp IO/Output/LED.h IO/Output/Output.h)
+        IO/Output/LED.cpp IO/Output/LED.h IO/Output/Output.h
+        Generated/CreateInputs.cpp)
 
 pico_enable_stdio_usb(PicoController 1)
 pico_enable_stdio_uart(PicoController 1)
@@ -23,3 +26,8 @@ target_link_libraries(PicoController
     etl)
 
 pico_add_extra_outputs(PicoController)
+
+add_custom_command(TARGET PicoController
+        PRE_BUILD
+        COMMAND pwsh ${CMAKE_CURRENT_SOURCE_DIR}/generate_inputs.ps1
+)
