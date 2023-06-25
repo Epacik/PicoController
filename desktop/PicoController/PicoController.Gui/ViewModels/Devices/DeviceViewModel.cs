@@ -119,7 +119,7 @@ public class DeviceViewModel : ViewModelBase
             CornerRadius = new CornerRadius(5),
             VerticalContentAlignment = VerticalAlignment.Stretch,
         };
-        var result = await dialog.ShowAsync(ContentDialogPlacement.Popup);
+        var result = await dialog.ShowAsync();
 
         if(result != ContentDialogResult.Primary)
         {

@@ -29,11 +29,11 @@ public partial class MainWindow : Window
         if (OperatingSystem.IsWindows())
         {
             var build = Environment.OSVersion.Version.Build;
-            TransparencyLevelHint = build switch
+            TransparencyLevelHint = new List<WindowTransparencyLevel> 
             {
-                > 20000 => WindowTransparencyLevel.Mica,
-                //> 10000 => WindowTransparencyLevel.AcrylicBlur,
-                _ => WindowTransparencyLevel.None,
+                WindowTransparencyLevel.Mica,
+                WindowTransparencyLevel.AcrylicBlur,
+                WindowTransparencyLevel.None 
             };
 
             Classes.Add(build switch
@@ -96,7 +96,8 @@ public partial class MainWindow : Window
         base.OnOpened(e);
         //_timer.Start();
     }
-    protected override void OnClosing(CancelEventArgs e)
+
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         e.Cancel = true;
         HideWindow();

@@ -67,7 +67,7 @@
                         <ComboBox 
                             Grid.Row="2"
                             Grid.Column="1"
-                            Items="{Binding InterfaceTypes}"
+                            ItemsSource="{Binding InterfaceTypes}"
                             SelectedItem="{Binding SelectedInterfaceType}"/>
                     </Grid>
                 </Expander.Content>
@@ -75,7 +75,7 @@
 
             <ListBox Classes="Inputs"
                      Grid.Row="4"
-                     Items="{Binding Inputs}">
+                     ItemsSource="{Binding Inputs}">
                 
             </ListBox>
         </Grid>

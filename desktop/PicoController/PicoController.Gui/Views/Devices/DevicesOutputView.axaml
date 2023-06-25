@@ -11,7 +11,7 @@
             Grid.Row="1"
             SelectedIndex="{Binding LastIndex}"
             VerticalAlignment="Stretch"
-            Items="{Binding Logs}">
+            ItemsSource="{Binding Logs}">
             <!--<ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Text, Mode=OneWay}"/>

@@ -12,14 +12,14 @@
     <Design.PreviewWith>
         <Border Padding="20" Width="500">
             <!-- Add Controls for Previewer Here -->
-            <ListBox Classes="Inputs" Items="{x:Static local:DeviceListTest.TestInputs}"/>
+            <ListBox Classes="Inputs" ItemsSource="{x:Static local:DeviceListTest.TestInputs}"/>
         </Border>
     </Design.PreviewWith>
 
     <Style Selector="ListBox.Inputs">
-        <Setter 
+        <!--<Setter 
             Property="VirtualizationMode"
-            Value="None"/>
+            Value="None"/>-->
         <Setter Property="CornerRadius"
                 Value="5"/>
         
@@ -42,7 +42,7 @@
                                         RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dw:DeviceView}}}"
                                       CommandParameter="{Binding .}"/>
                         
-                        <ListBox Items="{Binding Actions}"
+                        <ListBox ItemsSource="{Binding Actions}"
                                  Classes="InputActions"
                                  Grid.Row="2"
                                  Grid.ColumnSpan="6">

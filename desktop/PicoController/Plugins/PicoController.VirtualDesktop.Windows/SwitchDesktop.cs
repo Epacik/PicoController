@@ -57,16 +57,20 @@ public class SwitchDesktop : IPluginAction
 
         try 
         {
-            var output = System.Text.Json.JsonSerializer.Deserialize<Output>(json);
-            var header = new Text($"Desktop {output?.Index}", 25, 600);
+            if (json.TrimStart().StartsWith("{"))
+            {
 
-            if (string.IsNullOrWhiteSpace(output?.Name))
-            {
-                _displayInfo.Display(header);
-            }
-            else
-            {
-                _displayInfo.Display(header, new Text(output.Name));
+                var output = System.Text.Json.JsonSerializer.Deserialize<Output>(json);
+                var header = new Text($"Desktop {output?.Index}", 25, 600);
+
+                if (string.IsNullOrWhiteSpace(output?.Name))
+                {
+                    _displayInfo.Display(header);
+                }
+                else
+                {
+                    _displayInfo.Display(header, new Text(output.Name));
+                }
             }
         }
         catch (Exception ex)

@@ -22,9 +22,9 @@ namespace PicoController.Gui.Themes
 
         protected void OnThemeChanged(bool isDarkMode)
         {
-            var faTheme = AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>();
-            faTheme!.RequestedTheme = isDarkMode ? FluentAvaloniaTheme.DarkModeString : FluentAvaloniaTheme.LightModeString;
-            ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(isDarkMode));
+            //var faTheme = AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>();
+            //faTheme!.RequestedTheme = isDarkMode ? FluentAvaloniaTheme.DarkModeString : FluentAvaloniaTheme.LightModeString;
+            //ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(isDarkMode));
         }
 
         public abstract bool IsDarkMode();

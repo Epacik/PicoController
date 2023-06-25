@@ -17,7 +17,7 @@
 
     <ListBox SelectionMode="Single"
              Classes="Devices"
-             Items="{Binding Devices}"
+             ItemsSource="{Binding Devices}"
              SelectedItem="{Binding SelectedDevice}"
              Background="Transparent"
              SelectionChanged="ListBox_SelectionChanged"/>

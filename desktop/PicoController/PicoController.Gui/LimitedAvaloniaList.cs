@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace PicoController.Gui;
 
-public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollectionChangedDebug
+public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollectionChanged
 {
 	public LimitedAvaloniaList(int limit)
 	{
@@ -209,13 +209,13 @@ public class LimitedAvaloniaList<T> : IAvaloniaList<T>, IList, INotifyCollection
         }
     }
 
-    Delegate[]? INotifyCollectionChangedDebug.GetCollectionChangedSubscribers()
-    {
-        lock (SyncRoot)
-        {
-            return ((INotifyCollectionChangedDebug)InnerAvaloniaList).GetCollectionChangedSubscribers();
-        }
-    }
+    //Delegate[]? INotifyCollectionChangedDebug.GetCollectionChangedSubscribers()
+    //{
+    //    lock (SyncRoot)
+    //    {
+    //        return ((INotifyCollectionChangedDebug)InnerAvaloniaList).GetCollectionChangedSubscribers();
+    //    }
+    //}
 
     public IEnumerator<T> GetEnumerator()
     {
