@@ -8,7 +8,7 @@ namespace IO::Input
     public:
         IO::Input::Message* GetMessage() override;
         Button(uint8_t id, uint8_t pin);
-        Button(uint8_t id, IInputPin* pin);
+        Button(uint8_t id, InputPin* pin);
 
     private:
         bool isHeld;

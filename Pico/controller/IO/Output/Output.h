@@ -21,12 +21,12 @@ namespace IO::Output
     {
 
     public:
-        const uint8_t ID;
         const IO::Output::OutputType Type;
 
     protected:
-        etl::vector<IOutputPin *, 24> pins;
+        etl::vector<OutputPin *, 24> pins;
 
-        Output(uint8_t id, OutputType type) : ID(id), Type(type) {}
+        explicit Output(OutputType type) : Type(type) {}
+        virtual void Set(bool value) = 0;
     };
 }

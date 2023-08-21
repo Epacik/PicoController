@@ -7,7 +7,7 @@ enum class Values {
 
 IO::Input::Button::Button(uint8_t id, uint8_t pin) :  Button(id, new InputPin(pin)) {}
 
-IO::Input::Button::Button(uint8_t id, IInputPin* pin) : Input(id, InputType::Button)
+IO::Input::Button::Button(uint8_t id, InputPin* pin) : Input(id, InputType::Button)
 {
     pins = { pin };
     isHeld = false;

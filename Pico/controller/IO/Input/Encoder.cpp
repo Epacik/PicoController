@@ -1,14 +1,26 @@
 #include "Encoder.h"
+#include "mpark/patterns.hpp"
 
 namespace IO::Input
 {
-    Encoder::Encoder(uint8_t id, uint8_t pin0, uint8_t pin1) : Encoder(id, new InputPin(id), new InputPin(id)) {}
+    Encoder::Encoder(uint8_t id, uint8_t pin0, uint8_t pin1) : Encoder(id, new InputPin(id), new InputPin(id)) {
+        for (int i = 0; i < 4; ++i) {
+            states[i] = EncoderStates::None;
+        }
+    }
 
     Encoder::Encoder(uint8_t id, InputType type = InputType::Encoder) : Input(id, type) {}
     
-    Encoder::Encoder(uint8_t id, IInputPin* pin0, IInputPin* pin1) : Input(id, InputType::Encoder)
+    Encoder::Encoder(uint8_t id, InputPin* pin0, InputPin* pin1) : Input(id, InputType::Encoder)
     {
-        this->pins = {pin0, pin1};
+        this->pins = { pin0, pin1 };
+    }
+
+    bool HasState(EncoderStates value, EncoderStates state)
+    {
+        auto iValue = static_cast<uint32_t>(value);
+        auto iState = static_cast<uint32_t>(state);
+        return (iValue & iState) > 0;
     }
 
     IO::Input::Message* Encoder::GetMessage()
@@ -23,47 +35,19 @@ namespace IO::Input
         }
     }
 
-    bool Encoder::CompareState(bool a, bool b, EncoderStates state)
-    {
-        switch (state)
-        {
-        case EncoderStates::A:
-            return a && !b;
-        case EncoderStates::B:
-            return !a && b;
-        case EncoderStates::AB:
-            return a && b;
-        case EncoderStates::None:
-            return !a && !b;
-        }
-        return false;
-    }
-
-    bool Encoder::CompareStateAndPush(bool a, bool b, EncoderStates lastState, EncoderStates newState)
-    {
-        if (lastState != newState && CompareState(a, b, newState))
-        {
-            PushLastState(newState);
-            return true;
-        }
-
-        return false;
-    }
 
     EncoderDirection Encoder::CurrentDirection()
     {
-        auto newA = this->pins[0]->Read();
-        auto newB = this->pins[1]->Read();
+        auto currentState = GetState();
+        auto lastState = GetLastState(3);
 
-        auto lastState = lastStates.back();
-
-        // I only want to push one of them at the time, so that seems aproprieate
-        if (CompareStateAndPush(newA, newB, lastState, EncoderStates::None)) {}
-        else if (CompareStateAndPush(newA, newB, lastState, EncoderStates::A)) {}
-        else if (CompareStateAndPush(newA, newB, lastState, EncoderStates::B)) {}
-        else if (CompareStateAndPush(newA, newB, lastState, EncoderStates::AB)) {}
-        else
+        if (lastState == currentState)
             return EncoderDirection::None;
+
+        PushLastState(currentState);
+        printf("New State: A: %d; B: %d\r\n",
+               HasState(currentState, EncoderStates::A),
+               HasState(currentState, EncoderStates::B));
 
         /*
         counter clockwise
@@ -79,14 +63,19 @@ namespace IO::Input
         A: 1, B: 1
         */
 
+        auto state0 = GetLastState(0);
+        auto state1 = GetLastState(1);
+        auto state2 = GetLastState(2);
+        auto state3 = GetLastState(3);
+
         auto result = EncoderDirection::None;
-        if (lastStates[1] != EncoderStates::None || lastStates[3] != EncoderStates::AB)
+        if (state1 != EncoderStates::None || state3 != EncoderStates::AB)
             result = EncoderDirection::None;
 
-        else if (lastStates[0] == EncoderStates::B && lastStates[2] == EncoderStates::A)
+        else if (state0 == EncoderStates::B && state2 == EncoderStates::A)
             result = EncoderDirection::CounterClockwise;
 
-        else if (lastStates[0] == EncoderStates::A && lastStates[2] == EncoderStates::B)
+        else if (state0 == EncoderStates::A && state2 == EncoderStates::B)
             result = EncoderDirection::Clockwise;
         
         return result;
@@ -94,10 +83,28 @@ namespace IO::Input
 
     void Encoder::PushLastState(EncoderStates state)
     {
-        lastStates[0] = lastStates[1];
-        lastStates[1] = lastStates[2];
-        lastStates[2] = lastStates[3];
-        lastStates[3] = state;
+        states[0] = states[1];
+        states[1] = states[2];
+        states[2] = states[3];
+        states[3] = state;
+//        stateOffset = (stateOffset + 1) % 4;
+//        states[stateOffset] = state;
     }
 
+    EncoderStates Encoder::GetLastState(uint32_t i) {
+        return states[(i + stateOffset) % 4];
+    }
+
+    EncoderStates Encoder::GetState() {
+        using namespace mpark::patterns;
+        auto a = this->pins[0]->Read();
+        auto b = this->pins[1]->Read();
+
+        return match(a, b)(
+            pattern(true, false) = []() { return EncoderStates::A; },
+            pattern(false, true) = []() { return EncoderStates::B; },
+            pattern(true, true)  = []() { return EncoderStates::AB; },
+            pattern(_, _)        = []() { return EncoderStates::None; }
+        );
+    }
 }

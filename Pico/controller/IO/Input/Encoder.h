@@ -1,5 +1,6 @@
 #pragma once
 #include "Input.h"
+#include "etl/circular_buffer.h"
 
 namespace IO::Input
 {
@@ -22,18 +23,20 @@ namespace IO::Input
     {
     public:
         Encoder(uint8_t id, uint8_t pin0, uint8_t pin1);
-        Encoder(uint8_t id, IInputPin* pin0, IInputPin* pin1);
+        Encoder(uint8_t id, InputPin* pin0, InputPin* pin1);
         IO::Input::Message* GetMessage() override;
 
     protected:
         Encoder(uint8_t id, InputType type);
 
-        bool CompareStateAndPush(bool a, bool b, EncoderStates lastState, EncoderStates newState);
-        bool CompareState(bool a, bool b, EncoderStates state);
         EncoderDirection CurrentDirection();
         void PushLastState(EncoderStates state);
+        EncoderStates GetLastState(uint32_t i);
+        EncoderStates GetState();
 
     private:
-        etl::array<EncoderStates, 4> lastStates;
+        //etl::array<EncoderStates, 4> lastStates;
+        etl::array<EncoderStates, 4> states;
+        uint32_t stateOffset = 0;
     };
 }

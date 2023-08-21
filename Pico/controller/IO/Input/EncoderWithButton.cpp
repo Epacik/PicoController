@@ -13,7 +13,7 @@ namespace IO::Input
         : EncoderWithButton(id, new InputPin(pin0), new InputPin(pin1), new InputPin(pinButton))
     {}
     
-    EncoderWithButton::EncoderWithButton(uint8_t id, IInputPin* pin0, IInputPin* pin1, IInputPin* pinButton)
+    EncoderWithButton::EncoderWithButton(uint8_t id, InputPin* pin0, InputPin* pin1, InputPin* pinButton)
         : Encoder(id, InputType::EncoderWithButton)
     {
         pins = {pin0, pin1, pinButton};

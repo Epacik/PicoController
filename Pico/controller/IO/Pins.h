@@ -26,57 +26,31 @@ namespace IO {
         return static_cast<PinPull>(static_cast<int>(a) & static_cast<int>(b));
     }
 
-    class IPin {
-
+    class Pin {
         protected:
         const uint8_t pin;
         const PinDirection direction;
         const PinPull pull;
         
-        virtual void Init() = 0;
-        IPin(uint8_t pin, PinDirection direction, PinPull pull) : pin(pin), direction(direction), pull(pull) {}
+        void Init();
+        Pin(uint8_t pin, PinDirection direction, PinPull pull) : pin(pin), direction(direction), pull(pull) {
+            Init();
+        }
     };
 
-    class IInputPin : public IPin
-    {
-        public:
-        virtual bool Read() = 0;
 
-        protected:
-        IInputPin(uint8_t pin, PinPull pull) : IPin(pin, PinDirection::Input, pull) {}
-    };
 
-    class IOutputPin : public IPin 
-    {
-        public:
-        virtual void Set(bool value) = 0;
-
-        protected:
-        IOutputPin(uint8_t pin, PinPull pull) : IPin(pin, PinDirection::Output, pull) {}
-    };
-
-    class InputPin : public IInputPin 
+    class InputPin : public Pin
     {
         public: 
-        explicit InputPin(uint8_t pin, PinPull pull = PinPull::None) : IInputPin(pin, pull) {
-            Init();
-        }
-        bool Read() override;
-
-        protected:
-        void Init() override;
-        
+        explicit InputPin(uint8_t pin, PinPull pull = PinPull::None) : Pin(pin, PinDirection::Input, pull) { }
+        bool Read();
     };
 
-    class OutputPin : public IOutputPin 
+    class OutputPin : public Pin
     {
         public:
-        explicit OutputPin(uint8_t pin, PinPull pull = PinPull::None) : IOutputPin(pin, pull) {
-            Init();
-        }
-        void Set(bool value) override;
-
-        protected:
-        void Init() override;
+        explicit OutputPin(uint8_t pin, PinPull pull = PinPull::None) : Pin(pin, PinDirection::Output, pull) { }
+        virtual void Set(bool value);
     };
 }

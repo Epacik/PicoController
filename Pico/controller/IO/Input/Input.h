@@ -37,11 +37,12 @@ namespace IO::Input
         const IO::Input::InputType Type;
 
     protected:
-        etl::vector<IInputPin*, 24> pins;
+        etl::vector<InputPin*, 24> pins;
 
         Input(uint8_t id, InputType type) : ID(id), Type(type) {}
 
-        IO::Input::Message* CreateMessage(uint32_t value)
+        [[nodiscard]]
+        IO::Input::Message* CreateMessage(uint32_t value) const
         {
             return new IO::Input::Message(this->ID, this->Type, value);
         }

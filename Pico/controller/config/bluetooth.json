@@ -1,0 +1,38 @@
+{
+  "inputs": [
+    {
+      "type": "button",
+      "pins": [ 27 ]
+    },
+    {
+      "type": "button",
+      "pins": [ 26 ]
+    },
+    {
+      "type": "button",
+      "pins": [ 3 ]
+    },
+    {
+      "type": "button",
+      "pins": [ 4 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 18, 19, 2 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 20, 21, 22 ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "defaultLedPicoW",
+      "pins": [  ]
+    }
+  ],
+  "batteryInput": {
+    "pin": 28,
+    "adc": 2
+  }
+}

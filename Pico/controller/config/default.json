@@ -1,0 +1,46 @@
+{
+  "inputs": [
+    {
+      "type": "button",
+      "pins": [ 17 ]
+    },
+    {
+      "type": "button",
+      "pins": [ 18 ]
+    },
+    {
+      "type": "button",
+      "pins": [ 19 ]
+    },
+    {
+      "type": "button",
+      "pins": [ 20 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 2, 3, 12 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 5, 4, 13 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 6, 7, 14 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 8, 9, 15 ]
+    },
+    {
+      "type": "encoderWithButton",
+      "pins": [ 11, 10, 16 ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "defaultLed",
+      "pins": [ 25 ]
+    }
+  ]
+}

@@ -1,16 +1,17 @@
 #include "UserInteractions.h"
-#include "IO/Input/CreateInputs.h"
+#include "IO/CurrentIO.h"
 #include "IO/Output/LED.h"
-#include "Communication.h"
+#include "Communication/Communication.h"
+#include "Time.h"
 
 etl::vector<etl::unique_ptr<IO::Input::Input>, 256> inputs;
 
-IO::Output::LED* LED;
+etl::unique_ptr<IO::Output::LED> LED;
 
 void UserInteractions::Initialize()
 {
-    inputs = IO::Input::CreateInputs();
-    LED = new IO::Output::LED(0, 25);
+    inputs = IO::GetInputs();
+    LED = IO::GetDefaultLED();
 }
 
 
@@ -19,14 +20,13 @@ void UserInteractions::Entry()
 {
     LED->Blink(200);
 
-    //SOS(LED);
-    uint32_t time = UsSinceBoot();
+    uint32_t time = Time::UsSinceBoot();
 
     while(true) {
         // wait until at least next half of a ms to help with debounce buttons a bit
-        if(time + 200 >= UsSinceBoot()) {
-            continue;
-        }
+       if(time + 100 <= Time::UsSinceBoot()) {
+           continue;
+       }
 
         for (auto &input : inputs) {
             auto message = input->GetMessage();
@@ -36,7 +36,7 @@ void UserInteractions::Entry()
             Communication::PushOntoMessageQueue(message);
         }
 
-        time = UsSinceBoot();
+        time = Time::UsSinceBoot();
     }
 }
 
@@ -50,12 +50,6 @@ void UserInteractions::SOS(IO::Output::LED* led)
     }
 }
 
-
-
-uint32_t UserInteractions::UsSinceBoot()
-{
-    return to_us_since_boot(get_absolute_time());
-}
 
 
 

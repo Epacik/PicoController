@@ -7,7 +7,7 @@ namespace IO::Input
     {
     public:
         EncoderWithButton(uint8_t id, uint8_t pin0, uint8_t pin1, uint8_t pinButton);
-        EncoderWithButton(uint8_t id, IInputPin* pin0, IInputPin* pin1, IInputPin* pinButton);
+        EncoderWithButton(uint8_t id, InputPin* pin0, InputPin* pin1, InputPin* pinButton);
         IO::Input::Message* GetMessage() override;
 
     private:
