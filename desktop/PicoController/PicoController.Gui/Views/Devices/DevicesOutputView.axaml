@@ -3,20 +3,58 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PicoController.Gui.Views.Devices.DevicesOutputView">
+             x:Class="PicoController.Gui.Views.Devices.DevicesOutputView"
+             x:Name="Self">
     <Grid RowDefinitions="30,*">
-            <!--SelectedItem="{Binding LastItem}"-->
         <ListBox 
             x:Name="Output"
             Grid.Row="1"
-            SelectedIndex="{Binding LastIndex}"
             VerticalAlignment="Stretch"
             ItemsSource="{Binding Logs}">
-            <!--<ListBox.ItemTemplate>
+            <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Text, Mode=OneWay}"/>
+                    <Expander>
+                        <Expander.Header>
+                            <ContentControl>
+                                <StackPanel Spacing="10">
+                                    <StackPanel Spacing="5" Orientation="Horizontal">
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding LogEvent.Level}"/>
+                                        <TextBlock >
+                                            <Run Text="["/>
+                                            <Run Text="{Binding 
+                                             LogEvent.Timestamp, 
+                                             StringFormat='yyyy-MM-dd HH:mm:ss.fffff',
+                                             Mode=OneWay}"/>
+                                            <Run Text="]"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding ShortenedText}"/>
+                                </StackPanel>
+                            </ContentControl>
+                        </Expander.Header>
+                        <Expander.Content>
+                            <Grid ColumnDefinitions="*,60"
+                                  RowDefinitions="Auto,Auto">
+                                <TextBlock Text="{Binding Text}"
+                                           Grid.Column="0"
+                                           Grid.Row="0"/>
+                                <TextBlock Text="{Binding LogEvent.Exception, FallbackValue=''}"
+                                           Grid.Column="0"
+                                           Grid.Row="1"/>
+                                
+                                <Button Command="{Binding CopyToClipboard}"
+                                        CommandParameter="{Binding}"
+                                        Grid.Column="1"
+                                        Grid.Row="0"
+                                        VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Content="Copy"/>
+                                
+                            </Grid>
+                        </Expander.Content>
+                    </Expander>
                 </DataTemplate>
-            </ListBox.ItemTemplate>-->
+            </ListBox.ItemTemplate>
         </ListBox>
     </Grid>
 </UserControl>

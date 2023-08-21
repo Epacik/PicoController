@@ -12,14 +12,14 @@ namespace PicoController.Core.Devices.Inputs;
 internal class Button : Input
 {
     private readonly int _maxDelayBetweenClicks;
-    private readonly System.Timers.Timer _timer;
+    //private readonly System.Timers.Timer _timer;
 
     public Button(
         int deviceId,
         byte inputId,
         Dictionary<string, Func<int, Task>?> actions,
-        int maxDelayBetweenClicks, 
-        ILogger logger) 
+        int maxDelayBetweenClicks,
+        ILogger logger)
         : base(
             deviceId,
             inputId,
@@ -29,35 +29,12 @@ internal class Button : Input
             logger)
     {
         _maxDelayBetweenClicks = maxDelayBetweenClicks;
-        _timer = new System.Timers.Timer(_maxDelayBetweenClicks);
-        _timer.Elapsed += _timer_Elapsed;
-        _timer.AutoReset = false;
     }
 
-    private async void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
-    {
-        async Task invoke(int presses)
-        {
-            switch (presses)
-            {
-                case 1:
-                    await InvokeAction(0, ActionNames.Press); break;
-                case 2:
-                    await InvokeAction(0, ActionNames.DoublePress); break;
-                case 3:
-                    await InvokeAction(0, ActionNames.TriplePress); break;
-                case > 3:
-                    await InvokeAction(0, ActionNames.TriplePress);
-                    await invoke(presses - 3);
-                    break;
-            }
-        }
-        
-        await invoke(Interlocked.Exchange(ref _presses, 0));
-    }
 
-    private bool IsPressed;
+    private bool _isPressed;
     private int _presses;
+    private CancellationTokenSource? _tokenSource;
 
     protected override async Task ExecuteInternal(InputMessage message)
     {
@@ -65,17 +42,47 @@ internal class Button : Input
 
         await Task.Yield();
 
-        if (IsPressed && message.Value == Released)
+        _tokenSource?.Cancel();
+        _tokenSource?.Dispose();
+        _tokenSource = null;
+
+        if (_isPressed && message.Value == Released)
         {
-            IsPressed = false;
+            _isPressed = false;
             Interlocked.Increment(ref _presses);
 
-            _timer.Stop();
-            _timer.Start();
+            try
+            {
+                _tokenSource = new CancellationTokenSource();
+                await Task.Delay(_maxDelayBetweenClicks, _tokenSource.Token);
+                await InvokeClicks(Interlocked.Exchange(ref _presses, 0));
+            }
+            catch (TaskCanceledException)
+            {
+                // swallow
+            }
+
         }
-        else if(!IsPressed && message.Value == Pressed)
+        else if(!_isPressed && message.Value == Pressed)
         {
-            IsPressed = true;
+            _isPressed = true;
+        }
+    }
+
+    async Task InvokeClicks(int presses)
+    {
+        switch (presses)
+        {
+            case 1:
+                await InvokeAction(0, ActionNames.Press); break;
+            case 2:
+                await InvokeAction(0, ActionNames.DoublePress); break;
+            case 3:
+                await InvokeAction(0, ActionNames.TriplePress); break;
+            case > 3:
+                await InvokeAction(0, ActionNames.TriplePress);
+                await InvokeClicks(presses - 3);
+                break;
         }
     }
 }

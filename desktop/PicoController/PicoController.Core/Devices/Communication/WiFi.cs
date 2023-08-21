@@ -92,7 +92,7 @@ internal class WiFi : DeviceInterface
             }
             catch(Exception ex)
             {
-                _logger.Warning("An error occured while receiving data over network {Ex}", ex);
+                _logger.Warning(ex, "An error occured while receiving data over network");
                 listener.Stop();
                 listener = new TcpListener(_address, _port);
                 listener.Start();

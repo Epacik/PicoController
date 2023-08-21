@@ -54,9 +54,9 @@ public abstract class Input
             }
             catch (Exception ex)
             {
-                _logger.Error("An action thrown an exception\n" +
-                    "Device: {DeviceId}, input: {Id}, action: {ActionName}\n" +
-                    "{Ex}", _deviceId, Id, actionName, ex);
+                _logger.Error(ex,
+                    "An action thrown an exception\n" +
+                    "Device: {DeviceId}, input: {Id}, action: {ActionName}\n", _deviceId, Id, actionName);
             }
         }
         else if (_logger.ExistsAndIsEnabled(Serilog.Events.LogEventLevel.Verbose))

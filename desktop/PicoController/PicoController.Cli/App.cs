@@ -66,7 +66,7 @@ internal static class App
                     }
                     catch (Exception ex)
                     {
-                        Log.Logger.Error("Could not connect to device {Device}\nException: {Ex}", device.ToString(), ex);
+                        Log.Logger.Error(ex, "Could not connect to device {Device}", device.ToString());
                     }
                 }
 
@@ -102,7 +102,7 @@ internal static class App
                         }
                         catch (Exception ex)
                         {
-                            Log.Logger.Error("An error occured while disconnecting from device {Ex}", ex);
+                            Log.Logger.Error(ex, "An error occured while disconnecting from device");
                         }
                     }
                 }

@@ -76,10 +76,10 @@ public class SwitchDesktop : IPluginAction
         catch (Exception ex)
         {
             _logger.Warning(
-                "An error occured while parsing json.\nJson to parse: \"{Json}\"\n\nSTD Out: {Content}\n\n Exception: {Ex}",
+                ex,
+                "An error occured while parsing json.\nJson to parse: \"{Json}\"\n\nSTD Out: {Content}",
                 json,
-                content,
-                ex);
+                content);
         }
 
 

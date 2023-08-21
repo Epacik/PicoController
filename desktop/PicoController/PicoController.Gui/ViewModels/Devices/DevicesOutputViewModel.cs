@@ -1,6 +1,7 @@
 ﻿using Avalonia.Collections;
 using PicoController.Core;
 using PicoController.Core.Extensions;
+using PicoController.Core.Misc;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
@@ -13,32 +14,17 @@ namespace PicoController.Gui.ViewModels.Devices;
 
 public class DevicesOutputViewModel : ViewModelBase
 {
-    public DevicesOutputViewModel(LimitedAvaloniaList<LogEventOutput> logsList)
+    public DevicesOutputViewModel(ObservableCircularBuffer<LogEventOutput> logsList)
     {
         Logs = logsList;
         this.RaisePropertyChanged(nameof(Logs));
-        Logs.CollectionChanged += Logs_CollectionChanged;
     }
+    public ObservableCircularBuffer<LogEventOutput> Logs { get; }
 
-    private void Logs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    public void CopyToClipboard(object? param)
     {
-        if(e.NewItems is not null || e.NewStartingIndex == -1)
-        {
-            //LastIndex = Logs.Count - 1;
-            this.RaisePropertyChanged(nameof(LastItem));
-        }
+        Console.WriteLine("Copy item");
     }
-
-    public LogEventOutput? LastItem { get; set; }
-    public LimitedAvaloniaList<LogEventOutput> Logs { get; }
-
-    private int _lastIndex;
-    public int LastIndex
-    {
-        get => _lastIndex;
-        set => this.RaiseAndSetIfChanged(ref _lastIndex, value);
-    }
-
 }
 
 public class LogEventOutput
@@ -49,7 +35,26 @@ public class LogEventOutput
     }
 
     public LogEvent LogEvent { get; }
+
+    private const int ShortenedTextLimit = 150;
     private string? _text;
     public string Text => _text ??= LogEvent.RenderMessage();
+    private string? _shortenedString;
+    public string ShortenedText => _shortenedString ??= (Text.Length > ShortenedTextLimit ? Text[..ShortenedTextLimit] + "..." : Text);
     public override string ToString() => Text;
+
+    public async void CopyToClipboard()
+    {
+        Console.WriteLine("Copy self");
+
+        await App.MainWindow?.Clipboard?.SetTextAsync(
+            $"""
+            {LogEvent?.Level} [{LogEvent?.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fffff")}]
+
+            {Text}
+
+            {LogEvent?.Exception?.ToString()}
+            """
+            .Trim());
+    }
 }

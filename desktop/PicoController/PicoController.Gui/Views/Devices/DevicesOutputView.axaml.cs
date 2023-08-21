@@ -9,21 +9,6 @@ public partial class DevicesOutputView : UserControl
     public DevicesOutputView()
     {
         InitializeComponent();
-
-        Output.PropertyChanged += Output_PropertyChanged;
+        //new Expander().Header
     }
-
-    private void Output_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if(
-            e.Property.Name == nameof(Output.ItemCount) &&
-            e.NewValue is int count  &&
-            sender is ListBox output &&
-            output.Scroll is ScrollViewer scrollViewer)
-        {
-            scrollViewer.ScrollToEnd();
-        }
-        //throw new NotImplementedException();
-    }
-
 }

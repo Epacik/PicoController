@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "PicoController.sln",
+    "cmake.configureOnOpen": false
+}

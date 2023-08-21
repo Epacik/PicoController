@@ -131,7 +131,7 @@ internal class Volume : IPluginAction, IDisposable
         }
         catch (InvalidComObjectException ex)
         {
-            _logger?.Warning("An exception occured while changing volume {Ex}", ex);
+            _logger?.Warning(ex, "An exception occured while changing volume");
         }
     }
 
@@ -323,7 +323,7 @@ internal class Volume : IPluginAction, IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Logger?.Warning("An exception occured while disposing a process\n{Ex}", ex);
+                    Logger?.Warning(ex, "An exception occured while disposing a process");
                 }
             }
 
@@ -335,7 +335,7 @@ internal class Volume : IPluginAction, IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Logger?.Warning("An exception occured while disposing a process\n{Ex}", ex);
+                    Logger?.Warning(ex, "An exception occured while disposing a process");
                 }
             }
 
@@ -345,7 +345,7 @@ internal class Volume : IPluginAction, IDisposable
             }
             catch (Exception ex)
             {
-                Logger?.Warning("An exception occured while disposing a process\n{Ex}", ex);
+                Logger?.Warning(ex, "An exception occured while disposing a process");
             }
         }
     }

@@ -2,7 +2,6 @@
 using PicoController.Core.Config;
 using PicoController.Core.Extensions;
 
-using MessageBox.Avalonia;
 using PicoController.Gui.Helpers;
 using System.Threading.Tasks;
 using PicoController.Core.BuiltInActions.Other;
@@ -18,6 +17,8 @@ using Microsoft.Scripting.Utils;
 using System.Collections.ObjectModel;
 using System.Management;
 using System.IO.Ports;
+using PicoController.Core.Misc;
+using MsBox.Avalonia;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -60,7 +61,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         IPluginManager pluginManager,
         IDeviceManager deviceManager,
         IRepositoryHelper repositoryHelper,
-        LimitedAvaloniaList<LogEventOutput> logEventOutputs,
+        ObservableCircularBuffer<LogEventOutput> logEventOutputs,
         Serilog.ILogger? logger)
     {
         _pluginManager = pluginManager;
@@ -260,11 +261,11 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         var example = Config.ExampleConfig();
         await ConfigRepository.SaveAsync(example);
         if (App.DesktopApplicationLifetime?.MainWindow is Window win)
-            await MessageBoxManager.GetMessageBoxStandardWindow(
+            await MessageBoxManager.GetMessageBoxStandard(
                 "Config created",
                 "An example configuration file was created.")
 
-                .ShowDialog(win);
+                .ShowAsPopupAsync(win);
         ConfigNotFound = false;
     }
 
@@ -309,7 +310,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
             }
             catch (Exception ex)
             {
-                _logger?.Error("An exception occured while trying to connect to a device {Ex}", ex);
+                _logger?.Error(ex, "An exception occured while trying to connect to a device");
             }
         }
         _runningDevices = runningDevices.ToList();

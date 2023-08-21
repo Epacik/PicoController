@@ -54,7 +54,7 @@ public class App : Application
 
     public IMainWindowViewModel? MainWindowViewModel { get; set; }
     public static IClassicDesktopStyleApplicationLifetime? DesktopApplicationLifetime => Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-    private static MainWindow? MainWindow => DesktopApplicationLifetime?.MainWindow as MainWindow;
+    public static MainWindow? MainWindow => DesktopApplicationLifetime?.MainWindow as MainWindow;
     private System.Timers.Timer _clickResetTimer;
 
     private bool _openWindowAfterNextClick = false;
@@ -138,17 +138,17 @@ public class App : Application
             MainWindow?.Show();
         }
 
-        var box = MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(
+        var box = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(
             new()
             {
                 ContentTitle          = "Are you sure?",
                 ContentMessage        = "Do you want to close PicoController?",
-                ButtonDefinitions     = MessageBox.Avalonia.Enums.ButtonEnum.YesNo,
+                ButtonDefinitions     = MsBox.Avalonia.Enums.ButtonEnum.YesNo,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
             });
 
-        var result = await box.ShowDialog(MainWindow!);
-        if(result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+        var result = await box.ShowAsPopupAsync(MainWindow!);
+        if(result == MsBox.Avalonia.Enums.ButtonResult.Yes)
         {
             DesktopApplicationLifetime?.Shutdown();
         }

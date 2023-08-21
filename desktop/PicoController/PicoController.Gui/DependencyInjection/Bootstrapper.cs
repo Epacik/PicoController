@@ -13,6 +13,8 @@ using PicoController.Core.Devices;
 using PicoController.Gui.Helpers;
 using PicoController.Gui.Plugin;
 using PicoController.Plugin;
+using CircularBuffer;
+using PicoController.Core.Misc;
 
 namespace PicoController.Gui.DependencyInjection;
 
@@ -43,14 +45,14 @@ public static class Bootstrapper
             resolver.GetRequiredService<IPluginManager>(),
             resolver.GetRequiredService<IDeviceManager>(),
             resolver.GetRequiredService<IRepositoryHelper>(),
-            resolver.GetRequiredService<LimitedAvaloniaList<LogEventOutput>>("LogList"),
+            resolver.GetRequiredService<ObservableCircularBuffer<LogEventOutput>>("LogList"),
             resolver.GetService<Serilog.ILogger>()
         ));
     }
 
     private static void RegisterLogging(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver)
     {
-        services.RegisterLazySingleton(() => new LimitedAvaloniaList<LogEventOutput>(500), "LogList");
+        services.RegisterLazySingleton(() => new ObservableCircularBuffer<LogEventOutput>(500), "LogList");
 
         services.RegisterLazySingleton<Serilog.ILogger>(() =>
         {
@@ -73,18 +75,19 @@ public static class Bootstrapper
                         LogEventLevel.Information,
                         rollingInterval: RollingInterval.Hour));
 
-                //.WriteTo.Async(
-                //    x => x.EventLog(
-                //        "PicoController.GUI",
-                //        "PicoController"));
+            //.WriteTo.Async(
+            //    x => x.EventLog(
+            //        "PicoController.GUI",
+            //        "PicoController"));
 
-            var limitedList = resolver.GetService<LimitedAvaloniaList<LogEventOutput>>("LogList");
+            
+            var limitedList = resolver.GetService<ObservableCircularBuffer<LogEventOutput>>("LogList");
             if(limitedList is not null)
             {
                 config.WriteTo.Async(
                     x => x.Observers(
                         ev => ev
-                            .Do(e => limitedList.Add(new(e)))
+                            .Do(e => limitedList.PushFront(new(e)))
                             .Subscribe(),
                         LogEventLevel.Verbose));
             }
