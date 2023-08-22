@@ -147,7 +147,7 @@ public class App : Application
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
             });
 
-        var result = await box.ShowAsPopupAsync(MainWindow!);
+        var result = await box.ShowWindowDialogAsync(MainWindow!);
         if(result == MsBox.Avalonia.Enums.ButtonResult.Yes)
         {
             DesktopApplicationLifetime?.Shutdown();

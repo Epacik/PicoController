@@ -265,7 +265,7 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
                 "Config created",
                 "An example configuration file was created.")
 
-                .ShowAsPopupAsync(win);
+                .ShowWindowDialogAsync(win);
         ConfigNotFound = false;
     }
 

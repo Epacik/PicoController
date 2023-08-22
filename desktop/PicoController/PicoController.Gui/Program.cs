@@ -66,7 +66,7 @@ internal static class Program
             if ((DateTime.Now - start).TotalSeconds > 10)
                 Process.Start(Path.Combine(location, "Restarter", "PicoController.RestartAfterCrash.exe"));
 
-            logger?.Fatal("An unhandled error occured {ExceptionObject}", e.ExceptionObject);
+            logger?.Fatal(e.ExceptionObject as Exception, "An unhandled error occured");
         };
 
         //ListenToOtherInstances();

@@ -48,17 +48,35 @@ public class Serial : DeviceInterface
         if (availablePorts is null || !availablePorts.Contains(PortName))
             return;
 
-        _port = new SerialPort
+        var cleanup = false;
+        try
         {
-            PortName  = PortName,
-            BaudRate  = _baudRate,
-            DataBits  = _dataBits,
-            StopBits  = _stopBits,
-            Parity    = _parity,
-            DtrEnable = _dtrEnable,
-        };
-        _port.DataReceived += Port_DataReceived;
-        _port.Open();
+            _port = new SerialPort
+            {
+                PortName = PortName,
+                BaudRate = _baudRate,
+                DataBits = _dataBits,
+                StopBits = _stopBits,
+                Parity = _parity,
+                DtrEnable = _dtrEnable,
+            };
+            _port.DataReceived += Port_DataReceived;
+            _port.Open();
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "An exception occured while starting COM port");
+            cleanup = true;
+        }
+        finally
+        {
+            if (cleanup && _port is not null)
+            {
+                _port.DataReceived -= Port_DataReceived;
+                _port?.Close();
+                _port?.Dispose();
+            }
+        }
     }
 
     public override void Disconnect()
@@ -67,8 +85,8 @@ public class Serial : DeviceInterface
             throw new InvalidOperationException("Serial interface wasn't connected");
 
         _port.DataReceived -= Port_DataReceived;
-        _port.Close();
-        _port.Dispose();
+        _port?.Close();
+        _port?.Dispose();
     }
 
     public override void Reconnect()
