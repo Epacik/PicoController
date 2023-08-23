@@ -7,8 +7,7 @@
     ShowInTaskbar="False"
     SystemDecorations="None"
     Background="Transparent"
-    SizeToContent="Height"
-	Width="400">
+    SizeToContent="WidthAndHeight">
     <Border
         Width="300"
         Padding="15"

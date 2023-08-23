@@ -14,6 +14,7 @@ namespace PicoController.Gui.Plugin;
 
 internal class DisplayInfo : IDisplayInfo
 {
+    private CancellationTokenSource? _tokenSource;
     private static readonly DisplayInfoWindowViewModel _viewModel = new();
     private static readonly DisplayInfoWindow _window = new(_viewModel);
 
@@ -24,9 +25,24 @@ internal class DisplayInfo : IDisplayInfo
 
     public void Display(IEnumerable<DisplayInformations> infos)
     {
-        Task.Run(
-            async () => await Dispatcher.UIThread.InvokeAsync(
-                async () => await _viewModel.Update(infos)));
+        Task.Run(async () => await Dispatcher.UIThread.InvokeAsync(() => _viewModel.Update(infos)))
+            .ContinueWith(async t =>
+            {
+                _tokenSource?.Cancel();
+                _tokenSource?.Dispose();
+                _tokenSource = null;
+
+                try
+                {
+                    _tokenSource = new CancellationTokenSource();
+                    await Task.Delay(TimeSpan.FromSeconds(2), _tokenSource.Token);
+                    Close();
+                }
+                catch (TaskCanceledException)
+                {
+                    // swallow
+                }
+            });
     }
 
     public void Display(params DisplayInformations[] infos)
