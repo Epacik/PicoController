@@ -26,7 +26,7 @@ namespace PicoController.Gui.Views
 
         private void Controls_SizeChanged(object? sender, SizeChangedEventArgs e)
         {
-            UpdateWindowTransparency(e.NewSize);
+            UpdateWindoPosition(e.NewSize);
         }
 
 
@@ -49,7 +49,7 @@ namespace PicoController.Gui.Views
                     break;
 
                 case nameof(DisplayInfoWindowViewModel.Controls):
-                    UpdateWindowTransparency();
+                    UpdateWindoPosition();
                     break;
             }
         }
@@ -61,34 +61,53 @@ namespace PicoController.Gui.Views
         }
 
 
-        private void UpdateWindowTransparency(Size? newSize = null)
+        private void UpdateWindoPosition(Size? newSize = null)
         {
-            WindowState = WindowState.FullScreen;
+            //WindowState = WindowState.FullScreen;
+
+            var primaryScreen = Screens.Primary;
+
+            if (primaryScreen is null)
+                return;
+
+            var taskbarHeight = primaryScreen.Bounds.Bottom - primaryScreen.WorkingArea.Bottom;
+
+            var center = primaryScreen.WorkingArea.Center;
+            var halfWith = (int)(WindowBorder.DesiredSize.Width / 2 + WindowBorder.Margin.Left);
+
+
+            var bottomMargin = (int)(WindowBorder.DesiredSize.Height + WindowBorder.Margin.Bottom);
+
+            var adjustedPosition = center
+                .WithX(center.X - halfWith)
+                .WithY(primaryScreen.Bounds.Bottom - bottomMargin - taskbarHeight);
+
+            Position = adjustedPosition;
 
             if (OperatingSystem.IsWindows())
             {
 #if OS_WINDOWS
-                var primaryScreen = Screens.Primary;
-                var taskbarHeight = (primaryScreen?.Bounds.Bottom - primaryScreen?.WorkingArea.Bottom) ?? 0;
-                var hwnd = this.TryGetPlatformHandle()?.Handle;
-                var bounds = WindowBorder.Bounds;
-                var padding = WindowBorder.Padding.Top + WindowBorder.Padding.Bottom;
+                //var primaryScreen = Screens.Primary;
+                //var taskbarHeight = (primaryScreen?.Bounds.Bottom - primaryScreen?.WorkingArea.Bottom) ?? 0;
+                //var hwnd = this.TryGetPlatformHandle()?.Handle;
+                //var bounds = WindowBorder.Bounds;
+                //var padding = WindowBorder.Padding.Top + WindowBorder.Padding.Bottom;
 
-                var (topLeft, bottomRight) =
-                    newSize is Size s
-                    ? (new Point(bounds.Left, bounds.Bottom - s.Height - padding), bounds.BottomRight)
-                    : (bounds.TopLeft, bounds.BottomRight);
-                var margin = WindowBorder.Margin;
-                var rrect = NativeHelpers.WindowsNativeHelper.CreateRoundRectRgn(
-                    (int)(topLeft.X - margin.Left),
-                    (int)(topLeft.Y - margin.Top),
-                    (int)(bottomRight.X + margin.Right),
-                    (int)(bottomRight.Y + margin.Bottom - taskbarHeight),
-                    5,
-                    5);
+                //var (topLeft, bottomRight) =
+                //    newSize is Size s
+                //    ? (new Point(bounds.Left, bounds.Bottom - s.Height - padding), bounds.BottomRight)
+                //    : (bounds.TopLeft, bounds.BottomRight);
+                //var margin = WindowBorder.Margin;
+                //var rrect = NativeHelpers.WindowsNativeHelper.CreateRoundRectRgn(
+                //    (int)(topLeft.X - margin.Left),
+                //    (int)(topLeft.Y - margin.Top),
+                //    (int)(bottomRight.X + margin.Right),
+                //    (int)(bottomRight.Y + margin.Bottom - taskbarHeight),
+                //    5,
+                //    5);
 
-                if (hwnd is not null)
-                    NativeHelpers.WindowsNativeHelper.SetWindowRgn(hwnd ?? 0, rrect, true);
+                //if (hwnd is not null)
+                //    NativeHelpers.WindowsNativeHelper.SetWindowRgn(hwnd ?? 0, rrect, true);
 #endif
 
             }
