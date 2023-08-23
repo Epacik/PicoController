@@ -19,21 +19,11 @@ public class DisplayInfoWindowViewModel : ViewModelBase
 
     public DisplayInfoWindowViewModel()
     {
-        _timer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(2),
-        };
-        _timer.Tick += Timer_Tick;
-        
     }
 
-    private readonly DispatcherTimer _timer;
-    private void Timer_Tick(object? sender, EventArgs e)
-    {
-        Show = false;
-    }
+    private CancellationTokenSource? _tokenSource;
 
-    internal void Update(IEnumerable<DisplayInformations> infos)
+    internal async Task Update(IEnumerable<DisplayInformations> infos)
     {
         var infoArray = infos.ToImmutableArray();
         if(infoArray.Length < Controls.Count)
@@ -57,8 +47,26 @@ public class DisplayInfoWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(Controls));
 
         Show = true;
-        _timer.Stop();
-        _timer.Start();
+
+        _tokenSource?.Cancel();
+        _tokenSource?.Dispose();
+        _tokenSource = null;
+
+        try
+        {
+            _tokenSource = new CancellationTokenSource();
+            await Task.Delay(TimeSpan.FromSeconds(2), _tokenSource.Token);
+            Show = false;
+        }
+        catch (TaskCanceledException)
+        {
+            // swallow
+        }
+    }
+
+    internal void Close()
+    {
+        Show = false;
     }
 
     private object Lock = new();

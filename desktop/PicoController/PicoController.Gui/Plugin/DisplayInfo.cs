@@ -16,10 +16,17 @@ internal class DisplayInfo : IDisplayInfo
 {
     private static readonly DisplayInfoWindowViewModel _viewModel = new();
     private static readonly DisplayInfoWindow _window = new(_viewModel);
-    
+
+    public void Close()
+    {
+        Task.Run(async () => await Dispatcher.UIThread.InvokeAsync(() => _viewModel.Close()));
+    }
+
     public void Display(IEnumerable<DisplayInformations> infos)
     {
-        Task.Run(async () => await Dispatcher.UIThread.InvokeAsync(() => _viewModel.Update(infos)));
+        Task.Run(
+            async () => await Dispatcher.UIThread.InvokeAsync(
+                async () => await _viewModel.Update(infos)));
     }
 
     public void Display(params DisplayInformations[] infos)
