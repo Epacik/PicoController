@@ -2,9 +2,12 @@
 using PicoController.Core;
 using PicoController.Core.Extensions;
 using PicoController.Core.Misc;
+using PicoController.Gui.Helpers;
+using Serilog.Core;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
@@ -14,12 +17,47 @@ namespace PicoController.Gui.ViewModels.Devices;
 
 public class DevicesOutputViewModel : ViewModelBase
 {
-    public DevicesOutputViewModel(ObservableCircularBuffer<LogEventOutput> logsList)
+    private readonly IRepositoryHelper _repositoryHelper;
+    private readonly LoggingLevelSwitch _logLevelSwitch;
+
+    public DevicesOutputViewModel(
+        ObservableCircularBuffer<LogEventOutput> logsList,
+        IRepositoryHelper repositoryHelper,
+        LoggingLevelSwitch logLevelSwitch)
     {
         Logs = logsList;
+        _repositoryHelper = repositoryHelper;
+        _logLevelSwitch = logLevelSwitch;
         this.RaisePropertyChanged(nameof(Logs));
+
+        VerbosityLevels = new(Enum.GetValues(typeof(LogEventLevel)).Cast<LogEventLevel>());
+        var config = repositoryHelper.SavedConfigCopy;
+
+        var selectedVerbosity = config?.Verbosity;
+
+        SelectedVerbosity =  VerbosityLevels.FirstOrDefault(x => x.ToString() == selectedVerbosity);
+
     }
     public ObservableCircularBuffer<LogEventOutput> Logs { get; }
+
+    private ObservableCollection<LogEventLevel> _verbosityLevels;
+    public ObservableCollection<LogEventLevel> VerbosityLevels
+    {
+        get => _verbosityLevels;
+        set => this.RaiseAndSetIfChanged(ref _verbosityLevels, value);
+    }
+
+    private LogEventLevel? _selectedVerbosity;
+
+    public LogEventLevel? SelectedVerbosity
+    {
+        get => _selectedVerbosity;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedVerbosity, value);
+            _logLevelSwitch.MinimumLevel = value ?? LogEventLevel.Verbose;
+        }
+    }
 
     public void CopyToClipboard(object? param)
     {
@@ -47,14 +85,20 @@ public class LogEventOutput
     {
         Console.WriteLine("Copy self");
 
-        await App.MainWindow?.Clipboard?.SetTextAsync(
-            $"""
-            {LogEvent?.Level} [{LogEvent?.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fffff")}]
-
-            {Text}
-
-            {LogEvent?.Exception?.ToString()}
+        var level = LogEvent?.Level;
+        var timestamp = LogEvent?.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fffff") ?? "";
+        var text = Text ?? "";
+        var exception = LogEvent?.Exception?.ToString() ?? "";
+        var value = $"""
+            {level} [{timestamp}]
+            
+            {text}
+            
+            {exception}
             """
-            .Trim());
+            .Trim();
+
+        var task = App.MainWindow?.Clipboard?.SetTextAsync(value) ?? Task.CompletedTask;
+        await task;
     }
 }

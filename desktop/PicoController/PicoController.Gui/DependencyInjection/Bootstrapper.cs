@@ -15,6 +15,7 @@ using PicoController.Gui.Plugin;
 using PicoController.Plugin;
 using CircularBuffer;
 using PicoController.Core.Misc;
+using Serilog.Core;
 
 namespace PicoController.Gui.DependencyInjection;
 
@@ -46,13 +47,16 @@ public static class Bootstrapper
             resolver.GetRequiredService<IDeviceManager>(),
             resolver.GetRequiredService<IRepositoryHelper>(),
             resolver.GetRequiredService<ObservableCircularBuffer<LogEventOutput>>("LogList"),
-            resolver.GetService<Serilog.ILogger>()
+            resolver.GetService<Serilog.ILogger>(),
+            resolver.GetRequiredService<LoggingLevelSwitch>("DisplayLogLevelSwitch")
         ));
     }
 
     private static void RegisterLogging(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver)
     {
         services.RegisterLazySingleton(() => new ObservableCircularBuffer<LogEventOutput>(500), "LogList");
+
+        services.RegisterLazySingleton(() => new Serilog.Core.LoggingLevelSwitch(), "DisplayLogLevelSwitch");
 
         services.RegisterLazySingleton<Serilog.ILogger>(() =>
         {
@@ -82,14 +86,17 @@ public static class Bootstrapper
 
             
             var limitedList = resolver.GetService<ObservableCircularBuffer<LogEventOutput>>("LogList");
-            if(limitedList is not null)
+
+            var levelSwitch = resolver.GetService<LoggingLevelSwitch>("DisplayLogLevelSwitch");
+            if (limitedList is not null)
             {
                 config.WriteTo.Async(
                     x => x.Observers(
                         ev => ev
                             .Do(e => limitedList.PushFront(new(e)))
                             .Subscribe(),
-                        LogEventLevel.Verbose));
+                        LogEventLevel.Verbose,
+                        levelSwitch));
             }
 
             if (Environment.GetEnvironmentVariable("SERILOG_DISCORD_WEBHOOK") is string x)

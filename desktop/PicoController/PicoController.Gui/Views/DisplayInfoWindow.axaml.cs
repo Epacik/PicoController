@@ -26,7 +26,7 @@ namespace PicoController.Gui.Views
 
         private void Controls_SizeChanged(object? sender, SizeChangedEventArgs e)
         {
-            UpdateWindoPosition(e.NewSize);
+            UpdateWindowPosition(e.NewSize);
         }
 
 
@@ -49,7 +49,7 @@ namespace PicoController.Gui.Views
                     break;
 
                 case nameof(DisplayInfoWindowViewModel.Controls):
-                    UpdateWindoPosition();
+                    UpdateWindowPosition();
                     break;
             }
         }
@@ -61,7 +61,7 @@ namespace PicoController.Gui.Views
         }
 
 
-        private void UpdateWindoPosition(Size? newSize = null)
+        private void UpdateWindowPosition(Size? newSize = null)
         {
             //WindowState = WindowState.FullScreen;
 

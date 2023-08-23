@@ -30,6 +30,9 @@ namespace PicoController.Core.Config
         [JsonPropertyName("maxDelayBetweenClicks")]
         public int MaxDelayBetweenClicks { get; set; }
 
+        [JsonPropertyName("verbosity")]
+        public string? Verbosity { get; set; }
+
         [JsonPropertyName("devices")]
         public List<Device> Devices { get; set; } = new List<Device>();
 

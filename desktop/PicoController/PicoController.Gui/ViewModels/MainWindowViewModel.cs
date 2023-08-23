@@ -19,6 +19,7 @@ using System.Management;
 using System.IO.Ports;
 using PicoController.Core.Misc;
 using MsBox.Avalonia;
+using Serilog.Core;
 
 namespace PicoController.Gui.ViewModels;
 
@@ -62,14 +63,15 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         IDeviceManager deviceManager,
         IRepositoryHelper repositoryHelper,
         ObservableCircularBuffer<LogEventOutput> logEventOutputs,
-        Serilog.ILogger? logger)
+        Serilog.ILogger? logger,
+        LoggingLevelSwitch logLevelSwitch)
     {
         _pluginManager = pluginManager;
         _deviceManager = deviceManager;
         _repositoryHelper = repositoryHelper;
         _logger = logger;
         _devices = new(_repositoryHelper, pluginManager);
-        _output = new(logEventOutputs);
+        _output = new(logEventOutputs, repositoryHelper, logLevelSwitch);
 
         const string pluginDirArgName = "-PluginDir=";
         _customPluginDir = Array.Find(

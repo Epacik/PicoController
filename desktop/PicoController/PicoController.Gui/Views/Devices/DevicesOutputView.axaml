@@ -6,6 +6,14 @@
              x:Class="PicoController.Gui.Views.Devices.DevicesOutputView"
              x:Name="Self">
     <Grid RowDefinitions="30,*">
+		<StackPanel Orientation="Horizontal"
+					Spacing="10" 
+					HorizontalAlignment="Right"
+					Margin="10,0">
+			<TextBlock VerticalAlignment="Center">Verbosity</TextBlock>
+			<ComboBox ItemsSource="{Binding VerbosityLevels}" 
+					  SelectedItem="{Binding SelectedVerbosity}"/>
+		</StackPanel>
         <ListBox 
             x:Name="Output"
             Grid.Row="1"
