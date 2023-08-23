@@ -54,14 +54,25 @@ public class DevicesOutputViewModel : ViewModelBase
         get => _selectedVerbosity;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedVerbosity, value);
-            _logLevelSwitch.MinimumLevel = value ?? LogEventLevel.Verbose;
-        }
-    }
+            var verbosity = value ?? LogEventLevel.Verbose;
+            this.RaiseAndSetIfChanged(ref _selectedVerbosity, verbosity);
+            _logLevelSwitch.MinimumLevel = verbosity;
 
-    public void CopyToClipboard(object? param)
-    {
-        Console.WriteLine("Copy item");
+            var config = _repositoryHelper.SavedConfigCopy;
+            if (config is null)
+                return;
+
+            config.Verbosity = verbosity.ToString();
+
+            Task.Run(async () => await _repositoryHelper.Repository.SaveAsync(config))
+                .ContinueWith(t =>
+                {
+                    if (t.IsCompletedSuccessfully)
+                    {
+                        _repositoryHelper.RequestReload();
+                    }
+                });
+        }
     }
 }
 
