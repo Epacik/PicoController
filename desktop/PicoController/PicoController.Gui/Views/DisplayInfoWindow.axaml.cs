@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Platform;
 using OneOf.Types;
 using PicoController.Gui.ViewModels;
+using PicoController.Gui.Views.NativeHelpers;
 using SuccincT.Functional;
 using System.Collections.Specialized;
 using System.Reflection;
@@ -26,7 +27,7 @@ namespace PicoController.Gui.Views
 
         private void Controls_SizeChanged(object? sender, SizeChangedEventArgs e)
         {
-            UpdateWindowPosition(e.NewSize);
+            UpdateWindowPosition();
         }
 
 
@@ -44,7 +45,20 @@ namespace PicoController.Gui.Views
                 case nameof(DisplayInfoWindowViewModel.Show):
                     var value = (DataContext as DisplayInfoWindowViewModel)?.Show == true;
 
-                    if (value) Show();
+                    if (value)
+                    {
+                        nint focusedWindowHandle = 0;
+                        if(OperatingSystem.IsWindows())
+                        {
+                            focusedWindowHandle = WindowsNativeHelper.GetForegroundWindow();
+                        }
+                        Show();
+
+                        if (OperatingSystem.IsWindows() && focusedWindowHandle != 0)
+                        {
+                            WindowsNativeHelper.SetForegroundWindow(focusedWindowHandle);
+                        }
+                    }
                     else Hide();
                     break;
 
@@ -61,10 +75,8 @@ namespace PicoController.Gui.Views
         }
 
 
-        private void UpdateWindowPosition(Size? newSize = null)
+        private void UpdateWindowPosition()
         {
-            //WindowState = WindowState.FullScreen;
-
             var primaryScreen = Screens.Primary;
 
             if (primaryScreen is null)
@@ -78,39 +90,14 @@ namespace PicoController.Gui.Views
 
             var bottomMargin = (int)(WindowBorder.DesiredSize.Height + WindowBorder.Margin.Bottom);
 
+            var taskbarMargin = Math.Max(taskbarHeight / 2, 20);
+
             var adjustedPosition = center
                 .WithX(center.X - halfWith)
-                .WithY(primaryScreen.Bounds.Bottom - bottomMargin - taskbarHeight);
+                .WithY(primaryScreen.Bounds.Bottom - bottomMargin - taskbarMargin);
 
             Position = adjustedPosition;
 
-            if (OperatingSystem.IsWindows())
-            {
-#if OS_WINDOWS
-                //var primaryScreen = Screens.Primary;
-                //var taskbarHeight = (primaryScreen?.Bounds.Bottom - primaryScreen?.WorkingArea.Bottom) ?? 0;
-                //var hwnd = this.TryGetPlatformHandle()?.Handle;
-                //var bounds = WindowBorder.Bounds;
-                //var padding = WindowBorder.Padding.Top + WindowBorder.Padding.Bottom;
-
-                //var (topLeft, bottomRight) =
-                //    newSize is Size s
-                //    ? (new Point(bounds.Left, bounds.Bottom - s.Height - padding), bounds.BottomRight)
-                //    : (bounds.TopLeft, bounds.BottomRight);
-                //var margin = WindowBorder.Margin;
-                //var rrect = NativeHelpers.WindowsNativeHelper.CreateRoundRectRgn(
-                //    (int)(topLeft.X - margin.Left),
-                //    (int)(topLeft.Y - margin.Top),
-                //    (int)(bottomRight.X + margin.Right),
-                //    (int)(bottomRight.Y + margin.Bottom - taskbarHeight),
-                //    5,
-                //    5);
-
-                //if (hwnd is not null)
-                //    NativeHelpers.WindowsNativeHelper.SetWindowRgn(hwnd ?? 0, rrect, true);
-#endif
-
-            }
         }
 
 
