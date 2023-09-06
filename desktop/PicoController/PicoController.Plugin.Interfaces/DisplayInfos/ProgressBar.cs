@@ -67,4 +67,13 @@ public class ProgressBar
 
     public override int GetHashCode() 
         => HashCode.Combine(Indeterminate, Min, Max, Value);
+
+    public override string ToString()
+    {
+        return Indeterminate switch
+        {
+            true => $"ProgressBar {{Indeterminate: {Indeterminate}}}",
+            false => $"ProgressBar {{Min: {Min}, Max: {Max}, Value: {Value}, Indeterminate: {Indeterminate}}}"
+        };
+    }
 }

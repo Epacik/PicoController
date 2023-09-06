@@ -29,7 +29,7 @@ public static class Bootstrapper
         RegisterViewModels(services, resolver);
 
         services.RegisterLazySingleton(Themes.ThemeManager.CreateManager);
-        services.RegisterLazySingleton<IDisplayInfo>(() => new DisplayInfo());
+        services.RegisterLazySingleton<IDisplayInfo>(() => new DisplayInfo(resolver.GetService<Serilog.ILogger>()));
         services.InitializeSplat();
     }
 

@@ -54,12 +54,12 @@ return 0;
 
 string GetDesktopName(int newIndex)
 {
-    var ptr = Marshal.AllocHGlobal(32);
+    var ptr = Marshal.AllocHGlobal(1024);
     try
     {
-        var bufLen = VirtualDesktopAccessorInterop.GetDesktopName(newIndex, ptr, 32);
+        var bufLen = VirtualDesktopAccessorInterop.GetDesktopName(newIndex, ptr, 1024);
 
-        return PtrToString(ptr, 32);
+        return PtrToString(ptr, 1024);
     }
     catch (Exception)
     {

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "VirtualDesktop.Windows": {
+      "commandName": "Project",
+      "commandLineArgs": "right 1"
+    }
+  }
+}

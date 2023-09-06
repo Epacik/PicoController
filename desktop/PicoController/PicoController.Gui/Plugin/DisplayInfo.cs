@@ -14,6 +14,13 @@ namespace PicoController.Gui.Plugin;
 
 internal class DisplayInfo : IDisplayInfo
 {
+
+    public DisplayInfo(Serilog.ILogger? logger)
+    {
+        _logger = logger;
+    }
+
+    private readonly Serilog.ILogger? _logger;
     private CancellationTokenSource? _tokenSource;
     private static readonly DisplayInfoWindowViewModel _viewModel = new();
     private static readonly DisplayInfoWindow _window = new(_viewModel);
@@ -25,6 +32,8 @@ internal class DisplayInfo : IDisplayInfo
 
     public void Display(IEnumerable<DisplayInformations> infos)
     {
+        _logger?.Information("Showing a DisplayInfo {Info}", string.Join("; ", infos));
+
         Task.Run(async () => await Dispatcher.UIThread.InvokeAsync(() => _viewModel.Update(infos)))
             .ContinueWith(async t =>
             {

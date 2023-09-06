@@ -44,4 +44,9 @@ public class Text
 
     public override int GetHashCode()
         => HashCode.Combine(Content, FontSize, FontWeight);
+
+    public override string ToString()
+    {
+        return $"Text {{Content: {Content}, FontSize: {FontSize}, FontWeight: {FontWeight}}}";
+    }
 }

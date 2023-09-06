@@ -69,7 +69,7 @@ public class SwitchDesktop : IPluginAction
                 }
                 else
                 {
-                    _displayInfo.Display(header, new Text(output.Name));
+                    _displayInfo.Display(header, new Text(output.Name.Replace("\0", "")));
                 }
             }
         }
