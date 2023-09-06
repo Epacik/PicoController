@@ -45,10 +45,12 @@
                                   RowDefinitions="Auto,Auto">
                                 <TextBlock Text="{Binding Text}"
                                            Grid.Column="0"
-                                           Grid.Row="0"/>
+                                           Grid.Row="0"
+										   TextWrapping="Wrap"/>
                                 <TextBlock Text="{Binding LogEvent.Exception, FallbackValue=''}"
                                            Grid.Column="0"
-                                           Grid.Row="1"/>
+                                           Grid.Row="1"
+										   TextWrapping="Wrap"/>
                                 
                                 <Button Command="{Binding CopyToClipboard}"
                                         CommandParameter="{Binding}"
