@@ -1,4 +1,5 @@
 ﻿using Avalonia.Collections;
+using Avalonia.Media;
 using PicoController.Core;
 using PicoController.Core.Extensions;
 using PicoController.Core.Misc;
@@ -82,6 +83,16 @@ public class LogEventOutput
     {
         LogEvent = logEvent;
     }
+
+    public IImmutableSolidColorBrush HighlightBrush => LogEvent.Level switch
+    {
+        LogEventLevel.Verbose => Brushes.Black,
+        LogEventLevel.Debug => Brushes.Black,
+        LogEventLevel.Information => Brushes.Black,
+        LogEventLevel.Warning => Brushes.DarkOrange,
+        LogEventLevel.Error => Brushes.Red,
+        LogEventLevel.Fatal => Brushes.DarkRed,
+    };
 
     public LogEvent LogEvent { get; }
 
