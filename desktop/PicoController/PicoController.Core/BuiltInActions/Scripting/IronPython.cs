@@ -7,12 +7,12 @@ using IP = IronPython;
 
 namespace PicoController.Core.BuiltInActions.Scripting;
 
-public class IronPython : IronPythonBase
+public sealed class IronPython : IronPythonBase
 {
     public IronPython(ILogger logger, IDisplayInfo displayInfo) : base(false, logger, displayInfo) { }
 }
 
-public class IronPythonFile : IronPythonBase
+public sealed class IronPythonFile : IronPythonBase
 {
     public IronPythonFile(ILogger logger, IDisplayInfo displayInfo) : base(true, logger, displayInfo) { }
 }
@@ -33,23 +33,23 @@ public abstract class IronPythonBase : IPluginAction
         _displayInfo = displayInfo;
     }
 
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
     {
         await Task.Run(() =>
         {
-            if (argument is null)
-                throw new ArgumentNullException("data");
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
 
-        var scope = _engine.CreateScope();
+            var scope = _engine.CreateScope();
         
         scope.SetVariable("__input_value__", inputValue);
         scope.SetVariable("__logger__", _logger);
         scope.SetVariable("__display_info__", _displayInfo);
 
             if (_useFile)
-                _engine.ExecuteFile(argument, scope);
+                _engine.ExecuteFile(data, scope);
             else
-                _engine.Execute(argument, scope);
+                _engine.Execute(data, scope);
         });
     }
 }

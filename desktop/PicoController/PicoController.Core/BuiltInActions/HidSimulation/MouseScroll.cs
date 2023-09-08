@@ -7,7 +7,7 @@ namespace PicoController.Core.BuiltInActions.HidSimulation;
 
 internal class MouseScroll : IPluginAction
 {
-    private INativeInputSimulator _simulator;
+    private readonly INativeInputSimulator _simulator;
 
     public MouseScroll()
     {
@@ -18,14 +18,14 @@ internal class MouseScroll : IPluginAction
     }
 
     [SuppressUnmanagedCodeSecurity]
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
     {
-        if (string.IsNullOrWhiteSpace(argument))
+        if (string.IsNullOrWhiteSpace(data))
             return;
 
         await Task.Yield();
 
-        var (axis, amountStr) = argument.Split(';');
+        var (axis, amountStr) = data.Split(';');
 
         if (short.TryParse(amountStr, out short amount))
             _simulator.MouseScrollWheelScrolled(
