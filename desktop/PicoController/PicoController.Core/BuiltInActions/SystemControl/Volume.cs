@@ -26,19 +26,16 @@ internal class Volume : IPluginAction, IDisposable
 {
     public IDisplayInfo? DisplayInfo { get; set; }
 
-    private readonly SequentialScheduler _scheduler;
-    private readonly TaskFactory _taskFactory;
-    //private MMDeviceEnumerator _deviceEnumerator;
     private readonly ILogger? _logger;
 
     private readonly Timer _cacheTimer;
+
+    private readonly object _lock = new object();
+    
     private readonly Timer _procCacheTimer;
 
     public Volume(ILogger? logger, IDisplayInfo? displayInfo)
     {
-        _scheduler = new SequentialScheduler();
-        _taskFactory = new TaskFactory(_scheduler);
-        //_deviceEnumerator = new MMDeviceEnumerator();
         _logger = logger;
         DisplayInfo = displayInfo;
         _cacheTimer = new Timer(CacheTimerCallback, null, 5000, 5000);
@@ -73,7 +70,7 @@ internal class Volume : IPluginAction, IDisposable
 
         var oldCache = GetProcCache();
 
-        lock (this) { _procCache = new ProcCache(processes, services, _logger); }
+        lock (_lock) { _procCache = new ProcCache(processes, services, _logger); }
 
 
         _procCacheTimerCallbackRunning = false;
@@ -92,7 +89,7 @@ internal class Volume : IPluginAction, IDisposable
         using var enumerator = new MMDeviceEnumerator();
         var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
         var deviceName = device.FriendlyName;
-        var deviceCache = new DeviceCache(device, deviceName);
+        var deviceCache = new DeviceCache(device, deviceName, _logger);
 
         // get new sessions
 
@@ -113,7 +110,7 @@ internal class Volume : IPluginAction, IDisposable
 
         var cache = GetCache();
 
-        lock (this) { _cache = new Cache(deviceCache, sessionControls, _logger); }
+        lock (_lock) { _cache = new Cache(deviceCache, sessionControls, _logger); }
 
         // cleanup old cache
 
@@ -126,19 +123,18 @@ internal class Volume : IPluginAction, IDisposable
 
     private Cache? GetCache()
     {
-        lock (this) { return _cache; }
+        lock (_lock) { return _cache; }
     }
 
     private ProcCache? _procCache;
-
     private ProcCache? GetProcCache()
     {
         lock(this) { return _procCache; }
     }
 
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
     {
-        if (string.IsNullOrWhiteSpace(argument))
+        if (string.IsNullOrWhiteSpace(data))
             return;
 
         await Task.Yield();
@@ -151,17 +147,17 @@ internal class Volume : IPluginAction, IDisposable
             return;
         var device = cache.Device;
 
-        var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries);
+        var args = data.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
         try
         {
             if (args.Length < 2)
             {
-                ChangeMasterVolume(argument, step, device);
+                ChangeMasterVolume(data, step, device);
             }
             else if (procCache is not null)
             {
-                ChangeAppVolume(argument, step, device, cache.Sessions, procCache.Processes, procCache.Services, args);
+                ChangeAppVolume(data, step, cache.Sessions, procCache.Processes, procCache.Services, args);
             }
         }
         catch (InvalidComObjectException ex)
@@ -187,22 +183,19 @@ internal class Volume : IPluginAction, IDisposable
             Throw(argument);
         }
     }
-    private bool ChangeAppVolume(
+    private void ChangeAppVolume(
         string? argument,
         float step,
-        DeviceCache device,
         List<SessionInfo> sessions,
         List<ProcessInfo> processes,
         List<ServiceInfo> services,
         string[] args)
     {
-        var (dev, _) = device;
         var (appName, action) = (args[0], args[1]);
         bool exact = args.Contains("!") || args.Contains("EXACT");
         for (int i = 0; i < sessions.Count; i++)
         {
             var session = sessions[i];
-            var sessionId = session.SessionId;
             (string? name, string? displayName) proc = (session.SessionId, session.SessionId);
             int processId = (int)session.ProcessId;
 
@@ -218,7 +211,7 @@ internal class Volume : IPluginAction, IDisposable
             {
                 var service = services.Find(x => x.ProcessId == process.Id);
                 if (service is null)
-                    return false;
+                    return;
                 proc = (service.Name, service.DisplayName);
 
             }
@@ -252,8 +245,6 @@ internal class Volume : IPluginAction, IDisposable
 
             }
         }
-
-        return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -294,9 +285,6 @@ internal class Volume : IPluginAction, IDisposable
     {
         if (!disposedValue)
         {
-            if (disposing)
-            {}
-            _scheduler.Dispose();
             _cacheTimer.Dispose();
             GetCache()?.Dispose();
             disposedValue = true;
@@ -316,10 +304,13 @@ internal class Volume : IPluginAction, IDisposable
 
     private record struct DeviceCache(MMDevice Dev, string Name) : IDisposable
     {
-        public void Deconstruct(out MMDevice dev)
+        private readonly ILogger? _logger;
+
+        public DeviceCache(MMDevice Dev, string Name, ILogger? logger) : this(Dev, Name)
         {
-            dev = Dev;
+            _logger = logger;
         }
+
         public void Deconstruct(out MMDevice dev, out string name)
         {
             dev = Dev;
@@ -334,17 +325,17 @@ internal class Volume : IPluginAction, IDisposable
                 {
                     Dev.Dispose();
                 }
-                catch /*(Exception ex)*/
+                catch (Exception ex)
                 {
-                    //_logger?.Warning("Problem disposing audio device {Ex}", ex);
+                    _logger?.Warning("Problem disposing audio device {Ex}", ex);
                 }
             }
         }
     }
 
-    private record class SessionInfo(string? SessionId, uint ProcessId, AudioSessionControl SessionControl);
-    private record class ProcessInfo(int Id, string Name, string? MainWindowTitle, Process Process);
-    private record class ServiceInfo(uint ProcessId, string Name, string DisplayName);
+    private sealed record class SessionInfo(string? SessionId, uint ProcessId, AudioSessionControl SessionControl);
+    private sealed record class ProcessInfo(int Id, string Name, string? MainWindowTitle, Process Process);
+    private sealed record class ServiceInfo(uint ProcessId, string Name, string DisplayName);
 
     private record class Cache(DeviceCache Device, List<SessionInfo> Sessions, ILogger? Logger) : IDisposable
     {

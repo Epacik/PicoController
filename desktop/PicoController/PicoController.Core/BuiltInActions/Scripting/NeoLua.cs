@@ -19,29 +19,28 @@ public abstract class NeoLuaBase : IPluginAction, IDisposable
 {
     private readonly bool _useFile;
     private bool disposedValue;
-    private Lua _lua;
+    private readonly Lua _lua;
 
-    public NeoLuaBase(bool useFile)
+    protected NeoLuaBase(bool useFile)
     {
         _lua = new Lua();
         _useFile = useFile;
     }
 
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
     {
         await Task.Yield();
 
-        if (argument is null)
+        if (data is null)
             throw new ArgumentNullException("data");
 
         var env = _lua.CreateEnvironment();
         env["__input_value__"] = inputValue;
-        //env["__user_argument__"] = argument;
 
         if (_useFile)
-            env.DoChunk(argument);
+            env.DoChunk(data);
         else
-            env.DoChunk(argument, nameof(NeoLuaBase));
+            env.DoChunk(data, nameof(NeoLuaBase));
     }
 
     protected virtual void Dispose(bool disposing)

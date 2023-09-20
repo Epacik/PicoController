@@ -25,18 +25,18 @@ public class SwitchDesktop : IPluginAction
         _pluginInfo = pluginInfo;
     }
 
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
         //=> await Task.Run(() =>
     {
         
-        argument = argument ?? throw new ArgumentNullException(nameof(argument));
+        data = data ?? throw new ArgumentNullException(nameof(data));
 
         if (Environment.OSVersion.Version.Build < 14393)
             throw new InvalidOperationException("Use at least Windows 10 1607");
 
         var outputBuilder = new StringBuilder();
         var command = Cli.Wrap(Path.Combine(_pluginInfo.Location, "VirtualDesktop.Windows.exe"))
-            .WithArguments(new string[] { argument, inputValue.ToString() })
+            .WithArguments(new string[] { data, inputValue.ToString() })
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(outputBuilder, Encoding.UTF8))
             .WithValidation(CommandResultValidation.None);
 

@@ -11,8 +11,8 @@ namespace PicoController.Core.BuiltInActions.HidSimulation;
 internal class KeyboardSequence : IPluginAction, IValidValues
 {
     private readonly EventSimulator _simulator;
-    private Dictionary<string, KeyCode> _buttons = new();
-    private Queue<KeyCode[]> _sequencesToRun = new();
+    private readonly Dictionary<string, KeyCode> _buttons = new();
+    private readonly Queue<KeyCode[]> _sequencesToRun = new();
     private readonly object _locker = new object();
 
     public KeyboardSequence()
@@ -39,16 +39,18 @@ internal class KeyboardSequence : IPluginAction, IValidValues
 
     public IDictionary<string, string> ValidValues => _buttons.Keys./*OrderBy(x => x).*/ToDictionary(x => x);
 
-    private PeriodicTimer _timer;
-    private Thread _sequenceRunner;
+    private readonly PeriodicTimer _timer;
+#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
+    private readonly Thread _sequenceRunner;
+#pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
 
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
     {
-        if (string.IsNullOrWhiteSpace(argument))
+        if (string.IsNullOrWhiteSpace(data))
             return;
 
         await Task.Yield();
-        KeyCombination(argument);
+        KeyCombination(data);
     }
 
     private void KeyCombination(string argument)
@@ -88,7 +90,9 @@ internal class KeyboardSequence : IPluginAction, IValidValues
     }
 
     [SuppressUnmanagedCodeSecurity]
+#pragma warning disable S2190 // Loops and recursions should not be infinite
     private async void RunSequence(object? _)
+#pragma warning restore S2190 // Loops and recursions should not be infinite
     {
         while (true)
         {
@@ -104,13 +108,11 @@ internal class KeyboardSequence : IPluginAction, IValidValues
 
                 if (seq.Length == 0)
                 {
-                    //Press(seq[0]);
                     _simulator.SimulateKeyPress(seq[0]);
                     _simulator.SimulateKeyRelease(seq[0]);
                 }
                 else
                 {
-                    //PressSequence(seq);
                     for (int i = 0; i < seq.Length; i++)
                         _simulator.SimulateKeyPress(seq[i]);
 

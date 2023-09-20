@@ -6,13 +6,13 @@ namespace PicoController.Core.BuildtInActions.Other;
 
 internal class RunProgram : IPluginAction
 {
-    public async Task ExecuteAsync(int inputValue, string? argument)
+    public async Task ExecuteAsync(int inputValue, string? data)
     {
-        if(argument is null)
+        if(data is null)
             throw new ArgumentNullException("data");
 
         await Task.Yield();
-        var args = argument.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var args = data.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var wrapper = Cli.Wrap(args[0]);
 
         if (args.Length > 0)
