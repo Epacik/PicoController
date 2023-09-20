@@ -19,6 +19,8 @@ using System.Diagnostics;
 using System.Management;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.ServiceModel.Channels;
+using System.ServiceProcess;
 
 internal class Volume : IPluginAction, IDisposable
 {
@@ -30,7 +32,8 @@ internal class Volume : IPluginAction, IDisposable
     private readonly ILogger? _logger;
 
     private readonly Timer _cacheTimer;
-    
+    private readonly Timer _procCacheTimer;
+
     public Volume(ILogger? logger, IDisplayInfo? displayInfo)
     {
         _scheduler = new SequentialScheduler();
@@ -39,9 +42,51 @@ internal class Volume : IPluginAction, IDisposable
         _logger = logger;
         DisplayInfo = displayInfo;
         _cacheTimer = new Timer(CacheTimerCallback, null, 5000, 5000);
+        _procCacheTimer = new Timer(ProcessCacheTimerCallback, null, 5000, 30000);
     }
+
+    private bool _procCacheTimerCallbackRunning = false;
+
+    private void ProcessCacheTimerCallback(object? state)
+    {
+        if (_procCacheTimerCallbackRunning)
+            return;
+
+        _procCacheTimerCallbackRunning = true;
+
+        // get processes
+
+        var processes = Process.GetProcesses()
+            .Select(x => new ProcessInfo(x.Id, x.ProcessName, x.MainWindowTitle, x))
+            .ToList();
+
+        // get services
+
+
+        List<ServiceInfo> services = new();
+
+        ManagementObjectSearcher searcher = new("SELECT PROCESSID, NAME, DISPLAYNAME FROM WIN32_SERVICE");
+        foreach (ManagementObject mngntObj in searcher.Get().Cast<ManagementObject>())
+        {
+            services.Add(new((uint)mngntObj["PROCESSID"], (string)mngntObj["NAME"], (string)mngntObj["DISPLAYNAME"]));
+        }
+
+        var oldCache = GetProcCache();
+
+        lock (this) { _procCache = new ProcCache(processes, services, _logger); }
+
+
+        _procCacheTimerCallbackRunning = false;
+        oldCache?.Dispose();
+    }
+
+    private bool _cacheTimerCallbackRunning = false;
     private void CacheTimerCallback(object? state)
     {
+        if (_cacheTimerCallbackRunning)
+            return;
+        
+        _cacheTimerCallbackRunning = true;
         // get new device 
 
         using var enumerator = new MMDeviceEnumerator();
@@ -64,34 +109,17 @@ internal class Volume : IPluginAction, IDisposable
             }
         }
 
-        // get processes
-
-        var processes = Process.GetProcesses()
-            .Select(x => new ProcessInfo(x.Id, x.ProcessName, x.MainWindowTitle, x))
-            .ToList();
-
-        // get services
-
-        List<ServiceInfo> services = new();
-        ManagementObjectSearcher searcher = new("SELECT PROCESSID, NAME, DISPLAYNAME FROM WIN32_SERVICE");
-        foreach (ManagementObject mngntObj in searcher.Get().Cast<ManagementObject>())
-        {
-            services.Add(new((uint)mngntObj["PROCESSID"], (string)mngntObj["NAME"], (string)mngntObj["DISPLAYNAME"]));
-        }
-
-
         // create new cache 
 
         var cache = GetCache();
 
-        lock (this) { _cache = new Cache(deviceCache, sessionControls, processes, services, _logger); }
+        lock (this) { _cache = new Cache(deviceCache, sessionControls, _logger); }
 
         // cleanup old cache
 
-        if (cache is null)
-            return;
+        _cacheTimerCallbackRunning = false;
 
-        cache.Dispose();
+        cache?.Dispose();
     }
 
     private Cache? _cache;
@@ -101,6 +129,12 @@ internal class Volume : IPluginAction, IDisposable
         lock (this) { return _cache; }
     }
 
+    private ProcCache? _procCache;
+
+    private ProcCache? GetProcCache()
+    {
+        lock(this) { return _procCache; }
+    }
 
     public async Task ExecuteAsync(int inputValue, string? argument)
     {
@@ -112,6 +146,7 @@ internal class Volume : IPluginAction, IDisposable
         float step = 0.01f * (float)inputValue;
 
         var cache = GetCache();
+        var procCache = GetProcCache();
         if (cache is null)
             return;
         var device = cache.Device;
@@ -124,9 +159,9 @@ internal class Volume : IPluginAction, IDisposable
             {
                 ChangeMasterVolume(argument, step, device);
             }
-            else
+            else if (procCache is not null)
             {
-                ChangeAppVolume(argument, step, device, cache.Sessions, cache.Processes, cache.Services, args);
+                ChangeAppVolume(argument, step, device, cache.Sessions, procCache.Processes, procCache.Services, args);
             }
         }
         catch (InvalidComObjectException ex)
@@ -311,7 +346,34 @@ internal class Volume : IPluginAction, IDisposable
     private record class ProcessInfo(int Id, string Name, string? MainWindowTitle, Process Process);
     private record class ServiceInfo(uint ProcessId, string Name, string DisplayName);
 
-    private record class Cache(DeviceCache Device, List<SessionInfo> Sessions, List<ProcessInfo> Processes, List<ServiceInfo> Services, ILogger? Logger) : IDisposable
+    private record class Cache(DeviceCache Device, List<SessionInfo> Sessions, ILogger? Logger) : IDisposable
+    {
+        public void Dispose()
+        {
+            foreach (var session in Sessions)
+            {
+                try
+                {
+                    session.SessionControl.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Warning(ex, "An exception occured while disposing a session");
+                }
+            }
+
+            try
+            {
+                Device.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Logger?.Warning(ex, "An exception occured while disposing a process");
+            }
+        }
+    }
+
+    private record class ProcCache(List<ProcessInfo> Processes, List<ServiceInfo> Services, ILogger? Logger) : IDisposable
     {
         public void Dispose()
         {
@@ -327,26 +389,6 @@ internal class Volume : IPluginAction, IDisposable
                 }
             }
 
-            foreach (var session in Sessions)
-            {
-                try
-                {
-                    session.SessionControl.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Logger?.Warning(ex, "An exception occured while disposing a process");
-                }
-            }
-
-            try
-            {
-                Device.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Logger?.Warning(ex, "An exception occured while disposing a process");
-            }
         }
     }
 }
