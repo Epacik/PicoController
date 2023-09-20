@@ -223,7 +223,6 @@ public class PluginManager : IPluginManager
                 }
             }
             action = ctor.Invoke(arguments.ToArray()) as IPluginAction;
-            //action = Activator.CreateInstance(actionType.AsType(), arguments) as IPluginAction;
         }
 
 

@@ -30,6 +30,7 @@ public static class Bootstrapper
 
         services.RegisterLazySingleton(Themes.ThemeManager.CreateManager);
         services.RegisterLazySingleton<IDisplayInfo>(() => new DisplayInfo(resolver.GetService<Serilog.ILogger>()));
+        services.RegisterLazySingleton<IStorage>(() => new Storage());
         services.InitializeSplat();
     }
 
