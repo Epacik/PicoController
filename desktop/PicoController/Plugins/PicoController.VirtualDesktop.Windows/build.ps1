@@ -15,7 +15,13 @@ foreach ($dep in $mainDeps) {
 }
 
 $build = [System.Environment]::OSVersion.Version.Build;
-$osSpecificDepsFolder = if ($build -ge 20000) { "win11" } else { "win10" };
+$osSpecificDepsFolder = switch ($build) {
+    {$PSItem -lt 20000} { "win10" }
+    {$PSItem -lt 22621} { "win11" }
+    {$PSItem -gt 22621} { "win1123h2" }
+};
+
+#if ($build -ge 20000) { "win11" } else { "win10" }
 
 $osSpecificDeps = Get-ChildItem -Path "$PSScriptRoot/thirdparty/$osSpecificDepsFolder" -File
 foreach ($dep in $osSpecificDeps) {
