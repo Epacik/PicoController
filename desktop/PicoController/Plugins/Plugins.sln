@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.TidalVolume", "PicoControler.TidalVolume\PicoController.TidalVolume.csproj", "{3A1E7351-8235-4227-B279-C703759AA308}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.CsScript", "PicoController.CsScript\PicoController.CsScript.csproj", "{FBE7B66F-A04A-492B-B584-0F3CC0545279}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.VirtualDesktop.Windows", "PicoController.VirtualDesktop.Windows\PicoController.VirtualDesktop.Windows.csproj", "{3CE9347C-151A-4DAD-88E5-08F8CF51E28C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VirtualDesktops", "VirtualDesktops", "{0973C8A6-1649-4C0D-AE2E-D705C2790F48}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDesktop.Windows", "VirtualDesktops\VirtualDesktop.Windows\VirtualDesktop.Windows.csproj", "{DC4F2A0F-97DB-4AE0-81EA-A02231CC02F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A1E7351-8235-4227-B279-C703759AA308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A1E7351-8235-4227-B279-C703759AA308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A1E7351-8235-4227-B279-C703759AA308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A1E7351-8235-4227-B279-C703759AA308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBE7B66F-A04A-492B-B584-0F3CC0545279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBE7B66F-A04A-492B-B584-0F3CC0545279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBE7B66F-A04A-492B-B584-0F3CC0545279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBE7B66F-A04A-492B-B584-0F3CC0545279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CE9347C-151A-4DAD-88E5-08F8CF51E28C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CE9347C-151A-4DAD-88E5-08F8CF51E28C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CE9347C-151A-4DAD-88E5-08F8CF51E28C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CE9347C-151A-4DAD-88E5-08F8CF51E28C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC4F2A0F-97DB-4AE0-81EA-A02231CC02F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC4F2A0F-97DB-4AE0-81EA-A02231CC02F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC4F2A0F-97DB-4AE0-81EA-A02231CC02F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC4F2A0F-97DB-4AE0-81EA-A02231CC02F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DC4F2A0F-97DB-4AE0-81EA-A02231CC02F3} = {0973C8A6-1649-4C0D-AE2E-D705C2790F48}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {65C0F7E9-308F-4A41-8D25-1F6483CE6BB2}
+	EndGlobalSection
+EndGlobal

@@ -71,16 +71,36 @@ public class DeviceManager : IDeviceManager
                  var inputs = new List<Inputs.Input>();
                  foreach (Config.Input input in device.Inputs)
                  {
+
                      var actions = input.Actions.ToDictionary(x => x.Key, x => _pluginLoader.LookupActions(x.Value));
 
                      inputs.Add(input.Type switch
                      {
                          Inputs.InputType.Button
-                             => new Button(deviceId, input.Id, actions, config.MaxDelayBetweenClicks, _logger),
+                             => new Button(
+                                 deviceId,
+                                 input.Id, 
+                                 actions, 
+                                 config.MaxDelayBetweenClicks, 
+                                 _logger),
+
                          Inputs.InputType.Encoder
-                             => Inputs.Encoder.Create(deviceId, input.Id, actions, input.Split, _logger),
+                             => Inputs.Encoder.Create(
+                                 deviceId,
+                                 input.Id,
+                                 actions,
+                                 input.Split,
+                                 _logger),
+
                          Inputs.InputType.EncoderWithButton
-                             => EncoderWithButton.Create(deviceId, input.Id, actions, config.MaxDelayBetweenClicks, input.Split, _logger),
+                             => EncoderWithButton.Create(
+                                 deviceId,
+                                 input.Id,
+                                 actions,
+                                 config.MaxDelayBetweenClicks,
+                                 input.Split,
+                                 _logger),
+
                          _ => throw new InvalidDataException($"Invalid input type {input.Type}"),
                      });
                  }

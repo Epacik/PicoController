@@ -22,7 +22,7 @@ namespace IO::Input
     class Encoder : public Input
     {
     public:
-        Encoder(uint8_t id, uint8_t pin0, uint8_t pin1);
+        Encoder(uint8_t id, uint8_t pin0, uint8_t pin1, bool softDebounce);
         Encoder(uint8_t id, InputPin* pin0, InputPin* pin1);
         IO::Input::Message* GetMessage() override;
 

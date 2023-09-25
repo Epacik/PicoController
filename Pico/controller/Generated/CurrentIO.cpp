@@ -19,12 +19,14 @@ namespace IO {
     {
         etl::vector<etl::unique_ptr<IO::Input::Input>, 256> inputs;
 
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(0, 27)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(1, 26)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(2, 3)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(3, 4)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(4, 18, 19, 2)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(5, 20, 21, 22)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(0, 27, false)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(1, 26, false)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(2, 3, false)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(3, 4, false)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(4, 2, false)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(5, 22, false)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(6, 18, 19, 17, true)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(7, 20, 21, 16, true)));
 
         return inputs;
     }

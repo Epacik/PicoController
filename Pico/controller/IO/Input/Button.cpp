@@ -5,7 +5,7 @@ enum class Values {
     Released = 1 << 1,
 };
 
-IO::Input::Button::Button(uint8_t id, uint8_t pin) :  Button(id, new InputPin(pin)) {}
+IO::Input::Button::Button(uint8_t id, uint8_t pin, bool softDebounce) :  Button(id, new InputPin(pin,PinPull::None, softDebounce)) {}
 
 IO::Input::Button::Button(uint8_t id, InputPin* pin) : Input(id, InputType::Button)
 {

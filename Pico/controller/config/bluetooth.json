@@ -2,27 +2,43 @@
   "inputs": [
     {
       "type": "button",
-      "pins": [ 27 ]
+      "pins": [ 27 ],
+      "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 26 ]
+      "pins": [ 26 ],
+      "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 3 ]
+      "pins": [ 3 ],
+      "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 4 ]
+      "pins": [ 4 ],
+      "softDebounce": false
+    },
+    {
+      "type": "button",
+      "pins": [ 2 ],
+      "softDebounce": false
+    },
+    {
+      "type": "button",
+      "pins": [ 22 ],
+      "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 18, 19, 2 ]
+      "pins": [ 18, 19, 17 ],
+      "softDebounce": true
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 20, 21, 22 ]
+      "pins": [ 20, 21, 16 ],
+      "softDebounce": true
     }
   ],
   "outputs": [

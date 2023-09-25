@@ -3,7 +3,12 @@
 
 namespace IO::Input
 {
-    Encoder::Encoder(uint8_t id, uint8_t pin0, uint8_t pin1) : Encoder(id, new InputPin(id), new InputPin(id)) {
+    Encoder::Encoder(uint8_t id, uint8_t pin0, uint8_t pin1, bool softDebounce)
+        : Encoder(
+                id,
+                new InputPin(pin0, PinPull::None, softDebounce),
+                new InputPin(pin1,PinPull::None, softDebounce))
+                {
         for (int i = 0; i < 4; ++i) {
             states[i] = EncoderStates::None;
         }

@@ -1,6 +1,6 @@
 
 param (
-    [Parameter()]
+    [Parameter(Position = 1)]
     [string] $InputFile = $null
 )
 
@@ -44,22 +44,23 @@ function New-Output([string]$value) {
 
 foreach ($input in $peripherals.inputs) {
     $pinCount = $input.pins.Length 
+    $softDebounce = ([bool]$input.softDebounce).ToString().ToLowerInvariant();
     if ($input.type -eq "button") {
         if ($pinCount -ne 1) {
             Write-Error "Invalid pin count, expected 1 got $pinCount";
             continue;
         }
-        $pin = [int]$input.pins[0]
-        $linesInputs += New-Input("Button($Id, $pin)");
+        $pin = [int]$input.pins[0];
+        $linesInputs += New-Input("Button($Id, $pin, $softDebounce)");
     }
     elseif ($input.type -eq "encoder") {
         if ($pinCount -ne 2) {
             Write-Error "Invalid pin count, expected 2 got $pinCount";
             continue;
         }
-        $pinA = [int]$input.pins[0]
-        $pinB = [int]$input.pins[1]
-        $linesInputs += New-Input("Encoder($Id, $pinA, $pinB)");
+        $pinA = [int]$input.pins[0];
+        $pinB = [int]$input.pins[1];
+        $linesInputs += New-Input("Encoder($Id, $pinA, $pinB, $softDebounce)");
     }
     elseif ($input.type -eq "encoderWithButton") {
         if ($pinCount -ne 3) {
@@ -67,10 +68,10 @@ foreach ($input in $peripherals.inputs) {
             continue;
         }
 
-        $pinA = [int]$input.pins[0]
-        $pinB = [int]$input.pins[1]
-        $pinButton = [int]$input.pins[2]
-        $linesInputs += New-Input("EncoderWithButton($Id, $pinA, $pinB, $pinButton)");
+        $pinA = [int]$input.pins[0];
+        $pinB = [int]$input.pins[1];
+        $pinButton = [int]$input.pins[2];
+        $linesInputs += New-Input("EncoderWithButton($Id, $pinA, $pinB, $pinButton, $softDebounce)");
     }
 
     $Id += 1;

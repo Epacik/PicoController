@@ -18,7 +18,7 @@ $build = [System.Environment]::OSVersion.Version.Build;
 $osSpecificDepsFolder = switch ($build) {
     {$PSItem -lt 20000} { "win10" }
     {$PSItem -lt 22621} { "win11" }
-    {$PSItem -gt 22621} { "win1123h2" }
+    {$PSItem -ge 22621} { "win1123h2" }
 };
 
 #if ($build -ge 20000) { "win11" } else { "win10" }
@@ -31,5 +31,4 @@ foreach ($dep in $osSpecificDeps) {
     copy-item -Path "$source" -Destination "$dest"
 }
 
-robocopy "$PSScriptRoot\thirdparty\" "$Out"
 exit 0

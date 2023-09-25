@@ -1,6 +1,7 @@
 #pragma once
 #include "hardware/gpio.h"
 #include <cstdio>
+#include "etl/debounce.h"
 
 
 namespace IO {
@@ -32,9 +33,9 @@ namespace IO {
         const PinDirection direction;
         const PinPull pull;
         
-        void Init();
-        Pin(uint8_t pin, PinDirection direction, PinPull pull) : pin(pin), direction(direction), pull(pull) {
-            Init();
+        void Init(bool softDebounce);
+        Pin(uint8_t pin, PinDirection direction, PinPull pull, bool softDebounce) : pin(pin), direction(direction), pull(pull) {
+            Init(softDebounce);
         }
     };
 
@@ -43,14 +44,24 @@ namespace IO {
     class InputPin : public Pin
     {
         public: 
-        explicit InputPin(uint8_t pin, PinPull pull = PinPull::None) : Pin(pin, PinDirection::Input, pull) { }
+        explicit InputPin(
+                uint8_t pin,
+                PinPull pull = PinPull::None,
+                bool softDebounce = false)
+                : Pin(
+                        pin,
+                        PinDirection::Input,
+                        pull,
+                        softDebounce) {}
         bool Read();
+    private:
+        etl::debounce<100, 100> _debounce = etl::debounce<100, 100>();
     };
 
     class OutputPin : public Pin
     {
         public:
-        explicit OutputPin(uint8_t pin, PinPull pull = PinPull::None) : Pin(pin, PinDirection::Output, pull) { }
+        explicit OutputPin(uint8_t pin, PinPull pull = PinPull::None) : Pin(pin, PinDirection::Output, pull, false) { }
         virtual void Set(bool value);
     };
 }

@@ -24,9 +24,9 @@ void UserInteractions::Entry()
 
     while(true) {
         // wait until at least next half of a ms to help with debounce buttons a bit
-       if(time + 100 <= Time::UsSinceBoot()) {
-           continue;
-       }
+//       if(time + 100 <= Time::UsSinceBoot()) {
+//           continue;
+//       }
 
         for (auto &input : inputs) {
             auto message = input->GetMessage();

@@ -18,7 +18,7 @@ public abstract class Input
     public bool Split { get;}
 
     public ImmutableArray<string> AvailableActions { get; }
-
+    
     protected Input(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, ILogger logger, bool split = false)
     {
         _deviceId = deviceId;
