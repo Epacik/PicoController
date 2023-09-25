@@ -11,6 +11,8 @@ public static class Bootstrapper
     {
         services.RegisterLazySingleton<IFileSystem>(() => new FileSystem());
         services.RegisterLazySingleton<ILocationProvider>(() => new LocationProvider(customMainDir));
+        services.Register<IHandlerProvider>(() => new HandlerProvider(
+            resolver.GetRequiredService<IConfigRepository>()));
 
         services.RegisterLazySingleton<IConfigRepository>(() => new ConfigRepository(
             resolver.GetRequiredService<ILocationProvider>(),
@@ -28,6 +30,7 @@ public static class Bootstrapper
         services.RegisterLazySingleton<IDeviceManager>(() => new DeviceManager(
             resolver.GetRequiredService<IPluginManager>(),
             resolver.GetRequiredService<IConfigRepository>(),
+            resolver.GetRequiredService<IHandlerProvider>(),
             resolver.GetRequiredService<Serilog.ILogger>()
         ));
     }

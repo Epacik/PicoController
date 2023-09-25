@@ -12,20 +12,19 @@ namespace PicoController.Core.Devices.Inputs;
 internal class Button : Input
 {
     private readonly int _maxDelayBetweenClicks;
-    //private readonly System.Timers.Timer _timer;
 
     public Button(
-        int deviceId,
+        string deviceId,
         byte inputId,
-        Dictionary<string, Func<int, Task>?> actions,
         int maxDelayBetweenClicks,
+        IHandlerProvider handlerProvider,
+        Func<string, Func<int, string, Task>?> getAction,
         ILogger logger)
         : base(
             deviceId,
             inputId,
-            InputType.Button,
-            new string[] { ActionNames.Press, ActionNames.DoublePress, ActionNames.TriplePress },
-            actions,
+            handlerProvider,
+            getAction,
             logger)
     {
         _maxDelayBetweenClicks = maxDelayBetweenClicks;
@@ -35,6 +34,15 @@ internal class Button : Input
     private bool _isPressed;
     private int _presses;
     private CancellationTokenSource? _tokenSource;
+
+    public override InputType InputType => InputType.Button;
+    public override ImmutableArray<string> GetActions()
+        => ImmutableArray.CreateRange(new string[]
+        {
+            ActionNames.Press,
+            ActionNames.DoublePress,
+            ActionNames.TriplePress
+        });
 
     protected override async Task ExecuteInternal(InputMessage message)
     {
@@ -85,4 +93,6 @@ internal class Button : Input
                 break;
         }
     }
+
+    
 }

@@ -29,7 +29,7 @@ public class ConfigRepository : IConfigRepository
         Changed?.Invoke(this, new ConfigChangedEventArgs(config));
     }
 
-    private object lockObject = new object();
+    private readonly object lockObject = new object();
     private (Config config, DateTime readTime)? _configCache;
     
     public Config? Read()

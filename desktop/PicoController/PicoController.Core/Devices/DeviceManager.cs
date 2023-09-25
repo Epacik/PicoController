@@ -11,22 +11,28 @@ namespace PicoController.Core.Devices;
 public interface IDeviceManager : IDisposable
 {
     ValueTask<IEnumerable<Device>?> LoadDevicesAsync(CancellationToken? token = null);
+    Task<IEnumerable<Device>?> LoadDevicesAsync(Config.Config config, CancellationToken? token = null);
     Task<bool> UnloadDevicesAsync(CancellationToken? token = null);
     ValueTask<IEnumerable<Device>?> ReloadDevicesAsync(CancellationToken? token = null);
-    Task<IEnumerable<Device>?> LoadDevicesAsync(Config.Config config, CancellationToken? token = null);
 }
 public class DeviceManager : IDeviceManager
 {
     private readonly IPluginManager _pluginLoader;
     private readonly IConfigRepository _repository;
+    private readonly IHandlerProvider _handlerProvider;
     private readonly ILogger _logger;
     private bool _disposedValue;
     private List<Device>? _devices;
     public IEnumerable<Device>? Devices => _devices;
-    public DeviceManager(IPluginManager pluginLoader, IConfigRepository repository, Serilog.ILogger logger)
+    public DeviceManager(
+        IPluginManager pluginLoader,
+        IConfigRepository repository,
+        IHandlerProvider handlerProvider,
+        Serilog.ILogger logger)
     {
         _pluginLoader = pluginLoader;
         _repository = repository;
+        _handlerProvider = handlerProvider;
         _logger = logger;
     }
 
@@ -71,32 +77,32 @@ public class DeviceManager : IDeviceManager
                  var inputs = new List<Inputs.Input>();
                  foreach (Config.Input input in device.Inputs)
                  {
-
-                     var actions = input.Actions.ToDictionary(x => x.Key, x => _pluginLoader.LookupActions(x.Value));
-
                      inputs.Add(input.Type switch
                      {
                          Inputs.InputType.Button
                              => new Button(
-                                 deviceId,
-                                 input.Id, 
-                                 actions, 
-                                 config.MaxDelayBetweenClicks, 
+                                 device.Id,
+                                 input.Id,
+                                 config.MaxDelayBetweenClicks,
+                                 _handlerProvider,
+                                 _pluginLoader.GetAction,
                                  _logger),
 
                          Inputs.InputType.Encoder
-                             => Inputs.Encoder.Create(
-                                 deviceId,
+                             => new Inputs.Encoder(
+                                 device.Id,
                                  input.Id,
-                                 actions,
+                                 _handlerProvider,
+                                 _pluginLoader.GetAction,
                                  input.Split,
                                  _logger),
 
                          Inputs.InputType.EncoderWithButton
-                             => EncoderWithButton.Create(
-                                 deviceId,
+                             => new EncoderWithButton(
+                                 device.Id,
                                  input.Id,
-                                 actions,
+                                 _handlerProvider,
+                                 _pluginLoader.GetAction,
                                  config.MaxDelayBetweenClicks,
                                  input.Split,
                                  _logger),
@@ -155,12 +161,12 @@ public class DeviceManager : IDeviceManager
         {
             if (disposing)
             {
-                // TODO: clean managed
+                // TO DO: clean managed
             }
 
 
-            // TODO: clean unmanaged
-            // TODO: null out big fields
+            // TO DO: clean unmanaged
+            // TO DO: null out big fields
 
             if (_devices is not null)
             {

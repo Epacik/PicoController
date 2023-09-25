@@ -14,15 +14,15 @@ namespace PicoController.Core.Devices.Inputs
 {
     internal class EncoderWithButton : Input
     {
-        private EncoderWithButton(
-            int deviceId,
+        public EncoderWithButton(
+            string deviceId,
             byte inputId,
-            IEnumerable<string> availableActions,
-            Dictionary<string, Func<int, Task>?> actions,
+            IHandlerProvider handlerProvider,
+            Func<string, Func<int, string, Task>?> getAction,
             int maxDelayBetweenClicks,
             bool split,
-            ILogger logger) 
-            : base(deviceId, inputId, InputType.EncoderWithButton, availableActions, actions, logger, split)
+            ILogger logger)
+            : base(deviceId, inputId, handlerProvider, getAction, logger, split)
         {
             _maxDelayBetweenClicks = maxDelayBetweenClicks;
         }
@@ -32,6 +32,35 @@ namespace PicoController.Core.Devices.Inputs
         private int _presses;
         private CancellationTokenSource? _tokenSource;
         private readonly int _maxDelayBetweenClicks;
+
+        public override InputType InputType => InputType.EncoderWithButton;
+
+        public override ImmutableArray<string> GetActions()
+        {
+            var actions = Split switch
+            {
+                true =>
+                    new string[] {
+                        ActionNames.RotateSplitC,
+                        ActionNames.RotateSplitCC,
+                        ActionNames.RotatePressedSplitC,
+                        ActionNames.RotatePressedSplitCC,
+                        ActionNames.Press,
+                        ActionNames.DoublePress,
+                        ActionNames.TriplePress
+                    },
+                false => 
+                    new string[] {
+                        ActionNames.Rotate,
+                        ActionNames.RotatePressed,
+                        ActionNames.Press,
+                        ActionNames.DoublePress,
+                        ActionNames.TriplePress
+                    },
+            };
+
+            return actions.ToImmutableArray();
+        }
 
         protected override async Task ExecuteInternal(InputMessage message)
         {
@@ -102,52 +131,6 @@ namespace PicoController.Core.Devices.Inputs
                     await InvokeAction(0, ActionNames.TriplePress);
                     await InvokeClicks(presses - 3);
                     break;
-            }
-        }
-
-        public static EncoderWithButton Create(
-            int deviceId,
-            byte inputId,
-            Dictionary<string, Func<int, Task>?> actions,
-            int maxDelayBetweenClicks,
-            bool split,
-            ILogger logger)
-        {
-            if (split)
-            {
-                return new EncoderWithButton(
-                    deviceId,
-                    inputId,
-                    new string[] {
-                        ActionNames.Rotate,
-                        ActionNames.RotatePressed,
-                        ActionNames.Press,
-                        ActionNames.DoublePress,
-                        ActionNames.TriplePress
-                    },
-                    actions,
-                    maxDelayBetweenClicks,
-                    split,
-                    logger);
-            }
-            else
-            {
-                return new EncoderWithButton(
-                    deviceId,
-                    inputId,
-                    new string[] {
-                        ActionNames.RotateSplitC,
-                        ActionNames.RotateSplitCC,
-                        ActionNames.RotatePressedSplitC,
-                        ActionNames.RotatePressedSplitCC,
-                        ActionNames.Press,
-                        ActionNames.DoublePress,
-                        ActionNames.TriplePress
-                    },
-                    actions,
-                    maxDelayBetweenClicks,
-                    split, 
-                    logger);
             }
         }
     }

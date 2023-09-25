@@ -18,6 +18,11 @@ internal class DesignPluginManager : IPluginManager
 
     public IEnumerable<string> AllAvailableActions() => Array.Empty<string>();
 
+    public Func<int, string?, Task>? GetAction(string handler)
+    {
+        return null;
+    }
+
     public HandlerInfo? GetHandlerInfo(string handler)
         => new HandlerInfo("Example handler", _exampleActions);
 

@@ -24,8 +24,8 @@ public interface IPluginManager
     IEnumerable<string> AllAvailableActions();
     HandlerInfo? GetHandlerInfo(string handler);
     void LoadPlugins(string? directory = null);
-    Func<int, Task>? LookupActions(InputAction value);
     void UnloadPlugins();
+    Func<int, string?, Task>? GetAction(string handler);
 }
 
 internal class PluginInfo : IPluginInfo
@@ -132,30 +132,28 @@ public class PluginManager : IPluginManager
         LoadedActions.Clear();
     }
 
-    public Func<int, Task>? LookupActions(Config.InputAction value)
+    public Func<int, string?, Task>? GetAction(string handler)
     {
-        if (string.IsNullOrWhiteSpace(value.Handler))
+        if (string.IsNullOrWhiteSpace(handler))
             return null;
-
-        var handler = value.Handler;
 
         if (LoadedActions.ContainsKey(handler) && LoadedActions[handler] is not null)
         {
             var action = LoadedActions[handler];
-            return IPluginActionToFuncOfTask(value, action);
+            return IPluginActionToFuncOfTask(action);
         }
 
-        if (handler.StartsWith("/") || !value.Handler.Contains("/")) //built in actions
+        if (handler.StartsWith('/') || !handler.Contains('/')) //built in actions
         {
-            return LookupBuildtInAction(value, handler);
+            return LookupBuiltInAction(handler);
         }
         else
         {
-            return LookupPluginAction(value, handler);
+            return LookupPluginAction(handler);
         }
     }
 
-    private Func<int, Task>? LookupPluginAction(Config.InputAction value, string handler)
+    private Func<int, string?, Task>? LookupPluginAction(string handler)
     {
         var splittedHandler = handler.Split('/');
         var (assemblyName, typename) = (splittedHandler[0], splittedHandler[1]);
@@ -168,19 +166,19 @@ public class PluginManager : IPluginManager
         {
             var assembly = loader.LoadDefaultAssembly();
             var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPluginAction);
-            return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler, location);
+            return LookupActionsFromAssembly(allActionsInAssembly, typename, handler, location);
         }
     }
 
-    private Func<int, Task>? LookupBuildtInAction(Config.InputAction value, string handler)
+    private Func<int, string?, Task>? LookupBuiltInAction(string handler)
     {
         var typename = handler.TrimStart('/');
         var assembly = Assembly.GetExecutingAssembly();
         var allActionsInAssembly = assembly?.DefinedTypes.Where(IsPluginAction);
-        return LookupActionsFromAssembly(allActionsInAssembly, value, typename, handler, assembly?.Location);
+        return LookupActionsFromAssembly(allActionsInAssembly, typename, handler, assembly?.Location);
     }
 
-    private Func<int, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, Config.InputAction value, string typename, string handler, string? location)
+    private Func<int, string?, Task>? LookupActionsFromAssembly(IEnumerable<TypeInfo>? allActionsInAssembly, string typename, string handler, string? location)
     {
         if (allActionsInAssembly is null)
             return null;
@@ -203,23 +201,26 @@ public class PluginManager : IPluginManager
 
             action = Activator.CreateInstance(actionType.AsType()) as IPluginAction;
             if (action is null)
-            return null;
-
-            InjectDependencies(action, actionType, location);
+                return null;
         }
         else
         {
             List<object?> arguments = new();
+
             var ctor = constructors.First();
-            foreach ( var parameter in ctor.GetParameters() )
+            foreach (var type in ctor.GetParameters().Select(x => x.ParameterType))
             {
-                if (parameter.ParameterType == typeof(IPluginInfo))
+                if (type == typeof(IPluginInfo))
                 {
                     arguments.Add(new PluginInfo(location!));
                 }
+                else if (type == typeof(IInvokeHandler))
+                {
+                    arguments.Add(new InvokeHandler(this, _logger));
+                }
                 else
                 {
-                    arguments.Add(_resolver.GetService(parameter.ParameterType));
+                    arguments.Add(_resolver.GetService(type));
                 }
             }
             action = ctor.Invoke(arguments.ToArray()) as IPluginAction;
@@ -229,72 +230,16 @@ public class PluginManager : IPluginManager
         if (action is null)
             return null;
         LoadedActions[handler] = action;
-        return IPluginActionToFuncOfTask(value, action);
-    }
-
-    private void InjectDependencies(IPluginAction action, Type actionType, string? location)
-    {
-        var flags = BindingFlags.Public | BindingFlags.Instance;
-        var props = actionType.GetProperties(flags);
-        if (props is null)
-            return;
-
-        Type[] types = { typeof(IDisplayInfo), typeof(Serilog.ILogger), typeof(IPluginInfo) };
-
-        foreach (var type in types)
-        {
-            foreach (PropertyInfo prop in props.Where(x => x.PropertyType == type))
-            {
-                var set = prop.GetSetMethod(true);
-                var value = type == typeof(IPluginInfo) ? new PluginInfo(location!) : _resolver.GetService(type);
-                if (set is not null && value is not null)
-                    set.Invoke(action, new[] { value });
-            }
-        }
+        return IPluginActionToFuncOfTask(action);
     }
 
     private bool IsPluginAction(TypeInfo t) => typeof(IPluginAction).IsAssignableFrom(t);
     private bool IsVisiblePluginAction(TypeInfo t) =>
         IsPluginAction(t) && t.GetCustomAttribute<HideHandlerAttribute>(false) is null;
 
-    private Func<int, Task> IPluginActionToFuncOfTask(Config.InputAction value, IPluginAction action)
+    private Func<int, string?, Task> IPluginActionToFuncOfTask(IPluginAction action)
     {
-        return async inputValue =>
-        {
-            if (_logger.ExistsAndIsEnabled(LogEventLevel.Information))
-            {
-                if(value.InputValueOverride is not null)
-                {
-                    _logger?.Information(
-                        """
-                        Executing action.Handler: {Handler}
-                        Data: {Data}
-                        Input value Override: {InputValueOverride}
-
-                        IPluginAction Type: {Type}
-                        """,
-                        value.Handler,
-                        value.Data,
-                        value.InputValueOverride,
-                        action.GetType().FullName);
-                }
-                else
-                {
-                    _logger?.Information(
-                        """
-                        Executing action.Handler: {Handler}
-                        Data: {Data}
-
-                        IPluginAction Type: {Type}
-                        """,
-                        value.Handler,
-                        value.Data,
-                        action.GetType().FullName);
-                }
-            }
-
-            await action.ExecuteAsync(value.InputValueOverride ?? inputValue, value.Data);
-        };
+        return action.ExecuteAsync;
     }
 
     public IEnumerable<string> AllAvailableActions()

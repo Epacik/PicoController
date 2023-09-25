@@ -9,32 +9,37 @@ namespace PicoController.Core.Devices.Inputs;
 
 public abstract class Input
 {
-    private readonly int _deviceId;
+    private readonly IHandlerProvider _handlerProvider;
+    private readonly Func<string, Func<int, string, Task>?> _getAction;
     protected readonly ILogger _logger;
 
+    private readonly string _deviceId;
     public byte Id { get; }
-    public InputType Type { get; }
-    public Dictionary<string, Func<int, Task>?> Actions { get; } = new();
+    public abstract InputType InputType { get; }
     public bool Split { get;}
-
-    public ImmutableArray<string> AvailableActions { get; }
     
-    protected Input(int deviceId, byte inputId, InputType type, IEnumerable<string> availableActions, Dictionary<string, Func<int, Task>?> actions, ILogger logger, bool split = false)
+    protected Input(
+        string deviceId,
+        byte inputId,
+        IHandlerProvider handlerProvider,
+        Func<string, Func<int, string, Task>?> getAction,
+        ILogger logger,
+        bool split = false)
     {
         _deviceId = deviceId;
         Id = inputId;
-        Type = type;
-        Actions = actions;
+        _handlerProvider = handlerProvider;
+        _getAction = getAction;
         _logger = logger;
         Split = split;
-        AvailableActions = availableActions.ToImmutableArray();
     }
+    public abstract ImmutableArray<string> GetActions();
 
     public async Task Execute(InputMessage message)
     {
         if (Id != message.InputId)
             throw new ArgumentException("Message Id does not match Input Id");
-        if(Type != message.InputType)
+        if(InputType != message.InputType)
             throw new ArgumentException("Message Type does not match Input Type");
 
         await ExecuteInternal(message);
@@ -46,23 +51,55 @@ public abstract class Input
     {
         _logger.Information("Device: {DeviceId}, input: {Id}, action: {ActionName}", _deviceId, Id, actionName);
 
-        if (Actions.TryGetValue(actionName, out Func<int, Task>? value) && value is not null)
+        var handler = await _handlerProvider.GetHandler(
+            _deviceId,
+            Id,
+            actionName);
+
+        if (handler is null || handler.Handler is null)
         {
-            try
+            if (_logger.ExistsAndIsEnabled(Serilog.Events.LogEventLevel.Verbose))
             {
-                await value!.Invoke(inputValue);
+                _logger?.Verbose(
+                    "Handler for action not found: {ActionName}",
+                    actionName);
             }
-            catch (Exception ex)
-            {
-                _logger.Error(ex,
-                    "An action thrown an exception\n" +
-                    "Device: {DeviceId}, input: {Id}, action: {ActionName}\n", _deviceId, Id, actionName);
-            }
+            
+            return;
         }
-        else if (_logger.ExistsAndIsEnabled(Serilog.Events.LogEventLevel.Verbose))
+
+        var action = _getAction(handler.Handler);
+
+        if (action is null)
         {
-            _logger?.Verbose("Action not found: {ActionName}", actionName);
+            if (_logger.ExistsAndIsEnabled(Serilog.Events.LogEventLevel.Verbose))
+            {
+                _logger?.Verbose(
+                    "Invalid handler: {Handler}",
+                    handler.Handler);
+            }
+            return;
         }
+
+        try
+        {
+            await action!.Invoke(handler.InputValueOverride ?? inputValue, handler.Data!);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex,
+                "An action thrown an exception\n" +
+                "Device: {DeviceId}, input: {Id}, action: {ActionName}\n", _deviceId, Id, actionName);
+        }
+
+        //if (Actions.TryGetValue(actionName, out Func<int, Task>? value) && value is not null)
+        //{
+            
+        //}
+        //else if (_logger.ExistsAndIsEnabled(Serilog.Events.LogEventLevel.Verbose))
+        //{
+        //    _logger?.Verbose("Action not found: {ActionName}", actionName);
+        //}
     }
 
 }

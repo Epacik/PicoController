@@ -12,6 +12,7 @@ namespace PicoController.CsScript;
 
 public sealed class CsScript : CsScriptBase
 {
+    
     public CsScript(ILogger logger, IDisplayInfo displayInfo) : base(logger, displayInfo) {}
     protected override string GetCode(string data)
     {

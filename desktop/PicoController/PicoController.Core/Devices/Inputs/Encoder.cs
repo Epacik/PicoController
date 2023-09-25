@@ -13,15 +13,27 @@ namespace PicoController.Core.Devices.Inputs
     internal class Encoder : Input
     {
         
-        private Encoder(
-            int deviceId,
+        public Encoder(
+            string deviceId,
             byte inputId,
-            IEnumerable<string> availableActions,
-            Dictionary<string, Func<int, Task>?> actions,
+            IHandlerProvider handlerProvider,
+            Func<string, Func<int, string, Task>?> getAction,
             bool split,
             ILogger logger)
-            : base(deviceId, inputId, InputType.Encoder, availableActions, actions, logger, split)
+            : base(deviceId, inputId, handlerProvider, getAction, logger, split)
         {
+        }
+
+        public override InputType InputType => InputType.Encoder;
+        public override ImmutableArray<string> GetActions()
+        {
+            var actions = Split switch
+            {
+                true => new string[] { ActionNames.RotateSplitC, ActionNames.RotateSplitCC },
+                false => new string[] { ActionNames.Rotate }
+            };
+
+            return actions.ToImmutableArray();
         }
 
         protected override async Task ExecuteInternal(InputMessage message)
@@ -43,30 +55,6 @@ namespace PicoController.Core.Devices.Inputs
 
                 await InvokeAction(1, action);
             }
-        }
-
-        public static Encoder Create(int deviceId, byte inputId,  Dictionary<string, Func<int, Task>?> actions, bool split, ILogger logger)
-        {
-            if (split)
-            {
-                return new Encoder(
-                    deviceId,
-                    inputId,
-                    new string[] { ActionNames.Rotate },
-                    actions,
-                    split,
-                    logger);
-            }
-            else
-            {
-                return new Encoder(
-                    deviceId,
-                    inputId,
-                    new string[] { ActionNames.RotateSplitC, ActionNames.RotateSplitCC },
-                    actions,
-                    split,
-                    logger);
-            } 
         }
     }
 }
