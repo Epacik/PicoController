@@ -207,7 +207,12 @@ public class PluginManager : IPluginManager
         {
             List<object?> arguments = new();
 
-            var ctor = constructors.First();
+            var preferredCtor = constructors
+                .FirstOrDefault(x =>
+                    x.CustomAttributes.Any(p => p.AttributeType == typeof(PluginConstructorAttribute)));
+
+            var ctor = preferredCtor ?? constructors.First();
+
             foreach (var type in ctor.GetParameters().Select(x => x.ParameterType))
             {
                 if (type == typeof(IPluginInfo))
