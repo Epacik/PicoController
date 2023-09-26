@@ -7,6 +7,7 @@
     xmlns:viewModels="using:PicoController.Gui.ViewModels"
     mc:Ignorable="d" 
     x:Class="PicoController.Gui.Views.HandlerEditorView"
+	x:DataType="views:HandlerEditorView"
     MinWidth="500">
     <Grid Margin="5" RowDefinitions="30,30,5, 30,30,5, 30,30,5, 30,250" VerticalAlignment="Stretch">
         <!--<Grid.ColumnDefinitions>
@@ -25,7 +26,17 @@
             DragDrop.AllowDrop="True"/>
 
         <TextBlock Grid.Row="3">Data: </TextBlock>
-        <TextBox Grid.Row="4" Text="{Binding HandlerData}" />
+		<Grid Grid.Row="4">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="auto"/>
+			</Grid.ColumnDefinitions>
+			<TextBox Text="{Binding HandlerData}" />
+			<Button Grid.Column="1"
+					Content="Editor"
+					IsVisible="{Binding HasEditor}"
+					Command="{Binding OpenEditorCommand}"/>
+		</Grid>
 
         <TextBlock Grid.Row="6">Input value override</TextBlock>
         <CheckBox Grid.Row="6"

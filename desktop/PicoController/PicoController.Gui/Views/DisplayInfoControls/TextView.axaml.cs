@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Media;
+using PicoController.Plugin.Attributes;
 
 namespace PicoController.Gui.Views.DisplayInfoControls
 {
@@ -8,7 +9,6 @@ namespace PicoController.Gui.Views.DisplayInfoControls
         public TextView()
         {
             InitializeComponent();
-            new TextBlock().TextWrapping = TextWrapping.Wrap;
         }
     }
 }

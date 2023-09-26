@@ -23,7 +23,7 @@ internal static class Handlers
     {
         if(!pluginManager.AreLoaded)
             pluginManager.LoadPlugins();
-        var handlers = pluginManager.AllAvailableActions();
+        var handlers = pluginManager.GetAllAvailableActions();
         pluginManager.UnloadPlugins();
         Console.WriteLine("All available handlers:");
         Console.WriteLine(string.Join("\n", handlers));

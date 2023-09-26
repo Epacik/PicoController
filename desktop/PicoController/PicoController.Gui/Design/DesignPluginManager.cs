@@ -16,7 +16,7 @@ internal class DesignPluginManager : IPluginManager
 
     public bool AreLoaded => true;
 
-    public IEnumerable<string> AllAvailableActions() => Array.Empty<string>();
+    public IEnumerable<string> GetAllAvailableActions() => Array.Empty<string>();
 
     public Func<int, string?, Task>? GetAction(string handler)
     {
@@ -40,4 +40,8 @@ internal class DesignPluginManager : IPluginManager
     {
         
     }
+
+    public IEnumerable<string> GetBuiltInActions() => Array.Empty<string>();
+
+    public IEnumerable<string> GetPluginActions() => Array.Empty<string>();
 }

@@ -134,6 +134,8 @@ public class DeviceViewModel : ViewModelBase
             handler.Key!,
             newValue!.Adapt<InputAction>());
 
+        await _repositoryHelper.SaveChangesAsync();
+
         var inp = Device.Inputs?.FirstOrDefault(x => x.Id == inputId);
         if (inp is null)
         {
@@ -155,7 +157,7 @@ public class DeviceViewModel : ViewModelBase
     }
 
     public ReactiveCommand<DeviceInputConfigModel, Unit> SwitchChangedCommand { get; }
-    public void SwitchChanged(DeviceInputConfigModel input)
+    public async void SwitchChanged(DeviceInputConfigModel input)
     {
         if (input is null)
             return;
@@ -168,6 +170,6 @@ public class DeviceViewModel : ViewModelBase
         }
 
         _repositoryHelper.AddChanges(Device.Id!, input!.Id, input!.Split);
-
+        await _repositoryHelper.SaveChangesAsync();
     }
 }

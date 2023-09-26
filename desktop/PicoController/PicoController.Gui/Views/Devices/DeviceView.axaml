@@ -9,6 +9,7 @@
              xmlns:ir="clr-namespace:Avalonia.Xaml.Interactions.Responsive;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PicoController.Gui.Views.Devices.DeviceView"
+             x:DataType="vmd:DeviceViewModel"
              VerticalAlignment="Stretch">
 
     <Design.DataContext>
@@ -21,8 +22,7 @@
     <Grid ColumnDefinitions="*">
         <Grid RowDefinitions="auto,20,*"
               Margin="5">
-            <Expander IsEnabled="{Binding !DataContext.Run, 
-                        RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
+            <Expander >
                 <Expander.Header>
                     <Grid
                         ColumnDefinitions="60,*"
@@ -58,7 +58,9 @@
                     <Grid 
                         ShowGridLines="True"
                         RowDefinitions="30,5,30,5,*"
-                        ColumnDefinitions="150,*">
+                        ColumnDefinitions="150,*"
+                        IsEnabled="{Binding !DataContext.Run, 
+                            RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
                         <TextBlock>Interface settings</TextBlock>
                         <TextBlock Grid.Row="2">
                             Interface type

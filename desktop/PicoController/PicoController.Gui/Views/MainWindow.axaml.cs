@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 using PicoController.Gui.Converters;
 using PicoController.Gui.Themes;
+using PicoController.Plugin.Attributes;
 using Splat;
 using System;
 using System.ComponentModel;
@@ -13,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Timers;
 
 namespace PicoController.Gui.Views;
+
 
 public partial class MainWindow : Window
 {

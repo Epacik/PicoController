@@ -1,10 +1,13 @@
 ﻿using Avalonia.Collections;
 using PicoController.Core;
 using PicoController.Core.Config;
+using PicoController.Gui.Controls.Editors;
 using PicoController.Gui.Models;
+using PicoController.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,9 +25,11 @@ public class HandlerEditorViewModel : ViewModelBase
         HandlerData        = handler.Value!.Data;
         OverrideValue      = handler.Value!.InputValueOverride is not null;
         InputValueOverride = handler.Value!.InputValueOverride ?? 0;
+
+        OpenEditorCommand = ReactiveCommand.Create(OpenEditor);
+
         Reload();
     }
-
     private readonly IPluginManager _pluginManager;
 
     public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> Handler { get; }
@@ -40,7 +45,18 @@ public class HandlerEditorViewModel : ViewModelBase
     public string? HandlerId
     {
         get => _handlerId;
-        set => this.RaiseAndSetIfChanged(ref _handlerId, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _handlerId, value);
+            HasEditor = value is not null && GetEditorForHandler(value) is not null;
+        }
+    }
+
+    private bool _hasEditor = false;
+    public bool HasEditor
+    {
+        get => _hasEditor;
+        set => this.RaiseAndSetIfChanged(ref _hasEditor, value);
     }
 
     private string? _handlerData;
@@ -73,11 +89,71 @@ public class HandlerEditorViewModel : ViewModelBase
         get => _handlers;
         set => this.RaiseAndSetIfChanged(ref _handlers, value);
     }
+    
+    public ReactiveCommand<Unit, Unit> OpenEditorCommand { get; }
+
+    private async void OpenEditor()
+    {
+        var type = GetEditorForHandler(HandlerId);
+
+        var ctor = type.GetConstructors()
+            .FirstOrDefault(x =>
+            {
+                var param = x.GetParameters();
+                if (param?.Length != 1)
+                    return false;
+
+                if (param[0].ParameterType != typeof(string))
+                    return false;
+                return true;
+            });
+
+        if (ctor is null)
+            return;
+
+        var control = ctor.Invoke(new[] { HandlerData }) as IEditor;
+
+        if (control is null) 
+            return;
+
+        var window = new Window()
+        {
+            Title = "PicoController: Value editor",
+            Content = control,
+        };
+
+#if DEBUG
+        window.AttachDevTools();
+#endif
+
+        await window.ShowDialog(App.MainWindow!);
+
+        HandlerData = control.GetValue();
+    }
 
     public void Reload()
     {
         Handlers.Clear();
-        Handlers.AddRange(_pluginManager.AllAvailableActions());
+        Handlers.AddRange(_pluginManager.GetAllAvailableActions());
     }
 
+
+    private Type? GetEditorForHandler(string? handlerName)
+    {
+        var builtIn = _pluginManager.GetBuiltInActions();
+
+        if (builtIn.Contains(handlerName))
+        {
+            return GetEditorForBuiltInHandler(handlerName);
+        }
+
+        return null;
+    }
+
+    private Type? GetEditorForBuiltInHandler(string? handlerName)
+        => handlerName switch
+        {
+            "/IronPython" => typeof(IronPythonCodeEditor),
+            _ => null,
+        };
 }

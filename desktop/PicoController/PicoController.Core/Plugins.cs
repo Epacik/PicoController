@@ -21,11 +21,13 @@ namespace PicoController.Core;
 public interface IPluginManager
 {
     bool AreLoaded { get; }
-    IEnumerable<string> AllAvailableActions();
+    IEnumerable<string> GetAllAvailableActions();
     HandlerInfo? GetHandlerInfo(string handler);
     void LoadPlugins(string? directory = null);
     void UnloadPlugins();
     Func<int, string?, Task>? GetAction(string handler);
+    IEnumerable<string> GetBuiltInActions();
+    IEnumerable<string> GetPluginActions();
 }
 
 internal class PluginInfo : IPluginInfo
@@ -247,13 +249,19 @@ public class PluginManager : IPluginManager
         return action.ExecuteAsync;
     }
 
-    public IEnumerable<string> AllAvailableActions()
+    public IEnumerable<string> GetBuiltInActions()
     {
         var result = new List<string>();
 
         result.AddRange(
             Assembly.GetExecutingAssembly().DefinedTypes
                 .Where(IsVisiblePluginAction).Select(x => "/" + x.Name));
+        return result;
+    }
+
+    public IEnumerable<string> GetPluginActions()
+    {
+        var result = new List<string>();
 
         foreach (var (key, (loader, location)) in _loaders)
         {
@@ -263,6 +271,15 @@ public class PluginManager : IPluginManager
                     .Where(IsVisiblePluginAction)
                     .Select(x => $"{key}/{x.Name}"));
         }
+        return result;
+    }
+
+    public IEnumerable<string> GetAllAvailableActions()
+    {
+        var result = new List<string>();
+
+        result.AddRange(GetBuiltInActions());
+        result.AddRange(GetPluginActions());
 
         return result;
     }
