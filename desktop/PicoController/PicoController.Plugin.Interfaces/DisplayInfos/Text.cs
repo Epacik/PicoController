@@ -8,29 +8,47 @@ namespace PicoController.Plugin.DisplayInfos;
 
 public class Text
 {
-    public Text(string text, double fontSize = 14, int fontWeight = 400)
+    public Text(
+        string text,
+        double fontSize = 14,
+        int fontWeight = 400,
+        bool wrap = false,
+        TextAlignment alignment = TextAlignment.Left)
     {
         Content    = text;
         FontSize   = fontSize;
         FontWeight = fontWeight;
+        Wrap = wrap;
+        Alignment = alignment;
     }
 
     public string Content { get; }
     public double FontSize { get; }
     public int FontWeight { get; }
+    public bool Wrap { get; }
+    public TextAlignment Alignment { get; }
 
-    public void Deconstruct(out string content, out double fontSize, out int fontWeight)
+    public void Deconstruct(
+        out string content,
+        out double fontSize,
+        out int fontWeight,
+        out bool wrap,
+        out TextAlignment alignment)
     {
         content    = Content;
         fontSize   = FontSize;
         fontWeight = FontWeight;
+        wrap = Wrap;
+        alignment = Alignment;
     }
 
-    public override bool Equals(object? other)
-        => other is Text otherText
+    public override bool Equals(object? obj)
+        => obj is Text otherText
         && Content.Equals(otherText.Content)
         && FontSize.Equals(otherText.FontSize)
-        && FontWeight.Equals(otherText.FontWeight);
+        && FontWeight.Equals(otherText.FontWeight)
+        && Wrap.Equals(otherText.Wrap)
+        && Alignment.Equals(otherText.Alignment);
 
     public static bool operator ==(Text one, Text other)
         => one.Content    == other.Content
@@ -49,4 +67,8 @@ public class Text
     {
         return $"Text {{Content: {Content}, FontSize: {FontSize}, FontWeight: {FontWeight}}}";
     }
+}
+public enum TextAlignment
+{
+    Left, Center, Right,
 }
