@@ -17,6 +17,7 @@
     MinHeight="300"
     d:DesignWidth="1400"
     d:DesignHeight="450"
+    WindowStartupLocation="CenterScreen"
     TransparencyBackgroundFallback="{DynamicResource SolidBackgroundFillColorBase}"
     x:Class="PicoController.Gui.Views.MainWindow"
     Icon="/Assets/avalonia-logo.ico"

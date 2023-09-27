@@ -3,26 +3,45 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:ae="using:AvaloniaEdit"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d"
+             MinWidth="800" MinHeight="450"
              x:Class="PicoController.Gui.Controls.Editors.CodeEditor">
-    <Grid RowDefinitions="*,20">
+    <Grid RowDefinitions="*,40">
         <ae:TextEditor
 		    x:Name="Editor"
 		    ShowLineNumbers="True"
 		    FontFamily="Cascadia Code,Consolas,Menlo,Monospace"/>
-        <StackPanel
-            Spacing="5"
-            Orientation="Horizontal"
-            Background="Purple"
-            Grid.Row="1">
-            <TextBlock Foreground="White">
-                <Run>Line</Run>
-                <Run x:Name="LineNumber"/>
-            </TextBlock>
-            <TextBlock Foreground="White">
-                <Run>Column</Run>
-                <Run x:Name="ColumnNumber"/>
-            </TextBlock>
-        </StackPanel>
+
+
+        <Grid
+            Grid.Row="1"
+            Background="Purple">
+            <StackPanel
+                Spacing="5"
+                Orientation="Horizontal"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="5">
+                <TextBlock Foreground="White">
+                    <Run>Line</Run>
+                    <Run x:Name="LineNumber"/>
+                </TextBlock>
+                <TextBlock Foreground="White">
+                    <Run>Column</Run>
+                    <Run x:Name="ColumnNumber"/>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel
+                Spacing="5"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Margin="5,0">
+                <Button Content="Cancel"
+                        x:Name="CancelButton"/>
+                <Button Content="Save"
+                        x:Name="SaveButton"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

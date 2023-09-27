@@ -14,6 +14,15 @@ namespace PicoController.Gui.Controls.Editors;
 
 internal static class EditorHelpers
 {
+    internal static void CloseWindow(Control control)
+    {
+        var top = TopLevel.GetTopLevel(control);
+        if (top is not Window window)
+            return;
+
+        window.Close();
+    }
+
     internal static InitializeResult InitializeEditor(
         TextEditor editor,
         string languageExt,

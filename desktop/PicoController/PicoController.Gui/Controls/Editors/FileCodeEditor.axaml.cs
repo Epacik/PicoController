@@ -13,7 +13,9 @@ namespace PicoController.Gui.Controls.Editors
     {
         private readonly RegistryOptions _registryOptions;
         private readonly Installation _textMateInstallation;
+        private readonly string _path;
         private readonly string _languageExt;
+        private bool _saved = false;
 
         public FileCodeEditor(string path, string languageExt)
         {
@@ -43,8 +45,11 @@ namespace PicoController.Gui.Controls.Editors
             }, RoutingStrategies.Bubble, true);
 
             BrowseButton.Click += BrowseButton_Click;
-            SaveButton.Click += SaveButton_Click;
             ReloadButton.Click += ReloadButton_Click;
+            SaveFileButton.Click += SaveFileButton_Click;
+            SaveButton.Click += SaveButton_Click;
+            CancelButton.Click += CancelButton_Click;
+            _path = path;
             _languageExt = languageExt;
         }
 
@@ -102,7 +107,7 @@ namespace PicoController.Gui.Controls.Editors
             Editor.Document = new TextDocument( File.ReadAllText(path));
         }
 
-        private void SaveButton_Click(object? sender, RoutedEventArgs e)
+        private void SaveFileButton_Click(object? sender, RoutedEventArgs e)
         {
             var path = FileName.Text;
             if (!File.Exists(path))
@@ -110,10 +115,20 @@ namespace PicoController.Gui.Controls.Editors
 
             File.WriteAllText(path, Editor.Document.Text);
         }
+        private void CancelButton_Click(object? sender, RoutedEventArgs e)
+        {
+            EditorHelpers.CloseWindow(this);
+        }
+
+        private void SaveButton_Click(object? sender, RoutedEventArgs e)
+        {
+            _saved = true;
+            EditorHelpers.CloseWindow(this);
+        }
 
         public string GetValue()
         {
-            return FileName.Text ?? "";
+            return _saved ? FileName.Text ?? "" : _path;
         }
         public void Dispose()
         {
@@ -121,8 +136,10 @@ namespace PicoController.Gui.Controls.Editors
             Editor.TextArea.TextEntering -= textEditor_TextArea_TextEntering;
             Editor.TextArea.Caret.PositionChanged -= Caret_PositionChanged;
             BrowseButton.Click -= BrowseButton_Click;
-            SaveButton.Click -= SaveButton_Click;
+            SaveFileButton.Click += SaveFileButton_Click;
             ReloadButton.Click -= ReloadButton_Click;
+            CancelButton.Click -= CancelButton_Click;
+            SaveButton.Click -= SaveButton_Click;
         }
     }
 }

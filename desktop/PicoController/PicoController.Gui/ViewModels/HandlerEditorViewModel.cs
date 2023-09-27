@@ -96,24 +96,54 @@ public class HandlerEditorViewModel : ViewModelBase
 
     private async void OpenEditor()
     {
-        var control = GetEditorForHandler(HandlerId);
+        var editor = GetEditorForHandler(HandlerId);
 
-        if (control is null) 
+        if (editor is null) 
             return;
 
-        var window = new Window()
+        try
         {
-            Title = "PicoController: Value editor",
-            Content = control,
-        };
+            var window = new Window()
+            {
+                Title = "PicoController: Value editor",
+                Content = editor,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            };
+
+            if (editor is Control control)
+            {
+                window.MinHeight = control.MinHeight;
+                window.MinWidth = control.MinWidth;
+                window.Height = control.Height;
+                window.Width = control.Width;
+                window.MaxHeight = control.MaxHeight;
+                window.MaxWidth = control.MaxWidth;
+
+                if (window.MaxHeight - window.MinHeight < double.Epsilon ||
+                    window.MaxWidth - window.MinWidth < double.Epsilon)
+                {
+                    window.CanResize = false;
+                }
+
+                control.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+                control.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            }
+
+
 
 #if DEBUG
         window.AttachDevTools();
 #endif
 
-        await window.ShowDialog(App.MainWindow!);
+            await window.ShowDialog(App.MainWindow!);
 
-        HandlerData = control.GetValue();
+            HandlerData = editor.GetValue();
+        }
+        finally
+        {
+            if(editor is IDisposable disposable)
+                disposable.Dispose();
+        }
     }
 
     public void Reload()
@@ -145,6 +175,7 @@ public class HandlerEditorViewModel : ViewModelBase
             "/CsScriptFile" => new FileCodeEditor(HandlerData!, ".cs"),
             "/NeoLua" => new CodeEditor(HandlerData!, ".lua"),
             "/NeoLuaFile" => new FileCodeEditor(HandlerData!, ".lua"),
+            "/RunProgram" => new RunProgramEditor(HandlerData!),
             _ => null,
         };
     }

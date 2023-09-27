@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             Width="450"
+             Height="200"
+             MinWidth="450"
+             MinHeight="200"
+             MaxWidth="450"
+             MaxHeight="200"
+             x:Class="PicoController.Gui.Controls.Editors.RunProgramEditor">
+    <Grid 
+        Margin="10"
+        ColumnDefinitions="*,5,80"
+        RowDefinitions="30,30,10,30,30,15,30">
+        <TextBlock Text="Program"/>
+        <TextBox 
+            Grid.Row="1"
+            x:Name="ProgramName"/>
+        <Button 
+            Content="Browse"
+            Grid.Row="1"
+            Grid.Column="2"
+            x:Name="BrowseButton"/>
+        
+        <TextBlock
+            Text="Arguments"
+            Grid.Row="3"/>
+        <TextBox 
+            Grid.Row="4"
+            Grid.ColumnSpan="3"
+            x:Name="Arguments"/>
+        
+        <Button 
+            Grid.Row="6"
+            HorizontalAlignment="Right"
+            Content="Cancel"
+            x:Name="CancelButton"/>
+
+        <Button
+            Grid.Row="6"
+            Grid.Column="2"
+            HorizontalAlignment="Stretch"
+            Content="Save"
+            x:Name="SaveButton"/>
+    </Grid>
+</UserControl>

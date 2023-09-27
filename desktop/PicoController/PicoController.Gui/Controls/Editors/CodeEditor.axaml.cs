@@ -15,6 +15,8 @@ namespace PicoController.Gui.Controls.Editors
     {
         private readonly RegistryOptions _registryOptions;
         private readonly Installation _textMateInstallation;
+        private readonly string _text;
+        private bool _saved;
 
         public CodeEditor(string text, string languageExt)
         {
@@ -35,6 +37,10 @@ namespace PicoController.Gui.Controls.Editors
             }, RoutingStrategies.Bubble, true);
 
             //_textEditor.TextArea.IndentationStrategy = new Indentation.CSharp.CSharpIndentationStrategy(_textEditor.Options);
+
+            SaveButton.Click += SaveButton_Click;
+            CancelButton.Click += CancelButton_Click;
+            _text = text;
         }
 
         private void Caret_PositionChanged(object? sender, EventArgs e)
@@ -52,9 +58,20 @@ namespace PicoController.Gui.Controls.Editors
         {
         }
 
+        private void SaveButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            _saved = true;
+            EditorHelpers.CloseWindow(this);
+        }
+
+        private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            EditorHelpers.CloseWindow(this);
+        }
+
         public string GetValue()
         {
-            return Editor.Document.Text;
+            return _saved ? Editor.Document.Text : _text;
         }
 
         public void Dispose()
