@@ -143,6 +143,8 @@ public class HandlerEditorViewModel : ViewModelBase
             "/IronPythonFile" => new IronPythonFileCodeEditor(HandlerData!),
             "/CsScript" => new CodeEditor(HandlerData!, ".cs"),
             "/CsScriptFile" => new FileCodeEditor(HandlerData!, ".cs"),
+            "/NeoLua" => new CodeEditor(HandlerData!, ".lua"),
+            "/NeoLuaFile" => new FileCodeEditor(HandlerData!, ".lua"),
             _ => null,
         };
     }
