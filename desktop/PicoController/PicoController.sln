@@ -35,8 +35,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualDesktop.Windows", "P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoController.RestartAfterCrash", "PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj", "{946D58AF-42AA-498E-B9A3-DBB5E405BBAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoController.CsScript", "Plugins\PicoController.CsScript\PicoController.CsScript.csproj", "{3462198A-218E-4BA2-9E8D-C0FA79F50106}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,14 +131,6 @@ Global
 		{946D58AF-42AA-498E-B9A3-DBB5E405BBAA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{946D58AF-42AA-498E-B9A3-DBB5E405BBAA}.Release|x64.ActiveCfg = Release|Any CPU
 		{946D58AF-42AA-498E-B9A3-DBB5E405BBAA}.Release|x64.Build.0 = Release|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Debug|x64.Build.0 = Debug|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Release|x64.ActiveCfg = Release|Any CPU
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -159,7 +149,6 @@ Global
 		{61284211-F107-4DAE-A222-694524BE2B58} = {C0E17463-ABE1-4698-94CD-E6D69A3F7AAC}
 		{E69F4A0B-E3BF-4E97-9803-1FD5AA128004} = {61284211-F107-4DAE-A222-694524BE2B58}
 		{946D58AF-42AA-498E-B9A3-DBB5E405BBAA} = {AD9E25EC-A9F4-440A-BCA0-A4955CA1FB92}
-		{3462198A-218E-4BA2-9E8D-C0FA79F50106} = {C0E17463-ABE1-4698-94CD-E6D69A3F7AAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3C17AB0F-CD93-4594-9440-A9FEA7B5977F}

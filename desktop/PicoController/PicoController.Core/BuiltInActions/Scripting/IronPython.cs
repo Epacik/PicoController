@@ -53,10 +53,10 @@ public abstract class IronPythonBase : IPluginAction
 
     public async Task ExecuteAsync(int inputValue, string? data)
     {
+        if (data is null)
+            throw new ArgumentNullException(nameof(data));
         await Task.Run(() =>
         {
-            if (data is null)
-                throw new ArgumentNullException(nameof(data));
 
             var scope = _engine.CreateScope();
         

@@ -141,6 +141,8 @@ public class HandlerEditorViewModel : ViewModelBase
         {
             "/IronPython" => new IronPythonCodeEditor(HandlerData!),
             "/IronPythonFile" => new IronPythonFileCodeEditor(HandlerData!),
+            "/CsScript" => new CodeEditor(HandlerData!, ".cs"),
+            "/CsScriptFile" => new FileCodeEditor(HandlerData!, ".cs"),
             _ => null,
         };
     }
