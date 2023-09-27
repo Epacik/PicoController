@@ -36,8 +36,6 @@
                                       OnContent="Split"
                                       OffContent="Split"
                                       IsChecked="{Binding Split, TargetNullValue=false}"
-                                      IsEnabled="{Binding !DataContext.Run, 
-                                        RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
                                       Command="{Binding DataContext.SwitchChangedCommand,
                                         RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dw:DeviceView}}}"
                                       CommandParameter="{Binding .}"/>
@@ -95,13 +93,13 @@
             
             <Setter Property="CornerRadius"
                     Value="5"/>
-            <Setter Property="IsEnabled"
-                    Value="{Binding !DataContext.Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
+            <!--<Setter Property="IsEnabled"
+                    Value="{Binding !DataContext.Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>-->
             
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <Grid IsEnabled="{Binding !DataContext.Run, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                        <Grid 
                               ColumnDefinitions="150,*"
                               RowDefinitions="*,5,*,5,*,5,*">
                             <TextBlock FontWeight="SemiLight">Action</TextBlock>
@@ -120,7 +118,9 @@
                             <TextBlock
                                 Grid.Row="4"
                                 Grid.Column="1"
-                                Text="{Binding Value.Data}"/>
+                                Text="{Binding Value.Data}"
+								MaxLines="10"
+								TextTrimming="WordEllipsis"/>
 
                             <TextBlock 
                                 Grid.Row="6" 

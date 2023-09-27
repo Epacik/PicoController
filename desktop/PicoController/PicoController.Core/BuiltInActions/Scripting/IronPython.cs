@@ -18,6 +18,7 @@ public sealed class IronPython : IronPythonBase
 
 public sealed class IronPythonFile : IronPythonBase
 {
+    [PluginConstructor]
     public IronPythonFile(
         ILogger logger,
         IDisplayInfo displayInfo,
@@ -52,10 +53,10 @@ public abstract class IronPythonBase : IPluginAction
 
     public async Task ExecuteAsync(int inputValue, string? data)
     {
+        if (data is null)
+            throw new ArgumentNullException(nameof(data));
         await Task.Run(() =>
         {
-            if (data is null)
-                throw new ArgumentNullException(nameof(data));
 
             var scope = _engine.CreateScope();
         
@@ -63,7 +64,7 @@ public abstract class IronPythonBase : IPluginAction
             scope.SetVariable("__logger__", _logger);
             scope.SetVariable("__display_info__", _displayInfo);
             scope.SetVariable("__storage__", _storage);
-            //scope.SetVariable("__invoke_handler__", _invokeHandler);
+            scope.SetVariable("__invoke_handler__", _invokeHandler);
 
             if (_useFile)
                 _engine.ExecuteFile(data, scope);

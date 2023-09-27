@@ -15,6 +15,7 @@ public class HandlerProvider : IHandlerProvider
     {
         _configRepository = configRepository;
     }
+
     public async Task<InputAction?> GetHandler(string deviceId, int inputId, string action)
     {
         var config = await _configRepository.ReadAsync();

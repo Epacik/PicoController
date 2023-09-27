@@ -1,10 +1,15 @@
 ﻿using Avalonia.Collections;
 using PicoController.Core;
 using PicoController.Core.Config;
+using PicoController.Gui.Controls.Editors;
 using PicoController.Gui.Models;
+using PicoController.Plugin;
+using PicoController.Plugin.Attributes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,9 +27,11 @@ public class HandlerEditorViewModel : ViewModelBase
         HandlerData        = handler.Value!.Data;
         OverrideValue      = handler.Value!.InputValueOverride is not null;
         InputValueOverride = handler.Value!.InputValueOverride ?? 0;
+
+        OpenEditorCommand = ReactiveCommand.Create(OpenEditor);
+
         Reload();
     }
-
     private readonly IPluginManager _pluginManager;
 
     public ReactiveKeyValuePair<string, DeviceInputActionConfigModel> Handler { get; }
@@ -40,7 +47,18 @@ public class HandlerEditorViewModel : ViewModelBase
     public string? HandlerId
     {
         get => _handlerId;
-        set => this.RaiseAndSetIfChanged(ref _handlerId, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _handlerId, value);
+            HasEditor = value is not null && GetEditorForHandler(value) is not null;
+        }
+    }
+
+    private bool _hasEditor = false;
+    public bool HasEditor
+    {
+        get => _hasEditor;
+        set => this.RaiseAndSetIfChanged(ref _hasEditor, value);
     }
 
     private string? _handlerData;
@@ -73,11 +91,87 @@ public class HandlerEditorViewModel : ViewModelBase
         get => _handlers;
         set => this.RaiseAndSetIfChanged(ref _handlers, value);
     }
+    
+    public ReactiveCommand<Unit, Unit> OpenEditorCommand { get; }
+
+    private async void OpenEditor()
+    {
+        var control = GetEditorForHandler(HandlerId);
+
+        if (control is null) 
+            return;
+
+        var window = new Window()
+        {
+            Title = "PicoController: Value editor",
+            Content = control,
+        };
+
+#if DEBUG
+        window.AttachDevTools();
+#endif
+
+        await window.ShowDialog(App.MainWindow!);
+
+        HandlerData = control.GetValue();
+    }
 
     public void Reload()
     {
         Handlers.Clear();
-        Handlers.AddRange(_pluginManager.AllAvailableActions());
+        Handlers.AddRange(_pluginManager.GetAllAvailableActions());
     }
 
+
+    private IEditor? GetEditorForHandler(string? handlerName)
+    {
+        var builtIn = _pluginManager.GetBuiltInActions();
+
+        if (builtIn.Contains(handlerName))
+        {
+            return GetEditorForBuiltInHandler(handlerName);
+        }
+
+        return GetEditorForPluginHandler(handlerName);
+    }
+
+    private IEditor? GetEditorForBuiltInHandler(string? handlerName)
+    {
+        return handlerName switch
+        {
+            "/IronPython" => new IronPythonCodeEditor(HandlerData!),
+            "/IronPythonFile" => new IronPythonFileCodeEditor(HandlerData!),
+            "/CsScript" => new CodeEditor(HandlerData!, ".cs"),
+            "/CsScriptFile" => new FileCodeEditor(HandlerData!, ".cs"),
+            _ => null,
+        };
+    }
+
+    private IEditor? GetEditorForPluginHandler(string? handlerName)
+    {
+        var typeInfo = _pluginManager.GetPluginHandlerInfo(handlerName);
+
+        if (typeInfo is null)
+            return null;
+
+        var attributes = typeInfo.CustomAttributes;
+
+        var editor = attributes
+            .FirstOrDefault(x => x.AttributeType == typeof(CodeEditorAttribute));
+        if (editor is not null)
+        {
+            var extension = editor.ConstructorArguments.FirstOrDefault().Value as string;
+            return extension is not null ? new CodeEditor(HandlerData!, extension) : null;
+        }
+
+        editor = attributes
+            .FirstOrDefault(x => x.AttributeType == typeof(FileCodeEditorAttribute));
+        if (editor is not null)
+        {
+            var extension = editor.ConstructorArguments.FirstOrDefault().Value as string;
+            return extension is not null ? new FileCodeEditor(HandlerData!, extension) : null;
+        }
+
+        return null;
+    }
 }

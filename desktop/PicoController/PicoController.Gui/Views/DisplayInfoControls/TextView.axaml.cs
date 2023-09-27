@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Media;
+using PicoController.Plugin.Attributes;
 
 namespace PicoController.Gui.Views.DisplayInfoControls
 {

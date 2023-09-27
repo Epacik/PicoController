@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ae="using:AvaloniaEdit"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PicoController.Gui.Controls.Editors.FileCodeEditor">
+    <Grid RowDefinitions="40,*,20">
+        <Grid Margin="5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/> 
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="Auto"
+                                  MaxWidth="80"/>
+                <ColumnDefinition Width="*" MinWidth="10"/>
+                <ColumnDefinition Width="Auto"
+                                  MaxWidth="80"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="Auto"
+                                  MaxWidth="80"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="FileName" Margin="0,5"/>
+            <Button Grid.Column="2"
+                    x:Name="BrowseButton">
+                Browse
+            </Button>
+
+            <Button Grid.Column="4"
+                    x:Name="SaveButton">
+                Save
+            </Button>
+            <Button Grid.Column="6"
+                    x:Name="ReloadButton">
+                Reload
+            </Button>
+        </Grid>
+        <ae:TextEditor
+            x:Name="Editor"
+            ShowLineNumbers="True"
+            FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+            Grid.Row="1"/>
+        <StackPanel
+            Spacing="5"
+            Orientation="Horizontal"
+            Background="Purple"
+            Grid.Row="2">
+            <TextBlock Foreground="White">
+                <Run>Line</Run>
+                <Run x:Name="LineNumber"/>
+            </TextBlock>
+            <TextBlock Foreground="White">
+                <Run>Column</Run>
+                <Run x:Name="ColumnNumber"/>
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</UserControl>
