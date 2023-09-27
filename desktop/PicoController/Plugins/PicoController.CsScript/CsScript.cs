@@ -10,33 +10,31 @@ using System.Xml.Linq;
 
 namespace PicoController.CsScript;
 
-public sealed class CsScript : CsScriptBase
+[FileCodeEditor(".cs")]
+public sealed class CsScriptFile : CsScriptBase
 {
-    
-    public CsScript(ILogger logger, IDisplayInfo displayInfo) : base(logger, displayInfo) {}
+    public CsScriptFile(
+        ILogger logger,
+        IDisplayInfo displayInfo,
+        IStorage storage,
+        IInvokeHandler invokeHandler) 
+        : base(logger, displayInfo, storage, invokeHandler) { }
     protected override string GetCode(string data)
     {
-        return
-            """
-            using System;
-            using Serilog;
-            using PicoController.Plugin;
-            using PicoController.Plugin.DisplayInfos;
-            public void Invoke(ILogger logger, IDisplayInfo displayInfo) 
-            {
-                logger?.Information("Test");
-
-                var date = DateTime.Now;
-
-                displayInfo.Display(
-                    new Text("Test", 30),
-                    new Text(date.ToLongDateString()),
-                    new Text(date.ToLongTimeString()),
-                    new ProgressBar());
-            }
-            """;
+        return File.Exists(data) ? File.ReadAllText(data) : string.Empty;
     }
+}
 
+[CodeEditor(".cs")]
+public sealed class CsScript : CsScriptBase
+{
+    public CsScript(
+        ILogger logger,
+        IDisplayInfo displayInfo,
+        IStorage storage,
+        IInvokeHandler invokeHandler) 
+        : base(logger, displayInfo, storage, invokeHandler) {}
+    protected override string GetCode(string data) => data;
 }
 
 [HideHandler]
@@ -44,11 +42,19 @@ public abstract class CsScriptBase : IPluginAction
 {
     private readonly ILogger _logger;
     private readonly IDisplayInfo _displayInfo;
+    private readonly IStorage _storage;
+    private readonly IInvokeHandler _invokeHandler;
 
-    protected CsScriptBase(ILogger logger, IDisplayInfo displayInfo)
+    protected CsScriptBase(
+        ILogger logger,
+        IDisplayInfo displayInfo,
+        IStorage storage,
+        IInvokeHandler invokeHandler)
     {
         _logger = logger;
         _displayInfo = displayInfo;
+        _storage = storage;
+        _invokeHandler = invokeHandler;
     }
 
     protected abstract string GetCode(string data);
@@ -58,18 +64,22 @@ public abstract class CsScriptBase : IPluginAction
 
         var code = GetCode(data);
 
-        var del = CSScript.Evaluator
+        var del = CSScript.RoslynEvaluator
             .ReferenceAssembliesFromCode(code)
             .ReferenceAssemblyOf<ILogger>()
             .ReferenceAssemblyOf<IDisplayInfo>()
             .ReferenceDomainAssemblies()
             .CreateDelegate<IInvokable>(code);
 
-        del.Invoke(_logger, _displayInfo);
+        var x = del.Invoke(_logger, _displayInfo);
     }
 }
 
 public interface IInvokable
 {
-    public void Invoke(ILogger logger, IDisplayInfo displayInfo);
+    public Task Run(
+        ILogger logger,
+        IDisplayInfo displayInfo,
+        IStorage storage,
+        IInvokeHandler invokeHandler);
 }

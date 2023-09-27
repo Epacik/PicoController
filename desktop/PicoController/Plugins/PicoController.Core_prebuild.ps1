@@ -3,7 +3,9 @@ param (
     [string]$Config = "Debug"
 )
 
-if ($Config -eq "Release"){
+if ($Config -eq "Release") {
     &"$PSScriptRoot\buildTouserFolder.ps1"
 }
-&"$PSScriptRoot\buildAllHere.ps1"
+else {
+    &"$PSScriptRoot\buildAllHere.ps1"
+}

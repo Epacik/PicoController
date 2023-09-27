@@ -59,6 +59,14 @@
     <ProjectReference Include="..\PicoController.Core\PicoController.Core.csproj" />
     <ProjectReference Include="..\PicoController.Plugin.Interfaces\PicoController.Plugin.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Controls\Editors\FileCodeEditor.axaml.cs">
+      <DependentUpon>FileCodeEditor.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Controls\Editors\CodeEditor.axaml.cs">
+      <DependentUpon>CodeEditor.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <DefineConstants>OS_WINDOWS</DefineConstants>

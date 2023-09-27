@@ -3,6 +3,7 @@ using PicoController.Core.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,7 +17,6 @@ internal class DesignPluginManager : IPluginManager
 
     public bool AreLoaded => true;
 
-    public IEnumerable<string> GetAllAvailableActions() => Array.Empty<string>();
 
     public Func<int, string?, Task>? GetAction(string handler)
     {
@@ -40,8 +40,14 @@ internal class DesignPluginManager : IPluginManager
     {
         
     }
+    public IEnumerable<string> GetAllAvailableActions()
+        => Array.Empty<string>();
 
-    public IEnumerable<string> GetBuiltInActions() => Array.Empty<string>();
+    public IEnumerable<string> GetBuiltInActions()
+        => Array.Empty<string>();
 
-    public IEnumerable<string> GetPluginActions() => Array.Empty<string>();
+    public IEnumerable<string> GetPluginActions()
+        => Array.Empty<string>();
+
+    public TypeInfo? GetPluginHandlerInfo(string handler) => null;
 }

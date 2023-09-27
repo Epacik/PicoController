@@ -4,8 +4,10 @@ using PicoController.Core.Config;
 using PicoController.Gui.Controls.Editors;
 using PicoController.Gui.Models;
 using PicoController.Plugin;
+using PicoController.Plugin.Attributes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Runtime.InteropServices;
@@ -94,24 +96,7 @@ public class HandlerEditorViewModel : ViewModelBase
 
     private async void OpenEditor()
     {
-        var type = GetEditorForHandler(HandlerId);
-
-        var ctor = type.GetConstructors()
-            .FirstOrDefault(x =>
-            {
-                var param = x.GetParameters();
-                if (param?.Length != 1)
-                    return false;
-
-                if (param[0].ParameterType != typeof(string))
-                    return false;
-                return true;
-            });
-
-        if (ctor is null)
-            return;
-
-        var control = ctor.Invoke(new[] { HandlerData }) as IEditor;
+        var control = GetEditorForHandler(HandlerId);
 
         if (control is null) 
             return;
@@ -138,7 +123,7 @@ public class HandlerEditorViewModel : ViewModelBase
     }
 
 
-    private Type? GetEditorForHandler(string? handlerName)
+    private IEditor? GetEditorForHandler(string? handlerName)
     {
         var builtIn = _pluginManager.GetBuiltInActions();
 
@@ -147,13 +132,44 @@ public class HandlerEditorViewModel : ViewModelBase
             return GetEditorForBuiltInHandler(handlerName);
         }
 
-        return null;
+        return GetEditorForPluginHandler(handlerName);
     }
 
-    private Type? GetEditorForBuiltInHandler(string? handlerName)
-        => handlerName switch
+    private IEditor? GetEditorForBuiltInHandler(string? handlerName)
+    {
+        return handlerName switch
         {
-            "/IronPython" => typeof(IronPythonCodeEditor),
+            "/IronPython" => new IronPythonCodeEditor(HandlerData!),
+            "/IronPythonFile" => new IronPythonFileCodeEditor(HandlerData!),
             _ => null,
         };
+    }
+
+    private IEditor? GetEditorForPluginHandler(string? handlerName)
+    {
+        var typeInfo = _pluginManager.GetPluginHandlerInfo(handlerName);
+
+        if (typeInfo is null)
+            return null;
+
+        var attributes = typeInfo.CustomAttributes;
+
+        var editor = attributes
+            .FirstOrDefault(x => x.AttributeType == typeof(CodeEditorAttribute));
+        if (editor is not null)
+        {
+            var extension = editor.ConstructorArguments.FirstOrDefault().Value as string;
+            return extension is not null ? new CodeEditor(HandlerData!, extension) : null;
+        }
+
+        editor = attributes
+            .FirstOrDefault(x => x.AttributeType == typeof(FileCodeEditorAttribute));
+        if (editor is not null)
+        {
+            var extension = editor.ConstructorArguments.FirstOrDefault().Value as string;
+            return extension is not null ? new FileCodeEditor(HandlerData!, extension) : null;
+        }
+
+        return null;
+    }
 }

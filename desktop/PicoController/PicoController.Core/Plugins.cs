@@ -1,33 +1,24 @@
 ﻿using McMaster.NETCore.Plugins;
-using PicoController.Core;
-using PicoController.Core.Config;
-using PicoController.Core.Extensions;
 using PicoController.Plugin;
 using PicoController.Plugin.Attributes;
-using Serilog;
 using Serilog.Events;
 using Splat;
-using SuccincT.Functional;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PicoController.Core;
 
 public interface IPluginManager
 {
     bool AreLoaded { get; }
-    IEnumerable<string> GetAllAvailableActions();
     HandlerInfo? GetHandlerInfo(string handler);
     void LoadPlugins(string? directory = null);
     void UnloadPlugins();
     Func<int, string?, Task>? GetAction(string handler);
+    IEnumerable<string> GetAllAvailableActions();
     IEnumerable<string> GetBuiltInActions();
     IEnumerable<string> GetPluginActions();
+    TypeInfo? GetPluginHandlerInfo(string handler);
 }
 
 internal class PluginInfo : IPluginInfo
@@ -49,7 +40,7 @@ public class PluginManager : IPluginManager
     private readonly ILocationProvider _locationProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IReadonlyDependencyResolver _resolver;
-    private Serilog.ILogger? _logger;
+    private readonly Serilog.ILogger? _logger;
 
     public PluginManager(
         ILocationProvider locationProvider,
@@ -253,9 +244,12 @@ public class PluginManager : IPluginManager
     {
         var result = new List<string>();
 
+        var assembly = Assembly.GetExecutingAssembly();
         result.AddRange(
-            Assembly.GetExecutingAssembly().DefinedTypes
-                .Where(IsVisiblePluginAction).Select(x => "/" + x.Name));
+            assembly.DefinedTypes
+                .Where(IsVisiblePluginAction)
+                .Select(x => "/" + x.Name));
+
         return result;
     }
 
@@ -265,9 +259,9 @@ public class PluginManager : IPluginManager
 
         foreach (var (key, (loader, location)) in _loaders)
         {
+            var assembly = loader.LoadDefaultAssembly();
             result.AddRange(
-                loader
-                    .LoadDefaultAssembly().DefinedTypes
+                assembly.DefinedTypes
                     .Where(IsVisiblePluginAction)
                     .Select(x => $"{key}/{x.Name}"));
         }
@@ -316,11 +310,34 @@ public class PluginManager : IPluginManager
                         handler.Trim('/'),
                         StringComparison.CurrentCultureIgnoreCase));
 
-    private TypeInfo? GetPluginHandlerInfo(string handler)
+    public TypeInfo? GetPluginHandlerInfo(string handler)
     {
-        var (plugin, action) = handler.Split('/');
+        if (handler.StartsWith('/') || !handler.Contains('/')) //built in actions
+        {
+            var typeName = handler.TrimStart('/');
+            var assembly = Assembly.GetExecutingAssembly();
+            var typeInfo = assembly
+                ?.DefinedTypes
+                .FirstOrDefault(x => IsPluginAction(x) && x.Name == typeName);
+            return typeInfo;
+        }
+        else
+        {
+            var (assemblyName, typeName) = handler.Split('/');
 
-        throw new NotImplementedException();
+            if (assemblyName is null || !_loaders.ContainsKey(assemblyName))
+                return null;
+
+            var (loader, _) = _loaders[assemblyName];
+            using (loader.EnterContextualReflection())
+            {
+                var assembly = loader.LoadDefaultAssembly();
+                var typeInfo = assembly
+                    ?.DefinedTypes
+                    .FirstOrDefault(x => IsPluginAction(x) && x.Name == typeName);
+                return typeInfo;
+            }
+        }
     }
 }
 
