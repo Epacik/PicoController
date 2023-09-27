@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PicoController.Core;
 
-internal class InvokeHandler : IInvokeHandler
+public class InvokeHandler : IInvokeHandler
 {
     private readonly IPluginManager _pluginManager;
     private readonly ILogger? _logger;
