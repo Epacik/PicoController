@@ -94,4 +94,8 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   </Target>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Controls\Editors\KeyboardSequenceEditor.axaml" />
+  </ItemGroup>
 </Project>

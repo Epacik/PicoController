@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Width="450"
+             Height="200"
+             MinWidth="450"
+             MinHeight="200"
+             MaxWidth="450"
+             MaxHeight="200"
+             x:Class="PicoController.Gui.Controls.Editors.KeyboardSequenceEditor">
+    <Grid
+        Margin="10"
+        ColumnDefinitions="*,5,80"
+        RowDefinitions="30,30,10,40,15,30">
+
+        <ListBox x:Name="KeysList"
+                 Grid.ColumnSpan="3"
+                 Grid.RowSpan="2"
+                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                 AutoScrollToSelectedItem="True"
+                 VerticalAlignment="Center">
+            
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="5" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+        </ListBox>
+        
+        <ToggleButton
+            Grid.Row="3"
+            Content="Capture keyboard"
+            x:Name="CaptureButton"
+            IsTabStop="False"
+            Focusable="False"/>
+        
+        <Button
+            Grid.Row="5"
+            HorizontalAlignment="Right"
+            Content="Cancel"
+            x:Name="CancelButton"/>
+
+        <Button
+            Grid.Row="5"
+            Grid.Column="2"
+            HorizontalAlignment="Stretch"
+            Content="Save"
+            x:Name="SaveButton"/>
+    </Grid>
+</UserControl>

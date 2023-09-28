@@ -21,13 +21,13 @@ public class SetVariable : IPluginAction
     }
     public Task ExecuteAsync(int inputValue, string? data)
     {
+        var options = StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
+        var splitted = data?.Split(";", options) ?? throw new ArgumentNullException(nameof(data));
+        if (splitted.Length == 0)
+            throw new ArgumentException("No variable name specified", nameof(data));
+
         return Task.Run(() =>
         {
-            var options = StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
-            var splitted = data?.Split(";", options) ?? throw new ArgumentNullException(nameof(data));
-            if (splitted.Length == 0)
-                throw new ArgumentException("No variable name specified", nameof(data));
-
             var variable = splitted[0];
             var value = splitted.Length >= 2 ? splitted[1] : null;
 

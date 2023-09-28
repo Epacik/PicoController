@@ -28,7 +28,12 @@ public partial class HandlersView : UserControl
         var dataObject = new DataObject();
         dataObject.Set("", data);
 
-        await DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Move);
+        try
+        {
+            await DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Move);
+
+        }
+        catch { }
 
         Handlers.UnselectAll();
     }
