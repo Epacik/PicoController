@@ -176,6 +176,7 @@ public class HandlerEditorViewModel : ViewModelBase
             "/NeoLua" => new CodeEditor(HandlerData!, ".lua"),
             "/NeoLuaFile" => new FileCodeEditor(HandlerData!, ".lua"),
             "/RunProgram" => new RunProgramEditor(HandlerData!),
+            "/Volume" => new VolumeEditor(HandlerData!),
             _ => null,
         };
     }
