@@ -95,7 +95,7 @@ public class Bluetooth : DeviceInterface
 
     private void DisconnectInternal()
     {
-        Task.Run(async () =>
+        Task.Run( () =>
         {
             var ch = _characteristic;
             var de = _device;
@@ -108,11 +108,11 @@ public class Bluetooth : DeviceInterface
             if (ch is not null)
             {
                 ch.CharacteristicValueChanged -= Characteristic_CharacteristicValueChanged;
-                try
-                {
-                    await ch.StopNotificationsAsync();
-                }
-                catch { }
+                //try
+                //{
+                //    //await ch.StopNotificationsAsync();
+                //}
+                //catch { }
                 ch = null;
             }
             if (de is not null)
