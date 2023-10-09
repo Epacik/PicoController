@@ -8,16 +8,15 @@ using System.Security;
 namespace PicoController.Core.BuiltInActions.HidSimulation;
 
 [Description("Simulate a key sequence.\nKeys separated by '+' are pressed in sequence, keys separated by '&' are pressed together")]
-internal class KeyboardSequence : IPluginAction, IValidValues
+public class KeyboardSequence : IPluginAction, IValidValues
 {
     private readonly EventSimulator _simulator;
-    private readonly Dictionary<string, KeyCode> _buttons = new();
+    private static readonly Dictionary<string, KeyCode> _buttons = new();
     private readonly Queue<KeyCode[]> _sequencesToRun = new();
     private readonly object _locker = new object();
 
-    public KeyboardSequence()
+    static KeyboardSequence()
     {
-        _simulator = new EventSimulator();
         foreach (var key in Enum.GetNames<KeyCode>())
         {
             var name = (ReadOnlySpan<char>)key;
@@ -31,12 +30,19 @@ internal class KeyboardSequence : IPluginAction, IValidValues
         _buttons.Add("RightArrow", KeyCode.VcRight);
         _buttons.Add("UpArrow", KeyCode.VcUp);
         _buttons.Add("DownArrow", KeyCode.VcDown);
+    }
 
+    public KeyboardSequence()
+    {
+        _simulator = new EventSimulator();
+        
         _timer = new PeriodicTimer(new TimeSpan(0, 0, 0, 0, 100));
         _sequenceRunner = new Thread(RunSequence);
         _sequenceRunner.Start();
     }
 
+
+    public static Dictionary<string, KeyCode> GetValidValues() => _buttons;
     public IDictionary<string, string> ValidValues => _buttons.Keys./*OrderBy(x => x).*/ToDictionary(x => x);
 
     private readonly PeriodicTimer _timer;

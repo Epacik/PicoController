@@ -22,7 +22,7 @@ public partial class VolumeEditor : UserControl, IEditor, IDisposable
 
         CancelButton.Click += CancelButton_Click;
         SaveButton.Click += SaveButton_Click;
-        ProgramSwitch.Click += ProgramSwitch_Click;
+        ProgramSwitch.IsCheckedChanged += ProgramSwitch_IsCheckedChanged;
 
         var programs = new List<string>();
         programs.AddRange(Process.GetProcesses().Select(x => x.ProcessName));
@@ -50,19 +50,20 @@ public partial class VolumeEditor : UserControl, IEditor, IDisposable
         if (args.Length == 0)
         {
             Increment.Value = 0;
-            ProgramSwitch.IsEnabled = false;
             ProgramSwitch.IsChecked = false;
+            ExactSwitch.IsEnabled = false;
+            Programs.IsEnabled = false;
         }
         else if (args.Length == 1 && int.TryParse(args[0], out int val1))
         {
             Increment.Value = val1;
-            ProgramSwitch.IsEnabled = false;
             ProgramSwitch.IsChecked = false;
+            ExactSwitch.IsEnabled = false;
+            Programs.IsEnabled = false;
         }
         else if (args.Length >= 2 && int.TryParse(args[1], out int val2))
         {
             Increment.Value = val2;
-            ProgramSwitch.IsEnabled = true;
             ProgramSwitch.IsChecked = true;
             bool exact = args.Contains("!") || args.Contains("EXACT");
             ExactSwitch.IsChecked = exact;
@@ -76,6 +77,15 @@ public partial class VolumeEditor : UserControl, IEditor, IDisposable
                 Programs.SelectedItem = programs.FirstOrDefault(
                     x => x.Contains(args[0], StringComparison.InvariantCultureIgnoreCase));
             }
+        }
+    }
+
+    private void ProgramSwitch_IsCheckedChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (sender is ToggleSwitch ts)
+        {
+            Programs.IsEnabled = ts.IsChecked == true;
+            ExactSwitch.IsEnabled = ts.IsChecked == true;
         }
     }
 

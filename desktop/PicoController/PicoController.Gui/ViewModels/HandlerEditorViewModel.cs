@@ -50,7 +50,13 @@ public class HandlerEditorViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _handlerId, value);
-            HasEditor = value is not null && GetEditorForHandler(value) is not null;
+            var editor = GetEditorForHandler(value);
+            HasEditor = value is not null && editor is not null;
+
+            if(editor is IDisposable id)
+            {
+                id.Dispose();
+            }
         }
     }
 
@@ -149,7 +155,9 @@ public class HandlerEditorViewModel : ViewModelBase
     public void Reload()
     {
         Handlers.Clear();
-        Handlers.AddRange(_pluginManager.GetAllAvailableActions());
+        var handlers = _pluginManager.GetAllAvailableActions().ToList();
+        handlers.Sort();
+        Handlers.AddRange(handlers);
     }
 
 
@@ -177,6 +185,7 @@ public class HandlerEditorViewModel : ViewModelBase
             "/NeoLuaFile" => new FileCodeEditor(HandlerData!, ".lua"),
             "/RunProgram" => new RunProgramEditor(HandlerData!),
             "/Volume" => new VolumeEditor(HandlerData!),
+            "/KeyboardSequence" => new KeyboardSequenceEditor(HandlerData!),
             _ => null,
         };
     }
