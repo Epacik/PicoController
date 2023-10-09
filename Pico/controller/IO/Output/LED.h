@@ -1,9 +1,4 @@
-//
-// Created by epat on 14.05.2022.
-//
-
-#ifndef VOLUMECONTROL_IO_OUTPUT_LED_H
-#define VOLUMECONTROL_IO_OUTPUT_LED_H
+#pragma once
 
 #include "Output.h"
 
@@ -25,6 +20,3 @@ namespace IO::Output{
     };
 }
 
-
-
-#endif //VOLUMECONTROL_IO_OUTPUT_LED_H

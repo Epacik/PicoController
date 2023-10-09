@@ -9,5 +9,5 @@
 #include "UserInteractions.h"
 #include "IO/CurrentIO.h"
 
-[[noreturn]]
+[[noreturn]] [[noreturn]]
 void HaltAndBlinkSos(etl::unique_ptr<IO::Output::LED> led);

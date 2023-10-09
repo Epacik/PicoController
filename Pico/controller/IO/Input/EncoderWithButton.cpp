@@ -9,16 +9,9 @@ enum class ButtonValues {
 namespace IO::Input
 {
     using namespace IO;
-    EncoderWithButton::EncoderWithButton(uint8_t id, uint8_t pin0, uint8_t pin1, uint8_t pinButton, bool softDebounce)
-        : EncoderWithButton(
-                id,
-                new InputPin(pin0, PinPull::None, softDebounce),
-                new InputPin(pin1, PinPull::None, softDebounce),
-                new InputPin(pinButton, PinPull::None, softDebounce))
-    {}
     
-    EncoderWithButton::EncoderWithButton(uint8_t id, InputPin* pin0, InputPin* pin1, InputPin* pinButton)
-        : Encoder(id, InputType::EncoderWithButton)
+    EncoderWithButton::EncoderWithButton(uint8_t id, InputPin* pin0, InputPin* pin1, InputPin* pinButton, bool halfStep)
+        : Encoder(id, InputType::EncoderWithButton, halfStep)
     {
         pins = {pin0, pin1, pinButton};
         isHeld = false;

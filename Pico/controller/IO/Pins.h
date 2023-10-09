@@ -33,13 +33,14 @@ namespace IO {
         const PinDirection direction;
         const PinPull pull;
         
-        void Init(bool softDebounce);
+        virtual void Init(bool softDebounce);
         Pin(uint8_t pin, PinDirection direction, PinPull pull, bool softDebounce) : pin(pin), direction(direction), pull(pull) {
             Init(softDebounce);
         }
+
+    public:
+        virtual void AddState(bool b);
     };
-
-
 
     class InputPin : public Pin
     {
@@ -54,8 +55,10 @@ namespace IO {
                         pull,
                         softDebounce) {}
         bool Read();
+        void AddState(bool b) override;
+        void Init(bool softDebounce) override;
     private:
-        etl::debounce<100, 100> _debounce = etl::debounce<100, 100>();
+        etl::debounce<> _debounce = etl::debounce<>();
     };
 
     class OutputPin : public Pin

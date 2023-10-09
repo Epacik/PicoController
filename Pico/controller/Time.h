@@ -1,6 +1,4 @@
-#ifndef PICOCONTROLLERTESTS_TIME_H
-#define PICOCONTROLLERTESTS_TIME_H
-
+#pragma once
 
 #include <cstdint>
 
@@ -10,5 +8,3 @@ namespace Time {
     uint32_t SecSinceBoot();
 };
 
-
-#endif //PICOCONTROLLERTESTS_TIME_H

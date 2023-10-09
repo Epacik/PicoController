@@ -2,8 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
-using static IronPython.Modules._ast;
-using static IronPython.Runtime.Profiler;
 
 namespace PicoController.Core.Devices.Communication;
 

@@ -68,11 +68,12 @@ public class DeviceManager : IDeviceManager
 
                  var connectionData = device.Interface.Data;
                 Communication.DeviceInterface ifc = device.Interface.Type switch
-                 {
-                     InterfaceType.COM => new Serial(connectionData, _logger),
-                     InterfaceType.WiFi => new WiFi(connectionData, _logger),
+                {
+                    InterfaceType.COM => new Serial(connectionData, _logger),
+                    InterfaceType.WiFi => new WiFi(connectionData, _logger),
+                    InterfaceType.Bluetooth => new Bluetooth(connectionData, _logger),
                      _ => throw new InvalidDataException($"{device.Interface.Type} is not a valid interface"),
-                 };
+                };
 
                  var inputs = new List<Inputs.Input>();
                  foreach (Config.Input input in device.Inputs)

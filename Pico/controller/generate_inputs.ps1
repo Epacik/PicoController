@@ -42,6 +42,19 @@ function New-Output([string]$value) {
     return "        outputs.push_back(etl::unique_ptr<IO::Output::Output>(new IO::Output::$value));`n";
 }
 
+function New-InputPin($info) {
+
+    $pin = $info.pin;
+    $pull = if ($null -eq $info.pull) { "IO::PinPull::None" }
+        elseif ($info.pull.ToLowerInvariant() -eq "up") { "IO::PinPull::Up" }
+        elseif ($info.pull.ToLowerInvariant() -eq "down") { "IO::PinPull::Down" }
+          else  { "IO::PinPull::None" };
+
+    $debounce = ([bool]$info.softDebounce).ToString().ToLowerInvariant();
+
+    return "new IO::InputPin($pin, $pull, $debounce)"
+}
+
 foreach ($input in $peripherals.inputs) {
     $pinCount = $input.pins.Length 
     $softDebounce = ([bool]$input.softDebounce).ToString().ToLowerInvariant();
@@ -50,17 +63,19 @@ foreach ($input in $peripherals.inputs) {
             Write-Error "Invalid pin count, expected 1 got $pinCount";
             continue;
         }
-        $pin = [int]$input.pins[0];
-        $linesInputs += New-Input("Button($Id, $pin, $softDebounce)");
+
+        $pin = New-InputPin($input.pins[0]);
+        $linesInputs += New-Input("Button($Id, $pin)");
     }
     elseif ($input.type -eq "encoder") {
         if ($pinCount -ne 2) {
             Write-Error "Invalid pin count, expected 2 got $pinCount";
             continue;
         }
-        $pinA = [int]$input.pins[0];
-        $pinB = [int]$input.pins[1];
-        $linesInputs += New-Input("Encoder($Id, $pinA, $pinB, $softDebounce)");
+        $pinA = New-InputPin($input.pins[0]);
+        $pinB = New-InputPin($input.pins[1]);
+        $halfstep = if ($input.halfStep -eq $true) { "true" } else { "false" };
+        $linesInputs += New-Input("Encoder($Id, $pinA, $pinB, $halfstep)");
     }
     elseif ($input.type -eq "encoderWithButton") {
         if ($pinCount -ne 3) {
@@ -68,10 +83,11 @@ foreach ($input in $peripherals.inputs) {
             continue;
         }
 
-        $pinA = [int]$input.pins[0];
-        $pinB = [int]$input.pins[1];
-        $pinButton = [int]$input.pins[2];
-        $linesInputs += New-Input("EncoderWithButton($Id, $pinA, $pinB, $pinButton, $softDebounce)");
+        $pinA = New-InputPin($input.pins[0]);
+        $pinB = New-InputPin($input.pins[1]);
+        $pinButton = New-InputPin($input.pins[2]);
+        $halfstep = if ($input.halfStep -eq $true) { "true" } else { "false" };
+        $linesInputs += New-Input("EncoderWithButton($Id, $pinA, $pinB, $pinButton, $halfstep)");
     }
 
     $Id += 1;

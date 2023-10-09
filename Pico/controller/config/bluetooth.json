@@ -2,43 +2,112 @@
   "inputs": [
     {
       "type": "button",
-      "pins": [ 27 ],
+      "pins": [
+        {
+          "pin": 4,
+          "softDebounce": false,
+          "pull": null
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "pins": [
+        {
+          "pin": 26,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 26 ],
+      "pins": [
+        {
+          "pin": 3,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 3 ],
+      "pins": [
+        {
+          "pin": 27,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 4 ],
+      "pins": [
+        {
+          "pin": 2,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 2 ],
-      "softDebounce": false
-    },
-    {
-      "type": "button",
-      "pins": [ 22 ],
+      "pins": [
+        {
+          "pin": 22,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 18, 19, 17 ],
-      "softDebounce": true
+      "pins": [
+        {
+          "pin": 18,
+          "softDebounce": true,
+          "pull": "down"
+        },
+        {
+          "pin": 19,
+          "softDebounce": true,
+          "pull": "down"
+        },
+        {
+          "pin": 16,
+          "softDebounce": true,
+          "pull": "down"
+        }
+      ],
+      "softDebounce": true,
+      "halfStep": true
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 20, 21, 16 ],
-      "softDebounce": true
+      "pins": [
+        {
+          "pin": 20,
+          "softDebounce": true,
+          "pull": "down"
+        },
+        {
+          "pin": 21,
+          "softDebounce": true,
+          "pull": "down"
+        },
+        {
+          "pin": 17,
+          "softDebounce": true,
+          "pull": "down"
+        }
+      ],
+      "softDebounce": true,
+      "halfStep": true
     }
   ],
   "outputs": [

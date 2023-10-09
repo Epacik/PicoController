@@ -2,47 +2,151 @@
   "inputs": [
     {
       "type": "button",
-      "pins": [ 17 ],
+      "pins": [
+        {
+          "pin": 17,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 18 ],
+      "pins": [
+        {
+          "pin": 18,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 19 ],
+      "pins": [
+        {
+          "pin": 19,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "button",
-      "pins": [ 20 ],
+      "pins": [
+        {
+          "pin": 20,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 2, 3, 12 ],
+      "pins": [
+        {
+          "pin": 2,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 3,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 12,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 5, 4, 13 ],
+      "pins": [
+        {
+          "pin": 5,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 4,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 13,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 6, 7, 14 ],
+      "pins": [
+        {
+          "pin": 6,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 7,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 14,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 8, 9, 15 ],
+      "pins": [
+        {
+          "pin": 8,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 9,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 15,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     },
     {
       "type": "encoderWithButton",
-      "pins": [ 11, 10, 16 ],
+      "pins": [
+        {
+          "pin": 11,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 10,
+          "softDebounce": false,
+          "pull": null
+        },
+        {
+          "pin": 16,
+          "softDebounce": false,
+          "pull": null
+        }
+      ],
       "softDebounce": false
     }
   ],

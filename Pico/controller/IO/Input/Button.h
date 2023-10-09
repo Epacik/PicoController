@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Input.h"
 
 namespace IO::Input
@@ -11,6 +12,6 @@ namespace IO::Input
         Button(uint8_t id, InputPin* pin);
 
     private:
-        bool isHeld;
+        bool _isHeld;
     };
 }

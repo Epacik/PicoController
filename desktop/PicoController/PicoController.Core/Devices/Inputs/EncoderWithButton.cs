@@ -64,7 +64,11 @@ namespace PicoController.Core.Devices.Inputs
 
         protected override async Task ExecuteInternal(InputMessage message)
         {
-            const int counterClockwise = 1, clockwise = 1 << 1, pressed = 1 << 2, released = 1 << 3;
+            const int
+                counterClockwise = 1,
+                clockwise = 1 << 1,
+                pressed = 1 << 2,
+                released = 1 << 3;
 
             if (!_isPressed && message.ValueHasBits(pressed))
                 _isPressed = true;
@@ -89,6 +93,7 @@ namespace PicoController.Core.Devices.Inputs
                     var action = _isPressed ? ActionNames.RotatePressed : ActionNames.Rotate;
                     await InvokeAction(value, action);
                 }
+                return;
             }
 
             _tokenSource?.Cancel();

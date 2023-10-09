@@ -1,9 +1,13 @@
-#include <pico/cyw43_arch.h>
+#include "pico/cyw43_arch.h"
 #include "Communication.h"
 #include "hardware/exception.h"
 #include "etl/queue.h"
 #include "../IO/CurrentIO.h"
 #include "../Time.h"
+#include "../UserInteractions.h"
+#include "Bluetooth.h"
+#include "etl/string_stream.h"
+
 
 //queue_t messageQueue;
 etl::queue<IO::Input::Message*, 100> messageQueue1;
@@ -40,14 +44,21 @@ void Communication::Entry()
 
             if(msg->InputType <= IO::Input::InputType::MAX)
             {
-                char outputBuffer[21];
+                etl::string<20> value;
+                etl::string_stream str(value);
 
-                snprintf(outputBuffer, 21, "Inp%02X%04X%08lX;\r\n",
-                    msg->InputId,
-                    static_cast<uint16_t>(msg->InputType),
-                    msg->Value);
+                str << "Inp";
+                str << etl::format_spec().hex().width(2).fill('0') << msg->InputId;
+                str << etl::format_spec().hex().width(4).fill('0') << static_cast<uint16_t>(msg->InputType);
+                str << etl::format_spec().hex().width(8).fill('0') << msg->Value;
+                str << etl::format_spec() << ";\r\n";
 
-                printf("%s", outputBuffer);
+                printf("%s", value.c_str());
+
+                if (Bluetooth::IsInitialized())
+                {
+                   Bluetooth::PushMessage(value);
+                }
             }
             delete msg;
         }
@@ -78,4 +89,12 @@ void Communication::PushOntoMessageQueue(IO::Input::Message* message)
 
 void Communication::Initialize(bool battery) {
     hasBattery = battery;
+
+#ifdef BOARD_PICO_W
+    Bluetooth::Initialize(battery);
+#endif
 }
+
+
+
+

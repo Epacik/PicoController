@@ -3,22 +3,15 @@
 
 namespace IO::Input
 {
-    Encoder::Encoder(uint8_t id, uint8_t pin0, uint8_t pin1, bool softDebounce)
-        : Encoder(
-                id,
-                new InputPin(pin0, PinPull::None, softDebounce),
-                new InputPin(pin1,PinPull::None, softDebounce))
-                {
-        for (int i = 0; i < 4; ++i) {
-            states[i] = EncoderStates::None;
-        }
+    Encoder::Encoder(uint8_t id, InputType type = InputType::Encoder, bool halfStep = false) : Input(id, type)
+    {
+        _halfStep = halfStep;
     }
-
-    Encoder::Encoder(uint8_t id, InputType type = InputType::Encoder) : Input(id, type) {}
     
-    Encoder::Encoder(uint8_t id, InputPin* pin0, InputPin* pin1) : Input(id, InputType::Encoder)
+    Encoder::Encoder(uint8_t id, InputPin* pin0, InputPin* pin1, bool halfStep) : Input(id, InputType::Encoder)
     {
         this->pins = { pin0, pin1 };
+        _halfStep = halfStep;
     }
 
     bool HasState(EncoderStates value, EncoderStates state)
@@ -50,9 +43,6 @@ namespace IO::Input
             return EncoderDirection::None;
 
         PushLastState(currentState);
-        printf("New State: A: %d; B: %d\r\n",
-               HasState(currentState, EncoderStates::A),
-               HasState(currentState, EncoderStates::B));
 
         /*
         counter clockwise
@@ -74,30 +64,41 @@ namespace IO::Input
         auto state3 = GetLastState(3);
 
         auto result = EncoderDirection::None;
-        if (state1 != EncoderStates::None || state3 != EncoderStates::AB)
-            result = EncoderDirection::None;
+        if (this->_halfStep){
+            if ((state3 == EncoderStates::AB && state2 == EncoderStates::A) ||
+                (state3 == EncoderStates::None && state2 == EncoderStates::B))
+                result = EncoderDirection::CounterClockwise;
 
-        else if (state0 == EncoderStates::B && state2 == EncoderStates::A)
-            result = EncoderDirection::CounterClockwise;
+            if ((state3 == EncoderStates::AB && state2 == EncoderStates::B) ||
+                (state3 == EncoderStates::None && state2 == EncoderStates::A))
+                result = EncoderDirection::Clockwise;
+        }
+        else {
+            if (state1 != EncoderStates::None || state3 != EncoderStates::AB)
+                result = EncoderDirection::None;
 
-        else if (state0 == EncoderStates::A && state2 == EncoderStates::B)
-            result = EncoderDirection::Clockwise;
+            else if (state0 == EncoderStates::B && state2 == EncoderStates::A)
+                result = EncoderDirection::CounterClockwise;
+
+            else if (state0 == EncoderStates::A && state2 == EncoderStates::B)
+                result = EncoderDirection::Clockwise;
+        }
         
         return result;
     }
 
     void Encoder::PushLastState(EncoderStates state)
     {
-        states[0] = states[1];
-        states[1] = states[2];
-        states[2] = states[3];
-        states[3] = state;
-//        stateOffset = (stateOffset + 1) % 4;
-//        states[stateOffset] = state;
+        _states[0] = _states[1];
+        _states[1] = _states[2];
+        _states[2] = _states[3];
+        _states[3] = state;
+//        _stateOffset = (_stateOffset + 1) % 4;
+//        _states[_stateOffset] = state;
     }
 
     EncoderStates Encoder::GetLastState(uint32_t i) {
-        return states[(i + stateOffset) % 4];
+        return _states[(i + _stateOffset) % 4];
     }
 
     EncoderStates Encoder::GetState() {
@@ -105,6 +106,9 @@ namespace IO::Input
         auto a = this->pins[0]->Read();
         auto b = this->pins[1]->Read();
 
+//        if(this->ID == 7){
+//            printf("New State: A: %d; B: %d\r\n", a, b);
+//        }
         return match(a, b)(
             pattern(true, false) = []() { return EncoderStates::A; },
             pattern(false, true) = []() { return EncoderStates::B; },

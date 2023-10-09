@@ -1,5 +1,5 @@
-#ifndef PICOCONTROLLERTESTS_PICOWDEFAULTLED_H
-#define PICOCONTROLLERTESTS_PICOWDEFAULTLED_H
+#pragma once
+
 #include "LED.h"
 
 namespace IO::Output {
@@ -9,4 +9,3 @@ namespace IO::Output {
         void Set(bool value) override;
     };
 }
-#endif //PICOCONTROLLERTESTS_PICOWDEFAULTLED_H

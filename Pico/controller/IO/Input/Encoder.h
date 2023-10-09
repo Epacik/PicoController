@@ -22,12 +22,11 @@ namespace IO::Input
     class Encoder : public Input
     {
     public:
-        Encoder(uint8_t id, uint8_t pin0, uint8_t pin1, bool softDebounce);
-        Encoder(uint8_t id, InputPin* pin0, InputPin* pin1);
+        Encoder(uint8_t id, InputPin* pin0, InputPin* pin1, bool halfStep);
         IO::Input::Message* GetMessage() override;
 
     protected:
-        Encoder(uint8_t id, InputType type);
+        Encoder(uint8_t id, InputType type, bool halfStep);
 
         EncoderDirection CurrentDirection();
         void PushLastState(EncoderStates state);
@@ -35,8 +34,8 @@ namespace IO::Input
         EncoderStates GetState();
 
     private:
-        //etl::array<EncoderStates, 4> lastStates;
-        etl::array<EncoderStates, 4> states;
-        uint32_t stateOffset = 0;
+        etl::array<EncoderStates, 4> _states;
+        uint32_t _stateOffset = 0;
+        bool _halfStep = false;
     };
 }

@@ -10,22 +10,22 @@ IO::Input::Button::Button(uint8_t id, uint8_t pin, bool softDebounce) :  Button(
 IO::Input::Button::Button(uint8_t id, InputPin* pin) : Input(id, InputType::Button)
 {
     pins = { pin };
-    isHeld = false;
+    _isHeld = false;
 }
 
 IO::Input::Message* IO::Input::Button::GetMessage()
 {
     auto newState = this->pins[0]->Read();
 
-    if (newState && !this->isHeld) // pressed
+    if (newState && !this->_isHeld) // pressed
     {
-        this->isHeld = true;
+        this->_isHeld = true;
         return CreateMessage(static_cast<uint32_t>(Values::Pressed));
     }
 
-    if (!newState && this->isHeld) // released
+    if (!newState && this->_isHeld) // released
     {
-        this->isHeld = false;
+        this->_isHeld = false;
         return CreateMessage(static_cast<uint32_t>(Values::Released));
     }
 

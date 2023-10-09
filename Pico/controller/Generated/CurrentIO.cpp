@@ -19,14 +19,14 @@ namespace IO {
     {
         etl::vector<etl::unique_ptr<IO::Input::Input>, 256> inputs;
 
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(0, 27, false)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(1, 26, false)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(2, 3, false)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(3, 4, false)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(4, 2, false)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(5, 22, false)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(6, 18, 19, 17, true)));
-        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(7, 20, 21, 16, true)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(0, new IO::InputPin(4, IO::PinPull::None, false))));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(1, new IO::InputPin(26, IO::PinPull::None, false))));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(2, new IO::InputPin(3, IO::PinPull::None, false))));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(3, new IO::InputPin(27, IO::PinPull::None, false))));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(4, new IO::InputPin(2, IO::PinPull::None, false))));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::Button(5, new IO::InputPin(22, IO::PinPull::None, false))));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(6, new IO::InputPin(18, IO::PinPull::Down, true), new IO::InputPin(19, IO::PinPull::Down, true), new IO::InputPin(16, IO::PinPull::Down, true), true)));
+        inputs.push_back(etl::unique_ptr<IO::Input::Input>(new IO::Input::EncoderWithButton(7, new IO::InputPin(20, IO::PinPull::Down, true), new IO::InputPin(21, IO::PinPull::Down, true), new IO::InputPin(17, IO::PinPull::Down, true), true)));
 
         return inputs;
     }

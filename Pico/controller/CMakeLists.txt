@@ -1,6 +1,8 @@
 include(CMakePrintHelpers)
 
 add_executable(PicoController
+        config_headers/btstack_config.h
+
         main.cpp main.h
 
         IO/Pins.cpp IO/Pins.h
@@ -14,7 +16,14 @@ add_executable(PicoController
         UserInteractions.cpp UserInteractions.h
         IO/Output/Output.h
         IO/Output/LED.cpp IO/Output/LED.h
-        IO/Output/PicoWDefaultLED.cpp IO/Output/PicoWDefaultLED.h Time.h Time.cpp)
+        IO/Output/PicoWDefaultLED.cpp IO/Output/PicoWDefaultLED.h
+        Time.h Time.cpp
+        Communication/bluetooth.h
+        Communication/bluetooth.h
+        Communication/Bluetooth.cpp
+        Communication/Bluetooth.h
+        Communication/Bluetooth.cpp
+        Communication/Bluetooth.h)
 
 pico_enable_stdio_usb(PicoController 1)
 pico_enable_stdio_uart(PicoController 1)
@@ -40,12 +49,19 @@ if (DEFINED ENV{BUILD_FOR_PICO_W})
 
             pico_add_extra_outputs(PicoController)
             target_link_libraries(PicoController
+                    pico_btstack_ble
+                    pico_btstack_cyw43
                     pico_cyw43_arch_none     # we need Wifi to access the GPIO, but we don't need anything else
             )
+            pico_btstack_make_gatt_header(PicoController PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pc.gatt")
+
         endif()
     endif()
+endif()
 
-endif ()
+target_include_directories(PicoController PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/config_headers # For btstack config
+)
 
 pico_add_extra_outputs(PicoController)
 
