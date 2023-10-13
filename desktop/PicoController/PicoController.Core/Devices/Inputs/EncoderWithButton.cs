@@ -70,12 +70,16 @@ namespace PicoController.Core.Devices.Inputs
                 pressed = 1 << 2,
                 released = 1 << 3;
 
+            
+
             if (!_isPressed && message.ValueHasBits(pressed))
                 _isPressed = true;
 
             if (message.ValueHasBits(clockwise) || message.ValueHasBits(counterClockwise))
             {
-                _rotatedWhilePressed = true;
+                if (_isPressed)
+                    _rotatedWhilePressed = true;
+
                 if (Split)
                 {
                     var action = (message.ValueHasBits(clockwise), _isPressed) switch
@@ -115,7 +119,8 @@ namespace PicoController.Core.Devices.Inputs
                     // swallow
                 }
             } 
-            else if (_isPressed && message.ValueHasBits(released))
+            
+            if (_isPressed && message.ValueHasBits(released))
             {
                 _isPressed = false;
                 _rotatedWhilePressed = false;
