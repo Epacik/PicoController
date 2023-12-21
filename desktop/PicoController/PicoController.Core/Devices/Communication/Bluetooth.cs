@@ -19,7 +19,7 @@ public class Bluetooth : DeviceInterface
     private readonly ILogger _logger;
     private string? _deviceName;
     private readonly Guid _communicationServiceGuid = new("95C26871-655A-11EE-B1A8-108EAB4F90E5");
-    private BluetoothLEScan? _scan;
+    //private BluetoothLEScan? _scan;
     private BluetoothDevice? _device;
     private bool _connected = false;
     private GattCharacteristic? _characteristic;
@@ -32,17 +32,19 @@ public class Bluetooth : DeviceInterface
     }
     public override void Connect()
     {
-        BT.AdvertisementReceived += Bluetooth_AdvertisementReceived;
-        Task.Run(async () =>
-        {
-            if (!(await BT.GetAvailabilityAsync()))
-                return;
+        //BT.AdvertisementReceived += Bluetooth_AdvertisementReceived;
+        //Task.Run(async () =>
+        //{
+        //    if (!(await BT.GetAvailabilityAsync()))
+        //        return;
 
-            _logger.Verbose("Starting bluetooth scan");
-            _scan = await BT.RequestLEScanAsync();
-        })
-        .GetAwaiter()
-        .GetResult();
+        //    _logger.Verbose("Starting bluetooth scan");
+        //    _scan = await BT.RequestLEScanAsync();
+        //    await Task.Delay(5000);
+        //    _scan.Stop();
+        //})
+        //.GetAwaiter()
+        //.GetResult();
     }
 
     private async void Bluetooth_AdvertisementReceived(object? sender, BluetoothAdvertisingEvent e)
@@ -85,44 +87,44 @@ public class Bluetooth : DeviceInterface
 
     private void Device_GattServerDisconnected(object? sender, EventArgs e)
     {
-        DisconnectInternal();
+        //DisconnectInternal();
     }
     public override void Disconnect()
     {
-        _scan?.Stop();
-        DisconnectInternal();
+        //_scan?.Stop();
+        //DisconnectInternal();
     }
 
     private void DisconnectInternal()
     {
-        Task.Run( () =>
-        {
-            var ch = _characteristic;
-            var de = _device;
+        //Task.Run( () =>
+        //{
+        //    var ch = _characteristic;
+        //    var de = _device;
 
-            _characteristic = null;
-            _device = null;
+        //    _characteristic = null;
+        //    _device = null;
 
-            _connected = false;
+        //    _connected = false;
 
-            if (ch is not null)
-            {
-                ch.CharacteristicValueChanged -= Characteristic_CharacteristicValueChanged;
-                //try
-                //{
-                //    //await ch.StopNotificationsAsync();
-                //}
-                //catch { }
-                ch = null;
-            }
-            if (de is not null)
-            {
-                de.GattServerDisconnected -= Device_GattServerDisconnected;
-                de = null;
-            }
-        })
-        .GetAwaiter()
-        .GetResult();
+        //    if (ch is not null)
+        //    {
+        //        ch.CharacteristicValueChanged -= Characteristic_CharacteristicValueChanged;
+        //        //try
+        //        //{
+        //        //    //await ch.StopNotificationsAsync();
+        //        //}
+        //        //catch { }
+        //        ch = null;
+        //    }
+        //    if (de is not null)
+        //    {
+        //        de.GattServerDisconnected -= Device_GattServerDisconnected;
+        //        de = null;
+        //    }
+        //})
+        //.GetAwaiter()
+        //.GetResult();
 
 
     }
@@ -133,8 +135,8 @@ public class Bluetooth : DeviceInterface
 
     public override void Reconnect()
     {
-        _scan?.Stop();
-        DisconnectInternal();
-        Connect();
+        //_scan?.Stop();
+        //DisconnectInternal();
+        //Connect();
     }
 }

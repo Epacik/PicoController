@@ -3,7 +3,7 @@ param (
     [string]$Out
 )
 
-dotnet publish "$PSScriptRoot\PicoController.VirtualDesktop.Windows.csproj" --use-current-runtime --sc --os win -o "$Out";
+dotnet publish "$PSScriptRoot\PicoController.VirtualDesktop.Windows.csproj" --arch x64 --sc --os win -o "$Out";
 
 $mainDeps = Get-ChildItem -Path "$PSScriptRoot/thirdparty" -File
 

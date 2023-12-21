@@ -30,6 +30,6 @@ foreach ($plugin in $pluginDirs) {
     }
     else 
     {
-        dotnet publish $PSScriptRoot/$plugin --use-current-runtime --sc --os win -o "$Out$plugin";
+        dotnet publish $PSScriptRoot/$plugin --arch x64 --sc --os win -o "$Out$plugin";
     }
 }

@@ -9,3 +9,5 @@ if ($Config -eq "Release") {
 else {
     &"$PSScriptRoot\buildAllHere.ps1"
 }
+
+exit 0;
