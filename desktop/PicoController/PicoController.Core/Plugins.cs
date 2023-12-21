@@ -312,7 +312,11 @@ public class PluginManager : IPluginManager
 
     public TypeInfo? GetPluginHandlerInfo(string handler)
     {
-        if (handler.StartsWith('/') || !handler.Contains('/')) //built in actions
+        if (handler is null)
+        {
+            return null;
+        }
+        else if (handler.StartsWith('/') || !handler.Contains('/')) //built in actions
         {
             var typeName = handler.TrimStart('/');
             var assembly = Assembly.GetExecutingAssembly();

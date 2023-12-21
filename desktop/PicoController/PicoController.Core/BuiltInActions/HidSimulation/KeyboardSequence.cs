@@ -4,6 +4,7 @@ using SharpHook.Native;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text.Json;
 
 namespace PicoController.Core.BuiltInActions.HidSimulation;
 
@@ -12,7 +13,7 @@ public class KeyboardSequence : IPluginAction, IValidValues
 {
     private readonly EventSimulator _simulator;
     private static readonly Dictionary<string, KeyCode> _buttons = new();
-    private readonly Queue<KeyCode[]> _sequencesToRun = new();
+    private readonly Queue<KeyPressData> _keysToPress = new();
     private readonly object _locker = new object();
 
     static KeyboardSequence()
@@ -61,37 +62,22 @@ public class KeyboardSequence : IPluginAction, IValidValues
 
     private void KeyCombination(string argument)
     {
-        var sequencesStr = argument.Split("+", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var sequences = new List<KeyCode[]>();
-        foreach (var seq in sequencesStr)
+        try
         {
-            if (seq.Contains('&'))
+            var keys = JsonSerializer.Deserialize<List<KeyPressData>>(argument);
+            if (keys is not null)
             {
-                var buttons = seq.Split('&');
-                var sequence = new KeyCode[buttons.Length];
-                for (int i = 0; i < buttons.Length; i++)
+                lock (_locker)
                 {
-                    if (!_buttons.ContainsKey(buttons[i]))
-                        throw new ArgumentException($"'{buttons[i]}' is not a valid key");
-
-                    sequence[i] = _buttons[buttons[i]];
+                    foreach (var key in keys)
+                        _keysToPress.Enqueue(key);
                 }
-
-                sequences.Add(sequence);
-            }
-            else
-            {
-                if (!_buttons.ContainsKey(seq))
-                    throw new ArgumentException($"'{seq}' is not a valid key");
-
-                sequences.Add(new KeyCode[] { _buttons[seq] });
+                
             }
         }
-
-        lock (_locker)
+        catch
         {
-            foreach (var sequence in sequences)
-                _sequencesToRun.Enqueue(sequence);
+            return;
         }
     }
 
@@ -103,29 +89,53 @@ public class KeyboardSequence : IPluginAction, IValidValues
         while (true)
         {
             await _timer.WaitForNextTickAsync();
-            while(_sequencesToRun.Count > 0)
+            while(_keysToPress.Count > 0)
             {
-                KeyCode[]? seq = null;
+                KeyPressData key;
                 lock (_locker)
-                    seq = _sequencesToRun.Dequeue();
-
-                if (seq is null)
-                    continue;
-
-                if (seq.Length == 0)
                 {
-                    _simulator.SimulateKeyPress(seq[0]);
-                    _simulator.SimulateKeyRelease(seq[0]);
+                    key = _keysToPress.Dequeue();
+                }
+
+                if (key.Pressed == true)
+                {
+                    _simulator.SimulateKeyPress(key.Code);
+                }
+                else if (key.Pressed == false) 
+                {
+                    _simulator.SimulateKeyRelease(key.Code);
                 }
                 else
                 {
-                    for (int i = 0; i < seq.Length; i++)
-                        _simulator.SimulateKeyPress(seq[i]);
-
-                    for (int i = seq.Length - 1; i >= 0; i--)
-                        _simulator.SimulateKeyRelease(seq[i]);
+                    Thread.Sleep((ushort)key.Code);
                 }
             }
         }
+    }
+}
+
+public class KeyPressData
+{
+    public KeyPressData(KeyCode code, bool? pressed)
+    {
+        Code = code;
+        Pressed = pressed;
+    }
+    public KeyCode Code { get; }
+    public bool? Pressed { get; }
+    public static implicit operator (KeyCode code, bool? pressed)(KeyPressData value)
+    {
+        return (value.Code, value.Pressed);
+    }
+
+    public static implicit operator KeyPressData((KeyCode code, bool? pressed) value)
+    {
+        return new KeyPressData(value.code, value.pressed);
+    }
+
+    public void Deconstruct(out KeyCode keyCode, out bool? pressed)
+    {
+        keyCode = Code;
+        pressed = Pressed;
     }
 }
