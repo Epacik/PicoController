@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="CoreAudio" Version="1.24.0" />
     <PackageReference Include="LanguageExt.Core" Version="4.4.2" />
-    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
 
 </Project>
