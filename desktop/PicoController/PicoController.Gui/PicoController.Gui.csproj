@@ -72,23 +72,12 @@
     <DefineConstants>OS_WINDOWS</DefineConstants>
   </PropertyGroup>
 
-  <Target Name="BuildRestarter">
-    <Message Text="Build PicoController.RestartAfterCrash" />
-    <Exec Command="dotnet publish &quot;$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj&quot; -c $(Configuration) --sc -r win-x64 -f $(TargetFramework) -o &quot;$(OutDir)\Restarter\&quot;" />
-  </Target>
-
-  <Target Name="BuildRestarterPublish" AfterTargets="Publish">
-    <Message Text="Build PicoController.RestartAfterCrash" />
-    <Exec Command="dotnet publish &quot;$(ProjectDir)\..\PicoController.RestartAfterCrash\PicoController.RestartAfterCrash.csproj&quot; -c $(Configuration) --sc -r win-x64 -f $(TargetFramework) -o &quot;$(PublishDir)\Restarter\&quot;" />
-  </Target>
+  
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
-    <BuildDependsOn>
-      BuildRestarter;
-      $(BuildDependsOn);
-    </BuildDependsOn>
+    <SignAssembly>False</SignAssembly>
     
   </PropertyGroup>
 
